@@ -1,0 +1,19 @@
+.board_dock {
+    display: flex;
+    padding: 10px 10px 0 10px;
+    align-items: center;
+}
+
+.board_dock_element {
+    padding: 5px 10px 5px 10px;
+    text-align: center;
+    width: 100px;
+    border: 1px dashed coral;
+    border-radius: 10px;
+    margin: 0 10px 0 10px;
+    cursor: pointer;
+}
+
+.active {
+    box-shadow: 0 0 10px rgba(50, 100, 120, 0.5);
+}

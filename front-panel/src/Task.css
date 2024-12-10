@@ -1,0 +1,55 @@
+.text {
+    width: 80%;
+    resize: none;
+    border: none;
+}
+
+.task {
+    border: 5px solid coral;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    border-radius: 20px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.container_task {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.task_name {
+    overflow-wrap: anywhere;
+}
+
+.task_name>* {
+    padding-right: 10px;
+}
+
+.delete_task {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: coral;
+    padding: 10px;
+}
+
+.context_menu {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    background-color: white;
+    inset: 0px auto auto 0px;
+    width: 120px;
+    /* height: 150px; */
+    border-radius: 20px;
+    padding: 10px;
+    border: 2px solid coral;
+}
+
+.context_menu_button {
+    cursor: pointer;
+}

@@ -1,0 +1,28 @@
+.header {
+    background-color: lightgrey;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header_link>* {
+    margin: 10px;
+    color: coral;
+    text-decoration: none;
+}
+
+.user_info {
+    display: flex;
+    color: coral;
+}
+
+.user_info>* {
+    padding: 0 10px 0 10px;
+}
+
+.logout_button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: coral;
+}

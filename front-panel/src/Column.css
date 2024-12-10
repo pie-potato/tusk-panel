@@ -1,0 +1,25 @@
+.container {
+    /* display: flex; */
+    justify-content: left;
+    overflow-y: hidden;
+}
+
+.columns {
+    display: flex;
+    margin: 10px;
+}
+
+.column {
+    margin: 10px;
+    width: 380px;
+    border-top: 7px solid coral;
+    border-bottom: 7px solid coral;
+    padding: 10px 10px 10px 10px;
+    border-radius: 20px;
+    background-color: lightpink;
+    height: 100%;
+}
+
+.board_columns {
+    display: flex;
+}
