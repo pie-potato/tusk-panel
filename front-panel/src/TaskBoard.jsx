@@ -32,9 +32,6 @@ function TaskBoard() {
     // console.log(columnById.data);
   }, [activeBoard, columnById])
 
-  // console.log(columnById.data);
-  
-
   return (
     <div className="container">
       <BoardDock activeBoard={activeBoard} setActiveBoard={setActiveBoard} />

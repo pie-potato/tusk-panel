@@ -1,6 +1,6 @@
 .board_dock {
     display: flex;
-    padding: 10px 10px 0 10px;
+    padding: 10px 10px 0px 10px;
     align-items: center;
 }
 
@@ -16,4 +16,5 @@
 
 .active {
     box-shadow: 0 0 10px rgba(50, 100, 120, 0.5);
+    border: 3px solid coral;
 }

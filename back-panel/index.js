@@ -40,7 +40,7 @@ const Task = mongoose.model('Task', {
     title: String,
     columnId: { type: mongoose.Schema.Types.ObjectId, ref: 'Column' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Add createdBy field
-    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }  //  New field for assigned user
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },  //  New field for assigned user
 });
 
 const User = mongoose.model('User', {
@@ -105,6 +105,22 @@ app.put('/api/boards/:boardId', async (req, res) => {
 
     } catch (error) {
         res.status(500).json({ error: 'Ошибка при обновлении доски.' });
+    }
+});
+
+app.delete('/api/boards/:boardId', async (req, res) => {
+    try {
+        // First, delete all associated tasks:
+        // console.log(req.params.boardId);
+        const fetchAllColumns = await Column.find({ boardId: req.params.boardId })
+        fetchAllColumns.forEach(async (e) => await Task.deleteMany({ columnId: e._id }))
+        
+        await Column.deleteMany({ boardId: req.params.boardId });
+        // Then, delete the column:
+        await Board.findByIdAndDelete(req.params.boardId);
+        res.json({ message: 'Column and associated tasks deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error deleting column' });
     }
 });
 
@@ -303,11 +319,11 @@ app.post('/api/admin/users', async (req, res) => {
             return res.status(401).json({ message: 'Invalid token' });
         }
 
-        const { username, password, role } = req.body;
+        const password = req.body.password;
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = new User({ username, password: hashedPassword, role });
+        const newUser = new User({ ...req.body, password: hashedPassword });
 
         await newUser.save();
         res.json({ message: 'User created successfully' });
@@ -345,7 +361,7 @@ async function createDefaultAdmin() {
 
 app.get('/api/users', async (req, res) => {
     try {
-        const users = await User.find({}, 'username _id nickname'); // Only retrieve username and _id
+        const users = await User.find({}, 'username _id nickname firstname secondname thirdname'); // Only retrieve username and _id
         res.json(users);
     } catch (error) {
         res.status(500).json({ error: 'Error fetching users' });
@@ -399,7 +415,7 @@ app.put('/api/profile', async (req, res) => {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         const decoded = jwt.verify(token, 'PiePotato');
 
-        const updatedUser = await User.findByIdAndUpdate(decoded.userId, { nickname: req.body.nickname }, { new: true });
+        const updatedUser = await User.findByIdAndUpdate(decoded.userId, req.body, { new: true });
         res.json(updatedUser);
     } catch (error) {
         res.status(500).json({ error: 'Error updating profile' });
@@ -447,3 +463,12 @@ app.put('/api/admin/users/:userId', async (req, res) => {
         console.log(error);
     }
 });
+
+app.post('/api/fafa', async (req, res) => {
+    try {
+        console.log(req.body);
+        res.json(req.body)
+    } catch (error) {
+        console.log(error);
+    }
+})

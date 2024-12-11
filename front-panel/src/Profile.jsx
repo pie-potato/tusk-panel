@@ -3,11 +3,11 @@ import { handleEditNickname, fetchUserData } from './api/response';
 
 function Profile() {
     const [user, setUser] = useState(null);
-    const [newNickname, setNewNickname] = useState('');
+    const [name, setName] = useState({ firstname: '', secondname: '', thirdname: '' });
     const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
-        fetchUserData(setUser, setNewNickname);
+        fetchUserData(name, setUser, setName);
     }, []);
 
 
@@ -17,17 +17,21 @@ function Profile() {
 
     return (
         <div>
-            <h2>My Profile</h2>
+            <h2>Профиль пользователя</h2>
 
             {isEditing ? (
                 <div>
-                    <input type="text" value={newNickname} onChange={(e) => setNewNickname(e.target.value)} />
-                    <button onClick={() => handleEditNickname(user, newNickname, setUser, setIsEditing)}>Save</button>
+                    <div>
+                        <input type="text" value={name.firstname} onChange={(e) => setName({ ...name, firstname: e.target.value })} />
+                        <input type="text" value={name.secondname} onChange={(e) => setName({ ...name, secondname: e.target.value })} />
+                        <input type="text" value={name.thirdname} onChange={(e) => setName({ ...name, thirdname: e.target.value })} />
+                    </div>
+                    <button onClick={() => handleEditNickname(user, name, setUser, setIsEditing)}>Save</button>
                     <button onClick={() => setIsEditing(false)}>Cancel</button>
                 </div>
             ) : (
                 <div>
-                    <p>Nickname: {user.nickname || 'Not set'}</p>
+                    <p>ФИО: {user.firstname || user.nickname || 'Not set'} {user.secondname || user.nickname || 'Not set'}</p>
                     <button onClick={() => setIsEditing(true)}>Edit Nickname</button>
                 </div>
             )}

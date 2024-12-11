@@ -53,6 +53,15 @@ export const deleteColumn = async (id) => {
   }
 };
 
+export const deleteBoard = async (id, user) => {
+  try {
+    await axios.delete(`http://localhost:5000/api/boards/${id}`);
+    fetchColumns();
+  } catch (error) {
+    console.error('Error deleting column:', error);
+  }
+};
+
 export const deleteTask = async (id) => {
   try {
     await axios.delete(`http://localhost:5000/api/tasks/${id}`);
@@ -130,22 +139,22 @@ export const handleUpdateRole = async (userId, newRole) => {
   }
 };
 
-export const handleEditNickname = async (user, newNickname, setUser, setIsEditing) => {
+export const handleEditNickname = async (user, name, setUser, setIsEditing) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    await axios.put('http://localhost:5000/api/profile', { nickname: newNickname }, {
+    await axios.put('http://localhost:5000/api/profile', name, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    setUser({ ...user, nickname: newNickname });
+    setUser(name);
     setIsEditing(false);
   } catch (error) {
     console.error("Error updating nickname:", error);
   }
 };
 
-export const fetchUserData = async (setUser, setNewNickname) => {
+export const fetchUserData = async (name, setUser, setNewNickname) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
     const response = await axios.get('http://localhost:5000/api/profile', { // New route for profile data
@@ -154,7 +163,7 @@ export const fetchUserData = async (setUser, setNewNickname) => {
       },
     });
     setUser(response.data);
-    setNewNickname(response.data.nickname || ''); // Set initial nickname
+    setNewNickname({ ...name, firstname: response.data.firstame || '' }); // Set initial nickname
   } catch (error) {
     console.error("Error fetching user data:", error);
   }

@@ -44,7 +44,7 @@ export default function Task({ task }) {
             </div>
             <div>
                 {task.assignedTo?.username
-                    ? <div>Задача назначена на: {task.assignedTo?.nickname || task.assignedTo?.username} <button onClick={() => unassignTask(task._id)}>Снять задачу</button></div>
+                    ? <div>Задача назначена на: {task.assignedTo?.firstname || task.assignedTo?.username} <button onClick={() => unassignTask(task._id)}>Снять задачу</button></div>
                     : <select onChange={(e) => {
                         console.log(e.target.value)
                         assignTask(task._id, e.target.value)
@@ -52,12 +52,12 @@ export default function Task({ task }) {
                         <option value="">Назначить на:</option>
                         {users.map((user) => (
                             <option key={user._id} value={user._id}>
-                                {user?.nickname || user.username}
+                                {user?.secondname || user.username} {user?.firstname && user?.firstname[0] + '.'} {user?.thirdname && user?.thirdname[0] + '.'}
                             </option>
                         ))}
                     </select>
                 }
-                <div>Создатель задачи: {task.createdBy?.nickname || task.createdBy?.username || 'Unknown'}</div>
+                <div>Создатель задачи: {<>{task.createdBy?.secondname} {task.createdBy?.firstname[0]+'.'}</> || task.createdBy?.username || 'Unknown'}</div>
                 {isMouse && <div onMouseLeave={() => setIsMouse(false)} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left + 5}px, ${contextElementRef.current.getBoundingClientRect().top + 22}px)` }}>
                     <button onClick={() => deleteTask(task._id)} className="delete_task">Удалить задчу</button>
                     <button onClick={() => setEditTask(true)} className="delete_task">Редактировать задачу</button>

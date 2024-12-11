@@ -25,8 +25,8 @@ export default function Header({ handleLogout }) {
             {JSON.parse(localStorage.getItem('user'))?.username && (
                 <>
                     <div className="user_info">
-                        <p>Вы вошли как: {JSON.parse(localStorage.getItem('user'))?.nickname
-                            ? JSON.parse(localStorage.getItem('user')).nickname
+                        <p>Вы вошли как: {JSON.parse(localStorage.getItem('user'))?.firstname
+                            ? <>{JSON.parse(localStorage.getItem('user')).firstname} {JSON.parse(localStorage.getItem('user')).secondname}</>
                             : JSON.parse(localStorage.getItem('user')).username
                         }</p>
                         <button className="logout_button" onClick={handleLogout}>Выйти</button>
