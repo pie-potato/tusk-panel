@@ -1,3 +1,6 @@
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,6 +13,19 @@ const port = 5000;
 
 app.use(cors());
 app.use(express.json());
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // Папка для загруженных файлов.  Создайте папку 'uploads' в корне проекта.
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname)); // Уникальное имя файла
+    }
+});
+
+
+const upload = multer({ storage: storage });
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' with your DB name
@@ -50,6 +66,48 @@ const User = mongoose.model('User', {
     secondname: { type: String }, // Add nickname field
     thirdname: { type: String }, // Add nickname field
     role: { type: String, enum: ['admin', 'manager', 'employee'], default: 'employee' } // Add role field
+});
+
+app.post('/api/tasks/:taskId/upload', upload.single('file'), async (req, res) => {
+    try {
+        // ... (authentication/authorization logic, similar to other protected routes)
+        if (!req.file) {
+            return res.status(400).json({ message: 'Файл не выбран.' });
+        }
+
+        const task = await Task.findById(req.params.taskId);
+        if (!task) {
+            // Delete the uploaded file if the task doesn't exist
+            fs.unlinkSync(req.file.path); // Remove the file from the server
+            return res.status(404).json({ message: 'Задача не найдена.' });
+        }
+
+
+        task.attachments = task.attachments || []; // Initialize attachments array if it doesn't exist
+        task.attachments.push({ filename: req.file.filename, originalname: req.file.originalname }); // Use originalname for display
+
+
+        await task.save();
+
+        res.json({ message: 'Файл успешно загружен.', attachment: { filename: req.file.filename, originalname: req.file.originalname } });
+    } catch (error) {
+        // Delete the uploaded file if an error occurs
+        if (req.file) {
+            fs.unlinkSync(req.file.path); // Remove the file from the server
+        }
+        console.error('Ошибка при загрузке файла:', error);
+        res.status(500).json({ error: 'Ошибка при загрузке файла.' });
+    }
+});
+
+app.get('/api/uploads/:filename', (req, res) => {
+    const filePath = path.join(__dirname, 'uploads', req.params.filename);
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error("Ошибка при отправке файла:", err);
+            res.status(404).json({ message: 'Файл не найден.' });
+        }
+    });
 });
 
 // API routes
@@ -94,7 +152,7 @@ app.put('/api/boards/:boardId', async (req, res) => {
             return res.status(404).json({ message: 'Доска не найдена.' });
         }
 
-        if (currentUser.role !== 'admin' || currentUser.role !== 'manager') { // Check if current user is admin or the creator of the board
+        if (currentUser.role === 'admin' && currentUser.role !== 'manager' || currentUser.role !== 'admin' && currentUser.role === 'manager') { // Check if current user is admin or the creator of the board
             return res.status(403).json({ message: 'Нет прав для редактирования этой доски.' });
         }
 
@@ -112,9 +170,19 @@ app.delete('/api/boards/:boardId', async (req, res) => {
     try {
         // First, delete all associated tasks:
         // console.log(req.params.boardId);
+        console.log(req.headers);
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const decoded = jwt.verify(token, 'PiePotato');
+        const currentUser = await User.findById(decoded.userId);
+        console.log(currentUser);
+
+        if (currentUser.role !== 'admin' && currentUser.role !== 'manager') { // Check if current user is admin or the creator of the board
+            return res.status(403).json({ message: 'Нет прав для редактирования этой доски.' });
+        }
+
         const fetchAllColumns = await Column.find({ boardId: req.params.boardId })
         fetchAllColumns.forEach(async (e) => await Task.deleteMany({ columnId: e._id }))
-        
+
         await Column.deleteMany({ boardId: req.params.boardId });
         // Then, delete the column:
         await Board.findByIdAndDelete(req.params.boardId);

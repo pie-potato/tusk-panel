@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { deleteTask, handleTaskEditSave, fetchUsers, assignTask, unassignTask } from './api/response';
+import { deleteTask, handleTaskEditSave, fetchUsers, assignTask, unassignTask, handleFileUpload } from './api/response';
 import "./Task.css"
 
 export default function Task({ task }) {
@@ -8,8 +8,9 @@ export default function Task({ task }) {
     const [editTask, setEditTask] = useState(false)
     const [users, setUsers] = useState([]);
     const [isMouse, setIsMouse] = useState(false)
+    const [uploadFile, setUploadFile] = useState(false)
     const contextElementRef = useRef()
-// console.log(task);
+    // console.log(task);
 
     useEffect(() => {
         fetchUsers(setUsers);
@@ -57,12 +58,25 @@ export default function Task({ task }) {
                         ))}
                     </select>
                 }
-                <div>Создатель задачи: {<>{task.createdBy?.secondname} {task.createdBy?.firstname[0]+'.'}</> || task.createdBy?.username || 'Unknown'}</div>
-                {isMouse && <div onMouseLeave={() => setIsMouse(false)} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left + 5}px, ${contextElementRef.current.getBoundingClientRect().top + 22}px)` }}>
+                <div>Создатель задачи: {<>{task.createdBy?.secondname} {task.createdBy?.firstname[0] + '.'}</> || task.createdBy?.username || 'Unknown'}</div>
+                {isMouse && <div onMouseLeave={() => {
+                    setIsMouse(false)
+                }} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left + 5}px, ${contextElementRef.current.getBoundingClientRect().top + 22}px)` }}>
                     <button onClick={() => deleteTask(task._id)} className="delete_task">Удалить задчу</button>
                     <button onClick={() => setEditTask(true)} className="delete_task">Редактировать задачу</button>
+                    <button onClick={() => setUploadFile(true)} className="delete_task">Загрузить файл</button>
                 </div>
                 }
+                {uploadFile && <div onMouseLeave={() => setUploadFile(false)} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left + 5}px, ${contextElementRef.current.getBoundingClientRect().top + 121}px)` }}>
+                    <input type="file" onChange={handleFileUpload} />
+                    {task.attachments && task.attachments.map((attachment) => (
+                        <div key={attachment.filename}>
+                            <a href={`/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer">
+                                {attachment.originalname}
+                            </a>
+                        </div>
+                    ))}
+                </div>}
             </div>
         </div>
     )

@@ -44,8 +44,9 @@ export const addTask = async (newTask, setNewTask, user) => {
 };
 
 
-export const deleteColumn = async (id) => {
+export const deleteColumn = async (id, user) => {
   try {
+
     await axios.delete(`http://localhost:5000/api/columns/${id}`);
     fetchColumns();
   } catch (error) {
@@ -55,7 +56,12 @@ export const deleteColumn = async (id) => {
 
 export const deleteBoard = async (id, user) => {
   try {
-    await axios.delete(`http://localhost:5000/api/boards/${id}`);
+    const token = user ? JSON.parse(user).token : null;
+    await axios.delete(`http://localhost:5000/api/boards/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
     fetchColumns();
   } catch (error) {
     console.error('Error deleting column:', error);
@@ -240,3 +246,31 @@ export const updateBoardNameById = async (updateColumnName, boardId) => {
     console.log(error)
   }
 }
+
+export const handleFileUpload = async (event, task) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+
+  try {
+
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+
+    const response = await axios.post(`/api/tasks/${task._id}/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    // ... update task state with the new attachment
+
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    // ... handle error (e.g., display an error message)
+  }
+};
