@@ -2,6 +2,7 @@
 
 # dependencies
 /back-panel/node_modules
+/back-panel/uploads/*
 /front-panel/node_modules
 /.pnp
 .pnp.js

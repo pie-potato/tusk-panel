@@ -5,8 +5,9 @@
 }
 
 .task {
-    border: 5px solid coral;
+    /* border: 5px solid coral; */
     display: flex;
+    background-color: white;
     flex-direction: column;
     justify-content: space-around;
     border-radius: 20px;
@@ -52,4 +53,11 @@
 
 .context_menu_button {
     cursor: pointer;
+}
+
+.delete_column {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #125489;
 }

@@ -27,7 +27,9 @@ function App() {
       setIsLoading(false); // Set loading to false after fetching user
     };
     fetchUser(); // Call the async function
+    
   }, []);
+  console.log(window.location.hostname)
 
   if (isLoading) {  // Display loading message while fetching user data
     return <div>Loading...</div>;
@@ -35,7 +37,7 @@ function App() {
 
   const handleLogin = async (credentials) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/login', credentials);
+      const response = await axios.post(`http://${window.location.hostname}:5000/api/login`, credentials);
       const user = response.data;
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);

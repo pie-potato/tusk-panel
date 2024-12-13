@@ -9,7 +9,7 @@ function AdminPanel() {
 
     useEffect(() => {
         getUsers(setUsers)
-    }, [users])
+    }, [])
 
     const handleEditUser = (user) => {
         setEditingUser(user);

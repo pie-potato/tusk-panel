@@ -7,12 +7,9 @@ export default function BoardDock({ activeBoard, setActiveBoard }) {
     const [allBoard, setAllBoards] = useState([])
     const [creaeteBoard, setCreateBoard] = useState(false)
     const [newColumnName, setNewColumnName] = useState('');
-    const [isBoardNameUpdate, setIsBoardNameUpdate] = useState(false)
 
     useEffect(() => {
         getBoard(setAllBoards)
-        console.log(activeBoard);
-
     }, [])
 
     const createBoard = () => {
@@ -20,10 +17,6 @@ export default function BoardDock({ activeBoard, setActiveBoard }) {
         setNewColumnName('')
         setCreateBoard(false)
         getBoard(setAllBoards)
-    }
-
-    const updateBoardName = () => {
-
     }
 
     return (
@@ -52,7 +45,7 @@ export default function BoardDock({ activeBoard, setActiveBoard }) {
                             setCreateBoard(false)
                         }}
                     />
-                    : <>+</>
+                    : <button>+</button>
                 }
             </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { deleteTask, handleTaskEditSave, fetchUsers, assignTask, unassignTask, handleFileUpload } from './api/response';
+import { deleteTask, handleTaskEditSave, fetchUsers, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment } from './api/response';
 import "./Task.css"
 
 export default function Task({ task }) {
@@ -15,7 +15,10 @@ export default function Task({ task }) {
     useEffect(() => {
         fetchUsers(setUsers);
         // console.log(task);
+
+        // console.log(task);
     }, []);
+    
 
     return (
         <div key={task._id} className="task">
@@ -58,6 +61,14 @@ export default function Task({ task }) {
                         ))}
                     </select>
                 }
+                {task.attachments && task.attachments.map((attachment) => (
+                    <div key={attachment.filename}>
+                        <a href={`http://localhost:5000/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
+                            {attachment.originalname}
+                        </a>
+                        <button onClick={() => handleDeleteAttachment(attachment.filename, task)}>Delete</button>
+                    </div>
+                ))}
                 <div>Создатель задачи: {<>{task.createdBy?.secondname} {task.createdBy?.firstname[0] + '.'}</> || task.createdBy?.username || 'Unknown'}</div>
                 {isMouse && <div onMouseLeave={() => {
                     setIsMouse(false)
@@ -68,14 +79,7 @@ export default function Task({ task }) {
                 </div>
                 }
                 {uploadFile && <div onMouseLeave={() => setUploadFile(false)} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left + 5}px, ${contextElementRef.current.getBoundingClientRect().top + 121}px)` }}>
-                    <input type="file" onChange={handleFileUpload} />
-                    {task.attachments && task.attachments.map((attachment) => (
-                        <div key={attachment.filename}>
-                            <a href={`/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer">
-                                {attachment.originalname}
-                            </a>
-                        </div>
-                    ))}
+                    <input type="file" onChange={e => handleFileUpload(e, task)} />
                 </div>}
             </div>
         </div>

@@ -12,14 +12,53 @@
 .column {
     margin: 10px;
     width: 380px;
-    border-top: 7px solid coral;
-    border-bottom: 7px solid coral;
+    border-top: 4px solid #1876C2;
+    /* border-bottom: 4px solid coral; */
     padding: 10px 10px 10px 10px;
     border-radius: 20px;
-    background-color: lightpink;
-    height: 100%;
+    background-color: #1876c230;
+    max-height: 80vh;
+    overflow-x: hidden;
+    /* height: 100ch; */
+}
+
+.column::-webkit-scrollbar {
+    width: 10px;
+    border-radius: 20px;
+}
+
+.column::-webkit-scrollbar-track {
+    -webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+    background-color: #f9f9fd;
+}
+
+.column::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color: #356184;
 }
 
 .board_columns {
     display: flex;
+
+}
+
+.add_column {
+    border: 1px solid #1876C2;
+    border-radius: 20px;
+    padding: 5px;
+    background: none;
+}
+
+.input_task {
+    border: 1px solid #1876C2;
+    border-radius: 20px;
+    padding: 5px;
+    background: none;
+}
+
+.add_task {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #1876C2;
 }

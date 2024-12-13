@@ -6,13 +6,55 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt'); // Для хеширования паролей
 const jwt = require('jsonwebtoken'); // Для JWT
+const http = require('http'); // Import the http module
+const socketIO = require('socket.io');
 
+// Create a Socket.IO instance
 
 const app = express();
 const port = 5000;
 
 app.use(cors());
 app.use(express.json());
+const server = http.createServer(app)
+const io = socketIO(server);
+
+io.on('connection', (socket) => {
+    console.log('User connected');
+
+
+  socket.on('joinBoard', (boardId) => {
+      socket.join(boardId); // Join a room for the specific board
+  });
+
+
+
+  // Handle task updates
+
+  socket.on('taskUpdated', (updatedTask) => {
+    socket.to(updatedTask.columnId).emit('updateTask', updatedTask);
+  });
+
+
+
+    socket.on('taskCreated', (newTask) => {
+
+
+        socket.to(newTask.columnId).emit('addTask', newTask);
+    });
+
+
+
+  // ... (other socket events for columns, boards, etc.)
+
+
+
+
+    socket.on('disconnect', () => {
+      console.log('User disconnected');
+    });
+
+});
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -23,6 +65,7 @@ const storage = multer.diskStorage({
         cb(null, uniqueSuffix + path.extname(file.originalname)); // Уникальное имя файла
     }
 });
+
 
 
 const upload = multer({ storage: storage });
@@ -57,6 +100,7 @@ const Task = mongoose.model('Task', {
     columnId: { type: mongoose.Schema.Types.ObjectId, ref: 'Column' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Add createdBy field
     assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },  //  New field for assigned user
+    attachments: [{ filename: String, originalname: String }]
 });
 
 const User = mongoose.model('User', {
@@ -74,6 +118,7 @@ app.post('/api/tasks/:taskId/upload', upload.single('file'), async (req, res) =>
         if (!req.file) {
             return res.status(400).json({ message: 'Файл не выбран.' });
         }
+        console.log(req.params.taskId);
 
         const task = await Task.findById(req.params.taskId);
         if (!task) {
@@ -84,7 +129,7 @@ app.post('/api/tasks/:taskId/upload', upload.single('file'), async (req, res) =>
 
 
         task.attachments = task.attachments || []; // Initialize attachments array if it doesn't exist
-        task.attachments.push({ filename: req.file.filename, originalname: req.file.originalname }); // Use originalname for display
+        task.attachments.push({ filename: req.file.filename, originalname: Buffer.from(req.file.originalname, 'latin1').toString('utf8') }); // Use originalname for display
 
 
         await task.save();
@@ -102,12 +147,51 @@ app.post('/api/tasks/:taskId/upload', upload.single('file'), async (req, res) =>
 
 app.get('/api/uploads/:filename', (req, res) => {
     const filePath = path.join(__dirname, 'uploads', req.params.filename);
+    // res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(req.params.filename)}`);
     res.sendFile(filePath, (err) => {
         if (err) {
             console.error("Ошибка при отправке файла:", err);
             res.status(404).json({ message: 'Файл не найден.' });
         }
     });
+});
+
+app.delete('/api/tasks/:taskId/attachments/:filename', async (req, res) => {
+    try {
+        // ... (authentication/authorization logic)
+
+
+        const task = await Task.findById(req.params.taskId);
+        if (!task) {
+            return res.status(404).json({ message: 'Задача не найдена.' });
+        }
+
+
+        const filename = req.params.filename;
+
+
+        // Find the attachment index
+        const attachmentIndex = task.attachments.findIndex(attachment => attachment.filename === filename);
+        if (attachmentIndex === -1) {
+            return res.status(404).json({ message: 'Вложение не найдено.' });
+        }
+
+        // Remove the attachment from the array
+        const removedAttachment = task.attachments.splice(attachmentIndex, 1)[0];
+        await task.save();
+
+        // Delete the file from the uploads directory
+        const filePath = path.join(__dirname, 'uploads', removedAttachment.filename);
+        fs.unlinkSync(filePath);  // Delete the file
+
+
+        res.json({ message: 'Вложение успешно удалено.' });
+
+
+    } catch (error) {
+        console.error('Ошибка при удалении вложения:', error);
+        res.status(500).json({ error: 'Ошибка при удалении вложения.' });
+    }
 });
 
 // API routes

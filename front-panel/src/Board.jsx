@@ -1,46 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-// ... other imports
+import Column from './Column';
+import { getColumnByIdBoard, addColumn } from './api/response';
+import { io } from "socket.io-client";
 
-function Board({ boardId }) { // Receive boardId as a prop
+export default function Board({ boardId }) {
     const [columns, setColumns] = useState([]);
-    // ... other state for new column and editing
+    const [task, setTask] = useState([])
+    const [newColumnName, setNewColumnName] = useState('');
 
     useEffect(() => {
-        fetchColumns();
-    }, [boardId]);  // Add boardId to dependency array
+        if (!boardId) return;
+        getColumnByIdBoard(setColumns, boardId)
+        console.log("asdasd");
 
-    const fetchColumns = async () => {
-        try {
-            const response = await axios.get(`/api/boards/${boardId}/columns`); // Fetch columns for the specific board
-            setColumns(response.data);
-        } catch (error) {
-            console.error('Error fetching columns:', error);
-        }
-    };
+    }, [boardId]);
 
-    // ... functions for creating and editing columns (similar to previous example, but now include boardId)
-    const createColumn = async (newColumnTitle) => {
-        try {
-
-            const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-
-            await axios.post('/api/columns', { title: newColumnTitle, boardId }, {  // Send boardId
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            fetchColumns();
-
-        } catch (error) {
-            console.error("Error creating column:", error);
-        }
-    };
+    useEffect(() => {
+        const socket = io();
+        socket.on('connect', () => {
+            console.log("connected to the server ");
+            columns.forEach(column => {
+                socket.emit('joinBoard', column._id)
+            })
+        })
+    //     socket.on('updateTask', (updatedTask) => {
+    //         setTask(prevTasks =>
+    //             prevTasks.map(task =>
+    //                 task._id === updatedTask._id ? updatedTask : task
+    //             ))
+    //         setColumns((prevColumns) =>
+    //             prevColumns.map((column) =>
+    //                 column._id === updatedTask.columnId
+    //                     ? {
+    //                         ...column,
+    //                         tasks: column.tasks.map((task) => task._id === updatedTask._id ? updatedTask : task)
+    //                     }
+    //                     : column
+    //             ))
+    //     });
+    //     // Handle adding a task in realtime
+    //     socket.on('addTask', (newTask) => {
+    //         setColumns(prevColumns =>
+    //             prevColumns.map(column =>
+    //                 column._id === newTask.columnId
+    //                     ? { ...column, tasks: [...column.tasks, newTask] }
+    //                     : column
+    //             )
+    //         );
+    //     });
+        // return () => {
+        //     socket.disconnect()
+        // };
+    }, []);
 
     return (
-        <div>
-            {/* ... Display columns and column creation form */}
+        <div >
+            <div className="board_columns">
+                {columns.data?.map((column) => (
+                    <Column key={column._id} column={column} />
+                ))}
+                <div>
+                    <div>
+                        <input
+                            type="text"
+                            className='add_column'
+                            value={newColumnName}
+                            onChange={(e) => setNewColumnName(e.target.value)}
+                            placeholder="Добавить колонку..."
+                            onKeyDown={event => { if (event.key === "Enter") addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user')) }}
+                        />
+                        <button className='add_task' onClick={() => addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user'))}>Добавить колонку</button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
