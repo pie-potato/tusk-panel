@@ -14,11 +14,12 @@ export const fetchColumns = async () => {
 export const addColumn = async (newColumnName, setNewColumnName, boardId, user) => {
   try {
     const token = user ? JSON.parse(user).token : null;
-    await axios.post(`http://${window.location.hostname}:5000/api/columns`, { title: newColumnName, boardId: boardId }, {
+    const response = await axios.post(`http://${window.location.hostname}:5000/api/columns`, { title: newColumnName, boardId: boardId }, {
       headers: {
         Authorization: `Bearer ${token}`,
       }
     });
+    socket.emit('addColumn', response.data);
     setNewColumnName('');
     fetchColumns();
   } catch (error) {
@@ -47,10 +48,13 @@ export const addTask = async (newTask, setNewTask, user) => {
 };
 
 
-export const deleteColumn = async (id, user) => {
+export const deleteColumn = async (id) => {
   try {
 
-    await axios.delete(`http://${window.location.hostname}:5000/api/columns/${id}`);
+    const response = await axios.delete(`http://${window.location.hostname}:5000/api/columns/${id}`);
+    // console.log(response.data);
+    socket.emit('columnDeleted', id);
+    // socket.emit('deleteColumn', response.data);
     fetchColumns();
   } catch (error) {
     console.error('Error deleting column:', error);
@@ -233,7 +237,7 @@ export const addBoard = async (newBoard, setNewBoard, user) => {
 export const getColumnByIdBoard = async (setColumnById, boardId) => {
   try {
     const response = await axios.get(`http://${window.location.hostname}:5000/api/boards/${boardId}/columns`);
-    setColumnById(response)
+    setColumnById(response.data)
   } catch (error) {
     console.log(error)
   }

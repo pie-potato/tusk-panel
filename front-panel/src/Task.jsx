@@ -18,7 +18,6 @@ export default function Task({ task }) {
 
         // console.log(task);
     }, []);
-    
 
     return (
         <div key={task._id} className="task">
@@ -69,7 +68,7 @@ export default function Task({ task }) {
                         <button onClick={() => handleDeleteAttachment(attachment.filename, task)}>Delete</button>
                     </div>
                 ))}
-                <div>Создатель задачи: {<>{task.createdBy?.secondname} {task.createdBy?.firstname[0] + '.'}</> || task.createdBy?.username || 'Unknown'}</div>
+                {/* <div>Создатель задачи: {<>{task?.createdBy?.secondname} {task?.createdBy?.firstname[0] + '.'}</> || task?.createdBy?.username || 'Unknown'}</div> */}
                 {isMouse && <div onMouseLeave={() => {
                     setIsMouse(false)
                 }} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left + 5}px, ${contextElementRef.current.getBoundingClientRect().top + 22}px)` }}>

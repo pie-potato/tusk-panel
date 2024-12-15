@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import "./Column.css"
 import { addTask, deleteColumn, handleColumnEditSave } from './api/response';
 import Task from './Task';
-import { io } from "socket.io-client";
-
-
 
 export default function Column({ column }) {
 
@@ -12,28 +9,6 @@ export default function Column({ column }) {
     const [columnName, setColumnName] = useState(column.title)
     const [editColumn, setEditColumn] = useState(false)
     const [columns, setColumns] = useState()
-
-    useEffect(() => {
-        const socket = io();
-        socket.on('connect', () => {
-            console.log("connected to the server ");
-            columns.forEach(column => {
-                socket.emit('joinBoard', column._id)
-            })
-        })
-        socket.on('addTask', (newTask) => {
-            setColumns(prevColumns =>
-                prevColumns.map(column =>
-                    column._id === newTask.columnId
-                        ? { ...column, tasks: [...column.tasks, newTask] }
-                        : column
-                )
-            );
-        });
-        return () => {
-            socket.disconnect()
-        };
-    }, []);
 
     return (
         <div key={column._id} className="column">

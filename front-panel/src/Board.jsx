@@ -8,55 +8,40 @@ export default function Board({ boardId }) {
     const [task, setTask] = useState([])
     const [newColumnName, setNewColumnName] = useState('');
 
-    useEffect(() => {
+    useEffect(() => {   
         if (!boardId) return;
         getColumnByIdBoard(setColumns, boardId)
         console.log("asdasd");
+        console.log(columns);
+
+        const socket = io('http://localhost:5000'); // Подключаемся к Socket.IO серверу
+        socket.on('connect', () => { // После установки соединения
+            console.log('Соединение с сервером установлено');
+            socket.emit('joinBoard', boardId); // Присоединяемся к комнате доски, используя boardId
+        });
+        // Обработчики событий Socket.IO для этой доски
+        socket.on('updateTask', (updatedTask) => {
+            // ... (логика обновления задачи)
+        });
+        socket.on('addColumn', (newColumn) => { //  Добавление колонки
+            setColumns(prevColumns => [...prevColumns, newColumn])
+        });
+        socket.on('columnDeleted', (deletedColumnId) => {
+            setColumns(prevColumns => prevColumns.filter(column => column._id !== deletedColumnId));
+        });
+        // Отключаемся от Socket.IO при размонтировании компонента
+        return () => {
+            socket.disconnect();
+        };
 
     }, [boardId]);
 
-    useEffect(() => {
-        const socket = io();
-        socket.on('connect', () => {
-            console.log("connected to the server ");
-            columns.forEach(column => {
-                socket.emit('joinBoard', column._id)
-            })
-        })
-    //     socket.on('updateTask', (updatedTask) => {
-    //         setTask(prevTasks =>
-    //             prevTasks.map(task =>
-    //                 task._id === updatedTask._id ? updatedTask : task
-    //             ))
-    //         setColumns((prevColumns) =>
-    //             prevColumns.map((column) =>
-    //                 column._id === updatedTask.columnId
-    //                     ? {
-    //                         ...column,
-    //                         tasks: column.tasks.map((task) => task._id === updatedTask._id ? updatedTask : task)
-    //                     }
-    //                     : column
-    //             ))
-    //     });
-    //     // Handle adding a task in realtime
-    //     socket.on('addTask', (newTask) => {
-    //         setColumns(prevColumns =>
-    //             prevColumns.map(column =>
-    //                 column._id === newTask.columnId
-    //                     ? { ...column, tasks: [...column.tasks, newTask] }
-    //                     : column
-    //             )
-    //         );
-    //     });
-        // return () => {
-        //     socket.disconnect()
-        // };
-    }, []);
+
 
     return (
         <div >
             <div className="board_columns">
-                {columns.data?.map((column) => (
+                {columns.map((column) => (
                     <Column key={column._id} column={column} />
                 ))}
                 <div>

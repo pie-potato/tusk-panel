@@ -16,45 +16,14 @@ const port = 5000;
 
 app.use(cors());
 app.use(express.json());
-const server = http.createServer(app)
-const io = socketIO(server);
-
-io.on('connection', (socket) => {
-    console.log('User connected');
-
-
-  socket.on('joinBoard', (boardId) => {
-      socket.join(boardId); // Join a room for the specific board
-  });
-
-
-
-  // Handle task updates
-
-  socket.on('taskUpdated', (updatedTask) => {
-    socket.to(updatedTask.columnId).emit('updateTask', updatedTask);
-  });
-
-
-
-    socket.on('taskCreated', (newTask) => {
-
-
-        socket.to(newTask.columnId).emit('addTask', newTask);
-    });
-
-
-
-  // ... (other socket events for columns, boards, etc.)
-
-
-
-
-    socket.on('disconnect', () => {
-      console.log('User disconnected');
-    });
-
+const server = http.createServer(app);
+const io = socketIO(server, {
+    cors: {
+        origin: "http://localhost:3000", //  или ваш домен/порт клиента
+        methods: ["GET", "POST", "PUT", "DELETE"]
+    }
 });
+
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -78,7 +47,30 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
     .then(() => {
         console.log('Connected to MongoDB')
         createDefaultAdmin();
-        app.listen(port, () => console.log(`Server listening on port ${port}`));
+        io.on('connection', (socket) => { // Подключение нового клиента
+            console.log('Пользователь подключился');
+
+            socket.on('joinBoard', (boardId) => { // Клиент присоединяется к комнате доски
+                socket.join(boardId);
+                console.log(`Socket ${socket.id} joined room ${boardId}`);
+            });
+
+            socket.on('addColumn', (newColumn) => {
+                socket.to(newColumn.boardId).emit('addColumn', newColumn);
+            });
+            socket.on('columnDeleted', (columnId, boardId) => { // получаем boardId вместе с columnId
+                socket.to(boardId).emit('columnDeleted', columnId);
+            });
+
+            socket.on('taskUpdated', (updatedTask) => { // Клиент обновил задачу
+                socket.to(updatedTask.columnId).emit('updateTask', updatedTask);
+            });
+            // ... обработчики других событий
+            socket.on('disconnect', () => { // Отключение клиента
+                console.log('Пользователь отключился');
+            });
+        });
+        server.listen(port, () => console.log(`Server listening on port ${port}`));
     })
     .catch((error) => console.error('Error connecting to MongoDB:', error));
 
@@ -313,9 +305,35 @@ app.post('/api/columns', async (req, res) => {
 
         const newColumn = new Column({ title, boardId });
         const savedColumn = await newColumn.save();
-        res.json(savedColumn);
+        const populatedColumn = await Column.findById(savedColumn._id).populate('tasks');
+        console.log(boardId);
+        
+        // console.log(populatedColumn);
+
+        io.to(boardId).emit("addColumn", populatedColumn);
+        res.json(populatedColumn);
     } catch (error) {
         res.status(500).json({ error: 'Ошибка при создании колонки' });
+    }
+});
+
+app.delete('/api/columns/:id', async (req, res) => {
+    try {
+
+        const column = await Column.findById(req.params.id);
+        console.log(column.boardId.toString());
+
+        if (!column) {
+            return res.status(404).json({ message: 'Колонка не найдена.' });
+        }
+
+
+        await Task.deleteMany({ columnId: req.params.id }); // Удаляем все задачи в колонке
+        await Column.findByIdAndDelete(req.params.id);
+        io.to(column.boardId.toString()).emit('columnDeleted', req.params.id);
+        res.json({ message: 'Колонка успешно удалена.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error deleting column' });
     }
 });
 
@@ -354,18 +372,6 @@ app.get('/api/boards/:boardId/columns', async (req, res) => {
     }
 });
 
-app.delete('/api/columns/:id', async (req, res) => {
-    try {
-        // First, delete all associated tasks:
-        await Task.deleteMany({ columnId: req.params.id });
-        // Then, delete the column:
-        await Column.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Column and associated tasks deleted' });
-    } catch (error) {
-        res.status(500).json({ error: 'Error deleting column' });
-    }
-});
-
 app.delete('/api/tasks/:id', async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
@@ -393,7 +399,15 @@ app.put('/api/columns/:id', async (req, res) => {
 
 app.put('/api/tasks/:id', async (req, res) => {
     try {
-        const updatedTask = await Task.findByIdAndUpdate(req.params.id, { title: req.body.title }, { new: true });
+        const updatedTask = await Task.findByIdAndUpdate(req.params.id, { title: req.body.title }, { new: true })
+            .populate('createdBy')
+            .populate('assignedTo', 'username');
+
+        if (!updatedTask) {
+            return res.status(404).json({ message: 'Задача не найдена.' });
+
+        }
+        io.to(updatedTask.columnId.toString()).emit('taskUpdated', updatedTask);
         res.json(updatedTask);
     } catch (error) {
         res.status(500).json({ error: 'Error updating task' });
