@@ -12,6 +12,7 @@
 .column {
     margin: 10px;
     width: 380px;
+    min-width: 380px;
     border-top: 4px solid #1876C2;
     /* border-bottom: 4px solid coral; */
     padding: 10px 10px 10px 10px;
@@ -39,7 +40,6 @@
 
 .board_columns {
     display: flex;
-
 }
 
 .add_column {

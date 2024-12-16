@@ -14,9 +14,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log(user);
-  
-
   useEffect(() => {
     const fetchUser = async () => { // Make function async
       const storedUser = localStorage.getItem('user');
@@ -29,7 +26,6 @@ function App() {
     fetchUser(); // Call the async function
     
   }, []);
-  console.log(window.location.hostname)
 
   if (isLoading) {  // Display loading message while fetching user data
     return <div>Loading...</div>;

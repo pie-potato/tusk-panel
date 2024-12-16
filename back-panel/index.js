@@ -19,7 +19,7 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = socketIO(server, {
     cors: {
-        origin: "http://localhost:3000", //  или ваш домен/порт клиента
+        origin: "*", //  или ваш домен/порт клиента
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
 });
@@ -54,18 +54,21 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
                 socket.join(boardId);
                 console.log(`Socket ${socket.id} joined room ${boardId}`);
             });
-
-            socket.on('addColumn', (newColumn) => {
-                socket.to(newColumn.boardId).emit('addColumn', newColumn);
+            socket.on('addColumn', (boardId, newColumn) => {
+                socket.to(boardId).emit('addColumn', newColumn);
             });
-            socket.on('columnDeleted', (columnId, boardId) => { // получаем boardId вместе с columnId
-                socket.to(boardId).emit('columnDeleted', columnId);
+            socket.on('updateColumn', (boardId, updateColumn) => { // Клиент обновил задачу
+                socket.to(boardId).emit('updateColumn', updateColumn);
             });
-
-            socket.on('taskUpdated', (updatedTask) => { // Клиент обновил задачу
-                socket.to(updatedTask.columnId).emit('updateTask', updatedTask);
+            socket.on('deleteColumn', (boardId, columnId) => { // получаем boardId вместе с columnId
+                socket.to(boardId).emit('deleteColumn', columnId);
             });
-            // ... обработчики других событий
+            socket.on('addTask', (boardId, newTask) => {
+                socket.to(boardId).emit('addTask', newTask);
+            });
+            socket.on('deleteTask', (boardId, taskId) => { // Клиент обновил задачу
+                socket.to(boardId).emit('deleteTask', taskId);
+            });
             socket.on('disconnect', () => { // Отключение клиента
                 console.log('Пользователь отключился');
             });
@@ -305,12 +308,14 @@ app.post('/api/columns', async (req, res) => {
 
         const newColumn = new Column({ title, boardId });
         const savedColumn = await newColumn.save();
+        // await Board.findById(req.body.boardId, { $push: { column: savedColumn._id } })
         const populatedColumn = await Column.findById(savedColumn._id).populate('tasks');
         console.log(boardId);
-        
+
         // console.log(populatedColumn);
 
         io.to(boardId).emit("addColumn", populatedColumn);
+
         res.json(populatedColumn);
     } catch (error) {
         res.status(500).json({ error: 'Ошибка при создании колонки' });
@@ -321,16 +326,14 @@ app.delete('/api/columns/:id', async (req, res) => {
     try {
 
         const column = await Column.findById(req.params.id);
-        console.log(column.boardId.toString());
 
         if (!column) {
             return res.status(404).json({ message: 'Колонка не найдена.' });
         }
 
-
         await Task.deleteMany({ columnId: req.params.id }); // Удаляем все задачи в колонке
         await Column.findByIdAndDelete(req.params.id);
-        io.to(column.boardId.toString()).emit('columnDeleted', req.params.id);
+        io.to(column.boardId.toString()).emit('deleteColumn', req.params.id);
         res.json({ message: 'Колонка успешно удалена.' });
     } catch (error) {
         res.status(500).json({ error: 'Error deleting column' });
@@ -350,8 +353,10 @@ app.post('/api/tasks', async (req, res) => {
         });
 
         const savedTask = await newTask.save();
-
+        const column = await Column.findById(req.body.columnId)
         await Column.findByIdAndUpdate(req.body.columnId, { $push: { tasks: savedTask._id } });
+        io.to(column.boardId.toString()).emit('addTask', savedTask);
+
         res.json(savedTask);
     } catch (error) {
         res.status(500).json({ error: 'Error adding task' });
@@ -378,9 +383,10 @@ app.delete('/api/tasks/:id', async (req, res) => {
         if (!task) {
             return res.status(404).json({ error: 'Task not found' });
         }
-
-        await Column.findByIdAndUpdate(task.columnId, { $pull: { tasks: task._id } });
+        const column = await Column.findById(task.columnId)
+        const deletedTask = await Column.findByIdAndUpdate(task.columnId, { $pull: { tasks: task._id } });
         await Task.findByIdAndDelete(req.params.id);
+        io.to(column.boardId.toString()).emit('deleteTask', deletedTask)
         res.json({ message: 'Task deleted' });
     } catch (error) {
         res.status(500).json({ error: 'Error deleting task' });
@@ -390,6 +396,8 @@ app.delete('/api/tasks/:id', async (req, res) => {
 app.put('/api/columns/:id', async (req, res) => {
     try {
         const updatedColumn = await Column.findByIdAndUpdate(req.params.id, { title: req.body.title }, { new: true });
+        console.log(updatedColumn);
+        io.to(updatedColumn.boardId.toString()).emit('updateColumn', updatedColumn)
         res.json(updatedColumn);
     } catch (error) {
         res.status(500).json({ error: 'Error updating column' });

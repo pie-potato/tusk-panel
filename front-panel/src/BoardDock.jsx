@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getBoard, addBoard, deleteBoard } from './api/response';
 import './BoardDock.css'
+import { io } from "socket.io-client";
 
 export default function BoardDock({ activeBoard, setActiveBoard }) {
 
@@ -8,8 +9,14 @@ export default function BoardDock({ activeBoard, setActiveBoard }) {
     const [creaeteBoard, setCreateBoard] = useState(false)
     const [newColumnName, setNewColumnName] = useState('');
 
+    const getAllBoard = async () => {
+        const response = await getBoard()
+        setAllBoards(response.data)
+        setActiveBoard(allBoard[0]?._id)
+    }
+
     useEffect(() => {
-        getBoard(setAllBoards)
+        getAllBoard()
     }, [])
 
     const createBoard = () => {

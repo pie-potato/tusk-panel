@@ -59,5 +59,6 @@
     border: none;
     background: none;
     cursor: pointer;
-    color: #125489;
+    /* color: #125489; */
+    color: #001f82;
 }

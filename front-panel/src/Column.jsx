@@ -8,7 +8,6 @@ export default function Column({ column }) {
     const [newTask, setNewTask] = useState({ columnId: null, title: '' });
     const [columnName, setColumnName] = useState(column.title)
     const [editColumn, setEditColumn] = useState(false)
-    const [columns, setColumns] = useState()
 
     return (
         <div key={column._id} className="column">

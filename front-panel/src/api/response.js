@@ -19,9 +19,9 @@ export const addColumn = async (newColumnName, setNewColumnName, boardId, user) 
         Authorization: `Bearer ${token}`,
       }
     });
-    socket.emit('addColumn', response.data);
+    // socket.emit('addColumn', response.data);
     setNewColumnName('');
-    fetchColumns();
+    // fetchColumns();
   } catch (error) {
     console.error('Error adding column:', error);
   }
@@ -34,14 +34,13 @@ export const addTask = async (newTask, setNewTask, user) => {
   }
   try {
     const token = user ? JSON.parse(user).token : null;
-    const response = await axios.post(`http://${window.location.hostname}:5000/api/tasks`, newTask, {
+    await axios.post(`http://${window.location.hostname}:5000/api/tasks`, newTask, {
       headers: {
         Authorization: `Bearer ${token}`,
       }
     });
-    socket.emit('taskCreated', response.data)
+    // socket.emit('addTask', response.data)
     setNewTask({ columnId: null, title: '' });
-    fetchColumns(); // Refresh columns to reflect new task
   } catch (error) {
     console.error('Error adding task:', error);
   }
@@ -53,7 +52,7 @@ export const deleteColumn = async (id) => {
 
     const response = await axios.delete(`http://${window.location.hostname}:5000/api/columns/${id}`);
     // console.log(response.data);
-    socket.emit('columnDeleted', id);
+    // socket.emit('deleteColumn', id);
     // socket.emit('deleteColumn', response.data);
     fetchColumns();
   } catch (error) {
@@ -210,11 +209,10 @@ export const handleUpdateUser = async (editingUser, editPassword, setEditingUser
   }
 };
 
-export const getBoard = async (setAllBoards) => {
+export const getBoard = async () => {
   try {
     const response = await axios.get(`http://${window.location.hostname}:5000/api/boards`);
-    setAllBoards(response.data)
-    return
+    return response
   } catch (error) {
     console.log(error)
   }
@@ -234,10 +232,10 @@ export const addBoard = async (newBoard, setNewBoard, user) => {
   }
 }
 
-export const getColumnByIdBoard = async (setColumnById, boardId) => {
+export const getColumnByIdBoard = async (boardId) => {
   try {
     const response = await axios.get(`http://${window.location.hostname}:5000/api/boards/${boardId}/columns`);
-    setColumnById(response.data)
+    return response
   } catch (error) {
     console.log(error)
   }
