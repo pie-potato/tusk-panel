@@ -6,7 +6,7 @@ import Task from './Task';
 export default function Column({ column }) {
 
     const [newTask, setNewTask] = useState({ columnId: null, title: '' });
-    const [columnName, setColumnName] = useState(column.title)
+    const [columnName, setColumnName] = useState('')
     const [editColumn, setEditColumn] = useState(false)
 
     return (
@@ -23,7 +23,10 @@ export default function Column({ column }) {
                         }
                     }}
                 />
-                : <h2 onDoubleClick={() => setEditColumn(true)}>{columnName} <button className='delete_column' onClick={() => deleteColumn(column._id)}>Удалить колонку</button></h2>
+                : <h2 onDoubleClick={() => {
+                    setEditColumn(true)
+                    setColumnName(column.title)
+                }}>{column.title} <button className='delete_column' onClick={() => deleteColumn(column._id)}>Удалить колонку</button></h2>
             }
             <div>
                 {column.tasks.map((task) => (

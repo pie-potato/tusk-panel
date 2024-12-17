@@ -5,7 +5,6 @@
 }
 
 .task {
-    /* border: 5px solid coral; */
     display: flex;
     background-color: white;
     flex-direction: column;
@@ -13,6 +12,11 @@
     border-radius: 20px;
     padding: 10px;
     margin-bottom: 10px;
+}
+
+.bottom_input {
+    display: flex;
+    justify-content: space-between;
 }
 
 .container_task {
@@ -33,7 +37,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: coral;
+    color: #001f82;
     padding: 10px;
 }
 
@@ -48,7 +52,7 @@
     /* height: 150px; */
     border-radius: 20px;
     padding: 10px;
-    border: 2px solid coral;
+    border: 2px solid #001f82;
 }
 
 .context_menu_button {
@@ -61,4 +65,15 @@
     cursor: pointer;
     /* color: #125489; */
     color: #001f82;
+}
+
+.select_users {
+    border-radius: 20px;
+    padding: 5px;
+    border-color: #1876C2;
+    color: #001f82;
+}
+
+.select_users:active {
+    border: 0;
 }

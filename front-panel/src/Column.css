@@ -10,6 +10,8 @@
 }
 
 .column {
+    display: flex;
+    flex-direction: column;
     margin: 10px;
     width: 380px;
     min-width: 380px;
@@ -18,9 +20,9 @@
     padding: 10px 10px 10px 10px;
     border-radius: 20px;
     background-color: #1876c230;
-    max-height: 80vh;
+    max-height: 83vh;
     overflow-x: hidden;
-    /* height: 100ch; */
+    /* height: 130px; */
 }
 
 .column::-webkit-scrollbar {
@@ -38,8 +40,29 @@
     background-color: #356184;
 }
 
+.board_container {
+    overflow-y: hidden;
+    height: 88vh;
+}
+
 .board_columns {
     display: flex;
+    /* height: 100%; */
+}
+
+.board_container::-webkit-scrollbar {
+    height: 10px;
+    border-radius: 20px;
+}
+
+.board_container::-webkit-scrollbar-track {
+    -webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+    background-color: #f9f9fd;
+}
+
+.board_container::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color: #356184;
 }
 
 .add_column {

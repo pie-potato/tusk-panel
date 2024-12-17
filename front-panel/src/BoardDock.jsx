@@ -3,27 +3,15 @@ import { getBoard, addBoard, deleteBoard } from './api/response';
 import './BoardDock.css'
 import { io } from "socket.io-client";
 
-export default function BoardDock({ activeBoard, setActiveBoard }) {
+export default function BoardDock({ activeBoard, setActiveBoard, allBoard }) {
 
-    const [allBoard, setAllBoards] = useState([])
     const [creaeteBoard, setCreateBoard] = useState(false)
     const [newColumnName, setNewColumnName] = useState('');
-
-    const getAllBoard = async () => {
-        const response = await getBoard()
-        setAllBoards(response.data)
-        setActiveBoard(allBoard[0]?._id)
-    }
-
-    useEffect(() => {
-        getAllBoard()
-    }, [])
 
     const createBoard = () => {
         addBoard(newColumnName, setNewColumnName, localStorage.getItem('user'))
         setNewColumnName('')
         setCreateBoard(false)
-        getBoard(setAllBoards)
     }
 
     return (
@@ -32,7 +20,6 @@ export default function BoardDock({ activeBoard, setActiveBoard }) {
                 {e.title}
                 <button onClick={async() => {
                     await deleteBoard(e._id, localStorage.getItem('user'))
-                    getBoard(setAllBoards)
                 }} className="context_menu_button">...</button>
             </div>)}
             <div onClick={() => setCreateBoard(true)}>
@@ -44,7 +31,6 @@ export default function BoardDock({ activeBoard, setActiveBoard }) {
                         onKeyDown={event => {
                             if (event.key === "Enter") {
                                 createBoard()
-                                getBoard(setAllBoards)
                             }
                         }}
                         onBlur={() => {

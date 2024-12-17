@@ -114,7 +114,6 @@ export const fetchUsers = async (setUsers) => {
 export const assignTask = async (taskId, userId) => {
   try {
     await axios.put(`http://${window.location.hostname}:5000/api/tasks/${taskId}/assign`, { userId });
-    // fetchColumns();
   } catch (error) {
     console.error('Error assigning task:', error);
   }

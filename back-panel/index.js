@@ -66,8 +66,29 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
             socket.on('addTask', (boardId, newTask) => {
                 socket.to(boardId).emit('addTask', newTask);
             });
+            socket.on('updateTask', (boardId, updateTask) => {
+                socket.to(boardId).emit('updateTask', updateTask);
+            });
             socket.on('deleteTask', (boardId, taskId) => { // Клиент обновил задачу
                 socket.to(boardId).emit('deleteTask', taskId);
+            });
+            socket.on('addTaskAssing', (boardId, assignedUser) => { // Клиент обновил задачу
+                socket.to(boardId).emit('addTaskAssing', assignedUser);
+            });
+            socket.on('deleteTaskAssing', (boardId, unAssignedUser) => { // Клиент обновил задачу
+                socket.to(boardId).emit('deleteTaskAssing', unAssignedUser);
+            });
+            socket.on('addAttachmentsFile', (boardId, attachmentsFile) => { // Клиент обновил задачу
+                socket.to(boardId).emit('addAttachmentsFile', attachmentsFile);
+            });
+            socket.on('deleteAttachmentsFile', (boardId, deletedAttachmentsFile) => { // Клиент обновил задачу
+                socket.to(boardId).emit('deleteAttachmentsFile', deletedAttachmentsFile);
+            });
+            socket.on('addBoard', (boardId, newBoard) => { // Клиент обновил задачу
+                socket.to(boardId).emit('addBoard', newBoard);
+            });
+            socket.on('deleteBoard', (boardId, newBoard) => { // Клиент обновил задачу
+                socket.to(boardId).emit('deleteBoard', newBoard);
             });
             socket.on('disconnect', () => { // Отключение клиента
                 console.log('Пользователь отключился');
@@ -122,14 +143,18 @@ app.post('/api/tasks/:taskId/upload', upload.single('file'), async (req, res) =>
             return res.status(404).json({ message: 'Задача не найдена.' });
         }
 
-
+        const column = await Column.findById(task.columnId)
         task.attachments = task.attachments || []; // Initialize attachments array if it doesn't exist
-        task.attachments.push({ filename: req.file.filename, originalname: Buffer.from(req.file.originalname, 'latin1').toString('utf8') }); // Use originalname for display
+        const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8')
+        const nameFile = { filename: req.file.filename, originalname: originalName }
+        task.attachments.push(nameFile); // Use originalname for display
 
 
         await task.save();
+        console.log({ filename: req.file.filename, originalname: originalName });
+        io.to(column.boardId.toString()).emit("addAttachmentsFile", { nameFile, taskId: task._id, columnId: column._id });
 
-        res.json({ message: 'Файл успешно загружен.', attachment: { filename: req.file.filename, originalname: req.file.originalname } });
+        res.json({ message: 'Файл успешно загружен.', nameFile });
     } catch (error) {
         // Delete the uploaded file if an error occurs
         if (req.file) {
@@ -161,7 +186,7 @@ app.delete('/api/tasks/:taskId/attachments/:filename', async (req, res) => {
             return res.status(404).json({ message: 'Задача не найдена.' });
         }
 
-
+        const column = await Column.findById(task.columnId)
         const filename = req.params.filename;
 
 
@@ -178,11 +203,11 @@ app.delete('/api/tasks/:taskId/attachments/:filename', async (req, res) => {
         // Delete the file from the uploads directory
         const filePath = path.join(__dirname, 'uploads', removedAttachment.filename);
         fs.unlinkSync(filePath);  // Delete the file
+        console.log(filename, removedAttachment);
 
+        io.to(column.boardId.toString()).emit("deleteAttachmentsFile", { removedAttachment, taskId: task._id, columnId: column._id });
 
         res.json({ message: 'Вложение успешно удалено.' });
-
-
     } catch (error) {
         console.error('Ошибка при удалении вложения:', error);
         res.status(500).json({ error: 'Ошибка при удалении вложения.' });
@@ -205,6 +230,10 @@ app.post('/api/boards', async (req, res) => {
             createdBy: currentUser._id,
         });
         const savedBoard = await newBoard.save();
+        console.log(savedBoard);
+        
+        io.to(savedBoard._id.toString()).emit("addBoard", savedBoard);
+
         res.json(savedBoard);
     } catch (error) {
         res.status(500).json({ error: 'Ошибка при создании доски.' });
@@ -384,8 +413,8 @@ app.delete('/api/tasks/:id', async (req, res) => {
             return res.status(404).json({ error: 'Task not found' });
         }
         const column = await Column.findById(task.columnId)
-        const deletedTask = await Column.findByIdAndUpdate(task.columnId, { $pull: { tasks: task._id } });
-        await Task.findByIdAndDelete(req.params.id);
+        await Column.findByIdAndUpdate(task.columnId, { $pull: { tasks: task._id } });
+        const deletedTask = await Task.findByIdAndDelete(req.params.id);
         io.to(column.boardId.toString()).emit('deleteTask', deletedTask)
         res.json({ message: 'Task deleted' });
     } catch (error) {
@@ -410,12 +439,12 @@ app.put('/api/tasks/:id', async (req, res) => {
         const updatedTask = await Task.findByIdAndUpdate(req.params.id, { title: req.body.title }, { new: true })
             .populate('createdBy')
             .populate('assignedTo', 'username');
-
+        const column = await Column.findById(updatedTask.columnId)
         if (!updatedTask) {
             return res.status(404).json({ message: 'Задача не найдена.' });
 
         }
-        io.to(updatedTask.columnId.toString()).emit('taskUpdated', updatedTask);
+        io.to(column.boardId.toString()).emit('updateTask', updatedTask);
         res.json(updatedTask);
     } catch (error) {
         res.status(500).json({ error: 'Error updating task' });
@@ -546,29 +575,26 @@ app.get('/api/users', async (req, res) => {
 app.put('/api/tasks/:taskId/assign', async (req, res) => {
     try {
         const { userId } = req.body;
+        console.log(userId);
+
         const updatedTask = await Task.findByIdAndUpdate(
             req.params.taskId,
             { assignedTo: userId },
             { new: true }
         ).populate('createdBy').populate('assignedTo', 'username'); // Populate after updating
+        const column = await Column.findById(updatedTask.columnId)
+        if (userId) {
+            const assignedUser = await User.findById(updatedTask.assignedTo._id)
+            io.to(column.boardId.toString()).emit('addTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
+        } else {
+            io.to(column.boardId.toString()).emit('deleteTaskAssing', updatedTask);
+        }
+
+        console.log(updatedTask);
+
         res.json(updatedTask);
     } catch (error) {
         res.status(500).json({ error: 'Error assigning task' });
-    }
-});
-
-app.put('/api/tasks/:taskId/assign', async (req, res) => {
-    try {
-        const { userId } = req.body;
-        const updatedTask = await Task.findByIdAndUpdate(
-            req.params.taskId,
-            { assignedTo: userId }, // Use userId directly (can be null to unassign)
-            { new: true }
-        ).populate('createdBy').populate('assignedTo', 'username');
-
-        res.json(updatedTask);
-    } catch (error) {
-        res.status(500).json({ error: 'Error assigning/unassigning task' });
     }
 });
 
@@ -637,12 +663,3 @@ app.put('/api/admin/users/:userId', async (req, res) => {
         console.log(error);
     }
 });
-
-app.post('/api/fafa', async (req, res) => {
-    try {
-        console.log(req.body);
-        res.json(req.body)
-    } catch (error) {
-        console.log(error);
-    }
-})

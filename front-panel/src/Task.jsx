@@ -4,7 +4,7 @@ import "./Task.css"
 
 export default function Task({ task }) {
 
-    const [taskName, setTaskName] = useState(task.title)
+    const [taskName, setTaskName] = useState('')
     const [editTask, setEditTask] = useState(false)
     const [users, setUsers] = useState([]);
     const [isMouse, setIsMouse] = useState(false)
@@ -37,24 +37,27 @@ export default function Task({ task }) {
                         onBlur={() => setEditTask(false)}>
                     </textarea>
                     :
-                    <div onDoubleClick={() => setEditTask(true)} className="task_name">
-                        {taskName}
+                    <div onDoubleClick={() => {
+                        setTaskName(task.title)
+                        setEditTask(true)
+                        }} className="task_name">
+                        {task.title}
                     </div>
 
 
                 }
                 <div onMouseDown={() => setIsMouse(true)} className="context_menu_button" ref={contextElementRef}>...</div>
             </div>
-            <div>
+            <div className="bottom_input">
                 {task.assignedTo?.username
                     ? <div>Задача назначена на: {task.assignedTo?.firstname || task.assignedTo?.username} <button onClick={() => unassignTask(task._id)}>Снять задачу</button></div>
-                    : <select onChange={(e) => {
+                    : <select className="select_users" onChange={(e) => {
                         console.log(e.target.value)
                         assignTask(task._id, e.target.value)
                     }}>
                         <option value="">Назначить на:</option>
                         {users.map((user) => (
-                            <option key={user._id} value={user._id}>
+                            <option className="user" key={user._id} value={user._id}>
                                 {user?.secondname || user.username} {user?.firstname && user?.firstname[0] + '.'} {user?.thirdname && user?.thirdname[0] + '.'}
                             </option>
                         ))}
@@ -62,7 +65,7 @@ export default function Task({ task }) {
                 }
                 {task.attachments && task.attachments.map((attachment) => (
                     <div key={attachment.filename}>
-                        <a href={`http://localhost:5000/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
+                        <a href={`http://${window.location.hostname}:5000/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
                             {attachment.originalname}
                         </a>
                         <button onClick={() => handleDeleteAttachment(attachment.filename, task)}>Delete</button>
@@ -80,6 +83,7 @@ export default function Task({ task }) {
                 {uploadFile && <div onMouseLeave={() => setUploadFile(false)} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left + 5}px, ${contextElementRef.current.getBoundingClientRect().top + 121}px)` }}>
                     <input type="file" onChange={e => handleFileUpload(e, task)} />
                 </div>}
+                <button className="delete_task">n</button>
             </div>
         </div>
     )
