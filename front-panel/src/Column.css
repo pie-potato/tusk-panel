@@ -20,7 +20,7 @@
     padding: 10px 10px 10px 10px;
     border-radius: 20px;
     background-color: #1876c230;
-    max-height: 83vh;
+    max-height: 82vh;
     overflow-x: hidden;
     /* height: 130px; */
 }
@@ -42,7 +42,7 @@
 
 .board_container {
     overflow-y: hidden;
-    height: 88vh;
+    height: 87vh;
 }
 
 .board_columns {

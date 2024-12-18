@@ -84,11 +84,11 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
             socket.on('deleteAttachmentsFile', (boardId, deletedAttachmentsFile) => { // Клиент обновил задачу
                 socket.to(boardId).emit('deleteAttachmentsFile', deletedAttachmentsFile);
             });
-            socket.on('addBoard', (boardId, newBoard) => { // Клиент обновил задачу
+            socket.on('addBoard', (boardId, newBoard) => {
                 socket.to(boardId).emit('addBoard', newBoard);
             });
-            socket.on('deleteBoard', (boardId, newBoard) => { // Клиент обновил задачу
-                socket.to(boardId).emit('deleteBoard', newBoard);
+            socket.on('deleteBoard', (boardId, deletedBoard) => {
+                socket.to(boardId).emit('deleteBoard', deletedBoard);
             });
             socket.on('disconnect', () => { // Отключение клиента
                 console.log('Пользователь отключился');
@@ -230,9 +230,9 @@ app.post('/api/boards', async (req, res) => {
             createdBy: currentUser._id,
         });
         const savedBoard = await newBoard.save();
-        console.log(savedBoard);
+        console.log(typeof req.headers.referer);
         
-        io.to(savedBoard._id.toString()).emit("addBoard", savedBoard);
+        io.to('\\').emit("addBoard", savedBoard);
 
         res.json(savedBoard);
     } catch (error) {
@@ -277,13 +277,9 @@ app.put('/api/boards/:boardId', async (req, res) => {
 app.delete('/api/boards/:boardId', async (req, res) => {
     try {
         // First, delete all associated tasks:
-        // console.log(req.params.boardId);
-        console.log(req.headers);
         const token = req.header('Authorization')?.replace('Bearer ', '');
         const decoded = jwt.verify(token, 'PiePotato');
         const currentUser = await User.findById(decoded.userId);
-        console.log(currentUser);
-
         if (currentUser.role !== 'admin' && currentUser.role !== 'manager') { // Check if current user is admin or the creator of the board
             return res.status(403).json({ message: 'Нет прав для редактирования этой доски.' });
         }
@@ -293,7 +289,10 @@ app.delete('/api/boards/:boardId', async (req, res) => {
 
         await Column.deleteMany({ boardId: req.params.boardId });
         // Then, delete the column:
-        await Board.findByIdAndDelete(req.params.boardId);
+        const deletedBoard = await Board.findByIdAndDelete(req.params.boardId);
+        console.log(req.headers.referer);
+        
+        io.to('\\').emit("deleteBoard", deletedBoard);
         res.json({ message: 'Column and associated tasks deleted' });
     } catch (error) {
         res.status(500).json({ error: 'Error deleting column' });

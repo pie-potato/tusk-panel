@@ -68,7 +68,7 @@ export default function Task({ task }) {
                         <a href={`http://${window.location.hostname}:5000/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
                             {attachment.originalname}
                         </a>
-                        <button onClick={() => handleDeleteAttachment(attachment.filename, task)}>Delete</button>
+                        <button className="delete_task" onClick={() => handleDeleteAttachment(attachment.filename, task)}>Удалить</button>
                     </div>
                 ))}
                 {/* <div>Создатель задачи: {<>{task?.createdBy?.secondname} {task?.createdBy?.firstname[0] + '.'}</> || task?.createdBy?.username || 'Unknown'}</div> */}
@@ -76,14 +76,19 @@ export default function Task({ task }) {
                     setIsMouse(false)
                 }} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left + 5}px, ${contextElementRef.current.getBoundingClientRect().top + 22}px)` }}>
                     <button onClick={() => deleteTask(task._id)} className="delete_task">Удалить задчу</button>
-                    <button onClick={() => setEditTask(true)} className="delete_task">Редактировать задачу</button>
-                    <button onClick={() => setUploadFile(true)} className="delete_task">Загрузить файл</button>
+                    <button onClick={() => {
+                        setEditTask(true)
+                        setTaskName(task.title)
+                        }} className="delete_task">Редактировать задачу</button>
+                    {/* <button onClick={() => setUploadFile(true)} className="delete_task">Загрузить файл</button> */}
+                    <label className="delete_task" htmlFor="task_file">Загрузить файл</label>
+                    <input style={{opacity: 0, height: 0, width: 0, position: "absolute"}} multiple id="task_file" name="task_file" type="file" className="delete_task" onChange={e => handleFileUpload(e, task)} />
+
                 </div>
                 }
                 {uploadFile && <div onMouseLeave={() => setUploadFile(false)} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left + 5}px, ${contextElementRef.current.getBoundingClientRect().top + 121}px)` }}>
                     <input type="file" onChange={e => handleFileUpload(e, task)} />
                 </div>}
-                <button className="delete_task">n</button>
             </div>
         </div>
     )

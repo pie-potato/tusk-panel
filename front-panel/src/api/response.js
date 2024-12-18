@@ -62,13 +62,14 @@ export const deleteColumn = async (id) => {
 
 export const deleteBoard = async (id, user) => {
   try {
+    console.log('asad');
+    
     const token = user ? JSON.parse(user).token : null;
     await axios.delete(`http://${window.location.hostname}:5000/api/boards/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       }
     });
-    fetchColumns();
   } catch (error) {
     console.error('Error deleting column:', error);
   }
@@ -254,6 +255,8 @@ export const updateBoardNameById = async (updateColumnName, boardId) => {
 }
 
 export const handleFileUpload = async (event, task) => {
+  console.log(event);
+  
   const file = event.target.files[0];
   if (!file) return;
 

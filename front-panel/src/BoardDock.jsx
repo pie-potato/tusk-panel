@@ -16,11 +16,11 @@ export default function BoardDock({ activeBoard, setActiveBoard, allBoard }) {
 
     return (
         <div className="board_dock">
-            {allBoard.map(e => <div key={e._id} className={activeBoard === e._id ? 'board_dock_element active' : 'board_dock_element'} onClick={() => setActiveBoard(e._id)}>
-                {e.title}
+            {allBoard.map(e => <div key={e._id} className={activeBoard === e._id ? 'board_dock_element active' : 'board_dock_element'}>
+                <div onClick={() => setActiveBoard(e._id)}>{e.title}</div>
                 <button onClick={async() => {
                     await deleteBoard(e._id, localStorage.getItem('user'))
-                }} className="context_menu_button">...</button>
+                }} className="board_delete_button">...</button>
             </div>)}
             <div onClick={() => setCreateBoard(true)}>
                 {creaeteBoard
@@ -31,6 +31,8 @@ export default function BoardDock({ activeBoard, setActiveBoard, allBoard }) {
                         onKeyDown={event => {
                             if (event.key === "Enter") {
                                 createBoard()
+                                console.log(window.location.href);
+                                
                             }
                         }}
                         onBlur={() => {
