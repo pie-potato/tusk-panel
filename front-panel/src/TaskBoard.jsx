@@ -8,7 +8,6 @@ import { io } from "socket.io-client";
 function TaskBoard() {
   const [activeBoard, setActiveBoard] = useState(null)
   const [allBoard, setAllBoards] = useState([])
-console.log(typeof window.location.href);
 
   const getAllBoard = async () => {
     const response = await getBoard()
@@ -18,7 +17,7 @@ console.log(typeof window.location.href);
   useEffect(() => {
     getAllBoard()
 
-    const socket = io(`http://${window.location.hostname}:5000`); // Подключаемся к Socket.IO серверу
+    const socket = io(`ws://${window.location.hostname}:5000`); // Подключаемся к Socket.IO серверу
     socket.on('connect', () => { // После установки соединения
       console.log('Соединение с сервером установлено');
       socket.emit('joinBoard', '\\'); // Присоединяемся к комнате доски, используя activeBoard

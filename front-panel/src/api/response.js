@@ -1,6 +1,4 @@
 import axios from "axios";
-import { io } from "socket.io-client";
-const socket = io()
 
 export const fetchColumns = async () => {
   try {
@@ -19,9 +17,7 @@ export const addColumn = async (newColumnName, setNewColumnName, boardId, user) 
         Authorization: `Bearer ${token}`,
       }
     });
-    // socket.emit('addColumn', response.data);
     setNewColumnName('');
-    // fetchColumns();
   } catch (error) {
     console.error('Error adding column:', error);
   }
@@ -39,7 +35,6 @@ export const addTask = async (newTask, setNewTask, user) => {
         Authorization: `Bearer ${token}`,
       }
     });
-    // socket.emit('addTask', response.data)
     setNewTask({ columnId: null, title: '' });
   } catch (error) {
     console.error('Error adding task:', error);
@@ -51,9 +46,6 @@ export const deleteColumn = async (id) => {
   try {
 
     const response = await axios.delete(`http://${window.location.hostname}:5000/api/columns/${id}`);
-    // console.log(response.data);
-    // socket.emit('deleteColumn', id);
-    // socket.emit('deleteColumn', response.data);
     fetchColumns();
   } catch (error) {
     console.error('Error deleting column:', error);
@@ -63,7 +55,7 @@ export const deleteColumn = async (id) => {
 export const deleteBoard = async (id, user) => {
   try {
     console.log('asad');
-    
+
     const token = user ? JSON.parse(user).token : null;
     await axios.delete(`http://${window.location.hostname}:5000/api/boards/${id}`, {
       headers: {
@@ -93,11 +85,17 @@ export const handleColumnEditSave = async (columnId, columnName) => {
   }
 };
 
-export const handleTaskEditSave = async (taskId, taskTitle) => {
+export const editTaskTitle = async (taskId, taskTitle) => {
   try {
     const response = await axios.put(`http://${window.location.hostname}:5000/api/tasks/${taskId}`, { title: taskTitle });
-    socket.emit('taskUpdated', response.data);
-    fetchColumns();
+  } catch (error) {
+    console.error('Error updating task:', error);
+  }
+};
+
+export const editTaskDescription = async (taskId, taskDescription) => {
+  try {
+    const response = await axios.put(`http://${window.location.hostname}:5000/api/tasks/${taskId}/description`, { description: taskDescription });
   } catch (error) {
     console.error('Error updating task:', error);
   }
@@ -120,9 +118,9 @@ export const assignTask = async (taskId, userId) => {
   }
 };
 
-export const unassignTask = async (taskId) => {
+export const unassignTask = async (taskId, unAssignedUserId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:5000/api/tasks/${taskId}/assign`, { userId: null }); // Send null userId to unassign
+    await axios.delete(`http://${window.location.hostname}:5000/api/tasks/${taskId}/assign/${unAssignedUserId}`, { userId: unAssignedUserId }); // Send null userId to unassign
   } catch (error) {
     console.error('Error unassigning task:', error);
   }
@@ -256,7 +254,7 @@ export const updateBoardNameById = async (updateColumnName, boardId) => {
 
 export const handleFileUpload = async (event, task) => {
   console.log(event);
-  
+
   const file = event.target.files[0];
   if (!file) return;
 

@@ -6,16 +6,17 @@ import { io } from "socket.io-client";
 export default function Board({ boardId }) {
     const [newColumnName, setNewColumnName] = useState('');
     const [columns, setColumns] = useState([]);
+    console.log(columns);
 
     const responseColumnById = async (boardId) => {
         const response = await getColumnByIdBoard(boardId)
         setColumns(response.data)
-      }
+    }
     useEffect(() => {
         if (!boardId) return;
         responseColumnById(boardId)
-        
-        const socket = io(`http://${window.location.hostname}:5000`); // Подключаемся к Socket.IO серверу
+
+        const socket = io(`ws://${window.location.hostname}:5000`); // Подключаемся к Socket.IO серверу
         socket.on('connect', () => { // После установки соединения
             console.log('Соединение с сервером установлено');
             socket.emit('joinBoard', boardId); // Присоединяемся к комнате доски, используя activeBoard
@@ -26,7 +27,7 @@ export default function Board({ boardId }) {
         socket.on('updateColumn', (updatedColumn) => { //  Добавление колонки
             setColumns(prevColumns => prevColumns.map(e => {
                 if (e._id === updatedColumn._id) {
-                    return { ...e, title: updatedColumn.title }
+                    return updatedColumn
                 }
                 return e
             }))
@@ -73,7 +74,10 @@ export default function Board({ boardId }) {
                     return {
                         ...e, tasks: e.tasks.map(e => {
                             if (e._id === updatedTask.taskId) {
-                                return { ...e, assignedTo: updatedTask.assignedTo }
+                                if (e.assignedTo.length) {
+                                    return { ...e, assignedTo: [...e.assignedTo, updatedTask.assignedTo] }
+                                }
+                                return { ...e, assignedTo: [updatedTask.assignedTo] }
                             }
                             return e
                         })
@@ -87,8 +91,8 @@ export default function Board({ boardId }) {
                 if (e._id === updatedTask.columnId) {
                     return {
                         ...e, tasks: e.tasks.map(e => {
-                            if (e._id === updatedTask._id) {
-                                return updatedTask
+                            if (e._id === updatedTask.taskId) {
+                                return {...e, assignedTo: e.assignedTo.filter(e => e._id !== updatedTask.assignedTo._id)}
                             }
                             return e
                         })

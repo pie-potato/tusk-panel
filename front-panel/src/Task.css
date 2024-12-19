@@ -21,6 +21,10 @@
 
 .container_task {
     display: flex;
+}
+
+.container_task_modal {
+    display: flex;
     justify-content: space-between;
     margin-bottom: 30px;
 }

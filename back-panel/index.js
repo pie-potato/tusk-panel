@@ -113,9 +113,10 @@ const Column = mongoose.model('Column', {
 
 const Task = mongoose.model('Task', {
     title: String,
+    description: String,
     columnId: { type: mongoose.Schema.Types.ObjectId, ref: 'Column' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Add createdBy field
-    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },  //  New field for assigned user
+    assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],  //  New field for assigned user
     attachments: [{ filename: String, originalname: String }]
 });
 
@@ -231,7 +232,7 @@ app.post('/api/boards', async (req, res) => {
         });
         const savedBoard = await newBoard.save();
         console.log(typeof req.headers.referer);
-        
+
         io.to('\\').emit("addBoard", savedBoard);
 
         res.json(savedBoard);
@@ -291,7 +292,7 @@ app.delete('/api/boards/:boardId', async (req, res) => {
         // Then, delete the column:
         const deletedBoard = await Board.findByIdAndDelete(req.params.boardId);
         console.log(req.headers.referer);
-        
+
         io.to('\\').emit("deleteBoard", deletedBoard);
         res.json({ message: 'Column and associated tasks deleted' });
     } catch (error) {
@@ -429,6 +430,23 @@ app.put('/api/columns/:id', async (req, res) => {
         res.json(updatedColumn);
     } catch (error) {
         res.status(500).json({ error: 'Error updating column' });
+    }
+});
+
+app.put('/api/tasks/:id/description', async (req, res) => {
+    try {
+        const updatedTask = await Task.findByIdAndUpdate(req.params.id, { description: req.body.description }, { new: true })
+            .populate('createdBy')
+            .populate('assignedTo', 'username');
+        const column = await Column.findById(updatedTask.columnId)
+        if (!updatedTask) {
+            return res.status(404).json({ message: 'Задача не найдена.' });
+
+        }
+        io.to(column.boardId.toString()).emit('updateTask', updatedTask);
+        res.json(updatedTask);
+    } catch (error) {
+        res.status(500).json({ error: 'Error updating task' });
     }
 });
 
@@ -574,26 +592,41 @@ app.get('/api/users', async (req, res) => {
 app.put('/api/tasks/:taskId/assign', async (req, res) => {
     try {
         const { userId } = req.body;
-        console.log(userId);
-
         const updatedTask = await Task.findByIdAndUpdate(
             req.params.taskId,
-            { assignedTo: userId },
+            { $push: { assignedTo: userId } },
             { new: true }
         ).populate('createdBy').populate('assignedTo', 'username'); // Populate after updating
         const column = await Column.findById(updatedTask.columnId)
-        if (userId) {
-            const assignedUser = await User.findById(updatedTask.assignedTo._id)
-            io.to(column.boardId.toString()).emit('addTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
-        } else {
-            io.to(column.boardId.toString()).emit('deleteTaskAssing', updatedTask);
-        }
-
-        console.log(updatedTask);
-
+        const assignedUser = await User.findById(userId)
+        io.to(column.boardId.toString()).emit('addTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
+        console.log(assignedUser);
         res.json(updatedTask);
     } catch (error) {
         res.status(500).json({ error: 'Error assigning task' });
+    }
+});
+
+app.delete('/api/tasks/:taskId/assign/:userId', async (req, res) => {
+    try {
+        const taskId = req.params.taskId;
+        const userIdToRemove = req.params.userId;
+        const updatedTask = await Task.findByIdAndUpdate(
+            taskId,
+            { $pull: { assignedTo: userIdToRemove } },  // Use $pull to remove the userId
+            { new: true }
+        )
+            .populate('createdBy')
+            .populate('assignedTo', 'username');
+        const column = await Column.findById(updatedTask.columnId)
+        const assignedUser = await User.findById(userIdToRemove)
+        io.to(column.boardId.toString()).emit('deleteTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
+        console.log({ taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
+
+        res.json(updatedTask);
+    } catch (error) {
+        console.error('Error unassigning user:', error);
+        res.status(500).json({ error: 'Ошибка при удалении назначения.' });
     }
 });
 
