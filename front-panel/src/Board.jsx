@@ -49,7 +49,7 @@ export default function Board({ boardId }) {
                     return {
                         ...e, tasks: e.tasks.map(e => {
                             if (e._id === updatedTask._id) {
-                                return { ...e, title: updatedTask.title }
+                                return updatedTask
                             }
                             return e
                         })

@@ -99,10 +99,16 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
     .catch((error) => console.error('Error connecting to MongoDB:', error));
 
 // Models
+const Project = mongoose.model('Project', {
+    title: { type: String, required: true },
+    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Users with access
+});
+
 const Board = mongoose.model('Board', {
     title: { type: String, required: true },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    column: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Column' }]
+    column: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Column' }],
+    projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true }
 });
 
 const Column = mongoose.model('Column', {
@@ -117,7 +123,9 @@ const Task = mongoose.model('Task', {
     columnId: { type: mongoose.Schema.Types.ObjectId, ref: 'Column' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Add createdBy field
     assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],  //  New field for assigned user
-    attachments: [{ filename: String, originalname: String }]
+    attachments: [{ filename: String, originalname: String }],
+    startDate: { type: Date },
+    endDate: { type: Date },
 });
 
 const User = mongoose.model('User', {
@@ -128,6 +136,86 @@ const User = mongoose.model('User', {
     thirdname: { type: String }, // Add nickname field
     role: { type: String, enum: ['admin', 'manager', 'employee'], default: 'employee' } // Add role field
 });
+
+app.post('/api/projects/:projectId/members', async (req, res) => {
+    try {
+        // ... (authentication/authorization - only admins and project managers)
+        const { userId } = req.body;
+        const project = await Project.findById(req.params.projectId);
+        if (!project) {
+            return res.status(404).json({ message: 'Проект не найден.' });
+        }
+        // Check if user is already a member
+        if (project.members.includes(userId)) {
+            return res.status(400).json({ message: 'Пользователь уже является участником проекта.' });
+        }
+        project.members.push(userId);
+        await project.save();
+        res.json({ message: 'Пользователь успешно добавлен в проект.', project });
+    } catch (error) {
+        console.error('Error adding user to project:', error)
+        res.status(500).json({ error: 'Ошибка при добавлении пользователя в проект.' });
+    }
+});
+// Remove a user from a project
+
+app.delete('/api/projects/:projectId/members/:userId', async (req, res) => {
+    try {
+        // ... (authentication/authorization - only admins and project managers)
+        const project = await Project.findById(req.params.projectId);
+        if (!project) {
+            return res.status(404).json({ message: 'Проект не найден.' });
+        }
+        // Check if user is a member before removing
+        const memberIndex = project.members.indexOf(req.params.userId);
+        if (memberIndex === -1) {
+            return res.status(400).json({ message: 'Пользователь не является участником проекта.' });
+        }
+        project.members.splice(memberIndex, 1);
+        await project.save();
+        res.json({ message: 'Пользователь успешно удален из проекта.', project });
+    } catch (error) {
+        console.error('Error removing user from project:', error)
+        res.status(500).json({ error: 'Ошибка при удалении пользователя из проекта.' });
+    }
+});
+
+app.post('/api/projects', async (req, res) => {
+    try {
+        // ... (authentication/authorization - only admins can create projects)
+        const { title, members } = req.body;
+        const newProject = new Project({ title, members });
+        const savedProject = await newProject.save();
+        res.json(savedProject);
+    } catch (error) {
+        res.status(500).json({ error: 'Ошибка при создании проекта.' });
+    }
+});
+// Route to get projects for a user (including project members)
+app.get('/api/projects', async (req, res) => {
+    try {
+    //     const token = req.header('Authorization')?.replace('Bearer ', '');
+    //     const decoded = jwt.verify(token, 'your_secret_key');
+    //     const userId = decoded.userId;
+        const projects = await Project.find()
+            // .populate('members', 'username nickname')
+        res.json(projects);
+    } catch (error) {
+        res.status(500).json({ error: 'Ошибка при получении проектов.' });
+    }
+});
+
+// Route to get boards for a specific project
+app.get('/api/projects/:projectId/boards', async (req, res) => {
+    try {
+        const boards = await Board.find({ projectId: req.params.projectId }).populate('createdBy', 'username');
+        res.json(boards);
+    } catch (error) {
+        // Обработка ошибок
+        res.status(500).json({ error: "Ошибка при получении досок." })
+    }
+});
+
 
 app.post('/api/tasks/:taskId/upload', upload.single('file'), async (req, res) => {
     try {
@@ -221,14 +309,18 @@ app.post('/api/boards', async (req, res) => {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         const decoded = jwt.verify(token, 'PiePotato');
         const currentUser = await User.findById(decoded.userId);
-
         if (currentUser.role !== 'admin' && currentUser.role !== 'manager') {
             return res.status(403).json({ message: 'Нет прав для создания доски.' });
         }
-
+        const { title, projectId } = req.body;
+        const project = await Project.findOne({ _id: projectId, members: currentUser._id });
+        if (!project) {
+            return res.status(403).json({ message: 'Нет доступа к этому проекту.' });
+        }
         const newBoard = new Board({
-            title: req.body.title,
+            title,
             createdBy: currentUser._id,
+            projectId
         });
         const savedBoard = await newBoard.save();
         console.log(typeof req.headers.referer);
@@ -443,6 +535,8 @@ app.put('/api/tasks/:id/description', async (req, res) => {
             return res.status(404).json({ message: 'Задача не найдена.' });
 
         }
+        console.log(updatedTask);
+
         io.to(column.boardId.toString()).emit('updateTask', updatedTask);
         res.json(updatedTask);
     } catch (error) {
@@ -454,6 +548,28 @@ app.put('/api/tasks/:id/description', async (req, res) => {
 app.put('/api/tasks/:id', async (req, res) => {
     try {
         const updatedTask = await Task.findByIdAndUpdate(req.params.id, { title: req.body.title }, { new: true })
+            .populate('createdBy')
+            .populate('assignedTo', 'username');
+        const column = await Column.findById(updatedTask.columnId)
+        if (!updatedTask) {
+            return res.status(404).json({ message: 'Задача не найдена.' });
+
+        }
+        io.to(column.boardId.toString()).emit('updateTask', updatedTask);
+        res.json(updatedTask);
+    } catch (error) {
+        res.status(500).json({ error: 'Error updating task' });
+    }
+});
+
+app.put('/api/tasks/:id/date', async (req, res) => {
+    try {
+        const updatedTask = await Task.findByIdAndUpdate(req.params.id,
+            {
+                startDate: req.body.startDate,
+                endDate: req.body.endDate,
+            },
+            { new: true })
             .populate('createdBy')
             .populate('assignedTo', 'username');
         const column = await Column.findById(updatedTask.columnId)

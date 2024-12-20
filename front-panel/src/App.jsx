@@ -7,6 +7,7 @@ import TaskBoard from './TaskBoard'; // Новый компонент для д�
 import AdminPanel from './AdminPanel';
 import Header from './Header';
 import Profile from './Profile';
+import ProjectList from './ProjectList';
 
 
 
@@ -56,13 +57,14 @@ function App() {
   return (
     <Router>
       <Header handleLogout={handleLogout} />
-      <div>
+      <div className='main_container'>
         <Routes>
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
           <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
           <Route path="/admin" element={user && user.role === 'admin' ? <AdminPanel /> : <Navigate to="/" />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/" element={user ? <TaskBoard /> : <Navigate to="/login" />} /> {/* Перенаправление на /login, если пользователь не авторизован */}
+          <Route path="/project" element={<ProjectList />}/>
         </Routes>
       </div>
     </Router>
