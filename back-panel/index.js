@@ -50,45 +50,52 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
         io.on('connection', (socket) => { // Подключение нового клиента
             console.log('Пользователь подключился');
 
-            socket.on('joinBoard', (boardId) => { // Клиент присоединяется к комнате доски
-                socket.join(boardId);
-                console.log(`Socket ${socket.id} joined room ${boardId}`);
+            socket.on('joinRoom', (room) => { // Клиент присоединяется к комнате доски
+                socket.join(room);
+                console.log(`Socket ${socket.id} joined room ${room}`);
             });
-            socket.on('addColumn', (boardId, newColumn) => {
-                socket.to(boardId).emit('addColumn', newColumn);
+            socket.on('addColumn', (room, newColumn) => {
+                socket.to(room).emit('addColumn', newColumn);
             });
-            socket.on('updateColumn', (boardId, updateColumn) => { // Клиент обновил задачу
-                socket.to(boardId).emit('updateColumn', updateColumn);
+            socket.on('updateColumn', (room, updateColumn) => { // Клиент обновил задачу
+                socket.to(room).emit('updateColumn', updateColumn);
             });
-            socket.on('deleteColumn', (boardId, columnId) => { // получаем boardId вместе с columnId
-                socket.to(boardId).emit('deleteColumn', columnId);
+            socket.on('deleteColumn', (room, columnId) => { // получаем boardId вместе с columnId
+                socket.to(room).emit('deleteColumn', columnId);
             });
-            socket.on('addTask', (boardId, newTask) => {
-                socket.to(boardId).emit('addTask', newTask);
+            socket.on('addTask', (room, newTask) => {
+                socket.to(room).emit('addTask', newTask);
             });
-            socket.on('updateTask', (boardId, updateTask) => {
-                socket.to(boardId).emit('updateTask', updateTask);
+            socket.on('updateTask', (room, updateTask) => {
+                socket.to(room).emit('updateTask', updateTask);
             });
-            socket.on('deleteTask', (boardId, taskId) => { // Клиент обновил задачу
-                socket.to(boardId).emit('deleteTask', taskId);
+            socket.on('deleteTask', (room, taskId) => { // Клиент обновил задачу
+                socket.to(room).emit('deleteTask', taskId);
             });
-            socket.on('addTaskAssing', (boardId, assignedUser) => { // Клиент обновил задачу
-                socket.to(boardId).emit('addTaskAssing', assignedUser);
+            socket.on('addTaskAssing', (room, assignedUser) => { // Клиент обновил задачу
+                socket.to(room).emit('addTaskAssing', assignedUser);
             });
-            socket.on('deleteTaskAssing', (boardId, unAssignedUser) => { // Клиент обновил задачу
-                socket.to(boardId).emit('deleteTaskAssing', unAssignedUser);
+            socket.on('deleteTaskAssing', (room, unAssignedUser) => { // Клиент обновил задачу
+                socket.to(room).emit('deleteTaskAssing', unAssignedUser);
             });
-            socket.on('addAttachmentsFile', (boardId, attachmentsFile) => { // Клиент обновил задачу
-                socket.to(boardId).emit('addAttachmentsFile', attachmentsFile);
+            socket.on('addAttachmentsFile', (room, attachmentsFile) => { // Клиент обновил задачу
+                socket.to(room).emit('addAttachmentsFile', attachmentsFile);
             });
-            socket.on('deleteAttachmentsFile', (boardId, deletedAttachmentsFile) => { // Клиент обновил задачу
-                socket.to(boardId).emit('deleteAttachmentsFile', deletedAttachmentsFile);
+            socket.on('deleteAttachmentsFile', (room, deletedAttachmentsFile) => { // Клиент обновил задачу
+                socket.to(room).emit('deleteAttachmentsFile', deletedAttachmentsFile);
             });
-            socket.on('addBoard', (boardId, newBoard) => {
-                socket.to(boardId).emit('addBoard', newBoard);
+            socket.on('addBoard', (room, newBoard) => {
+                socket.to(room).emit('addBoard', newBoard);
             });
-            socket.on('deleteBoard', (boardId, deletedBoard) => {
-                socket.to(boardId).emit('deleteBoard', deletedBoard);
+            socket.on('deleteBoard', (room, deletedBoard) => {
+                socket.to(room).emit('deleteBoard', deletedBoard);
+            });
+            socket.on('addProject', (room, newProject) => {
+                socket.to(room).emit('addProject', newProject);
+            });
+            socket.on('leaveRoom', (room) => {
+                socket.leave(room);
+                console.log(`user left room: ${room}`);
             });
             socket.on('disconnect', () => { // Отключение клиента
                 console.log('Пользователь отключился');
@@ -101,7 +108,7 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
 // Models
 const Project = mongoose.model('Project', {
     title: { type: String, required: true },
-    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Users with access
+    members: { type: mongoose.Schema.Types.Array, ref: 'User' }, // Users with access
 });
 
 const Board = mongoose.model('Board', {
@@ -131,9 +138,9 @@ const Task = mongoose.model('Task', {
 const User = mongoose.model('User', {
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    firstname: { type: String }, // Add nickname field
-    secondname: { type: String }, // Add nickname field
-    thirdname: { type: String }, // Add nickname field
+    firstname: { type: String, required: true }, // Add nickname field
+    secondname: { type: String, required: true }, // Add nickname field
+    thirdname: { type: String, required: true }, // Add nickname field
     role: { type: String, enum: ['admin', 'manager', 'employee'], default: 'employee' } // Add role field
 });
 
@@ -186,6 +193,7 @@ app.post('/api/projects', async (req, res) => {
         const { title, members } = req.body;
         const newProject = new Project({ title, members });
         const savedProject = await newProject.save();
+        io.to('/project').emit('addProject', savedProject)
         res.json(savedProject);
     } catch (error) {
         res.status(500).json({ error: 'Ошибка при создании проекта.' });
@@ -313,7 +321,9 @@ app.post('/api/boards', async (req, res) => {
             return res.status(403).json({ message: 'Нет прав для создания доски.' });
         }
         const { title, projectId } = req.body;
-        const project = await Project.findOne({ _id: projectId, members: currentUser._id });
+        const project = await Project.findById(projectId);
+        console.log(project);
+        
         if (!project) {
             return res.status(403).json({ message: 'Нет доступа к этому проекту.' });
         }
@@ -325,7 +335,7 @@ app.post('/api/boards', async (req, res) => {
         const savedBoard = await newBoard.save();
         console.log(typeof req.headers.referer);
 
-        io.to('\\').emit("addBoard", savedBoard);
+        io.to(projectId).emit("addBoard", savedBoard);
 
         res.json(savedBoard);
     } catch (error) {
@@ -367,7 +377,7 @@ app.put('/api/boards/:boardId', async (req, res) => {
     }
 });
 
-app.delete('/api/boards/:boardId', async (req, res) => {
+app.delete('/api/project/:projectId/boards/:boardId', async (req, res) => {
     try {
         // First, delete all associated tasks:
         const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -385,7 +395,7 @@ app.delete('/api/boards/:boardId', async (req, res) => {
         const deletedBoard = await Board.findByIdAndDelete(req.params.boardId);
         console.log(req.headers.referer);
 
-        io.to('\\').emit("deleteBoard", deletedBoard);
+        io.to(req.params.projectId).emit("deleteBoard", deletedBoard);
         res.json({ message: 'Column and associated tasks deleted' });
     } catch (error) {
         res.status(500).json({ error: 'Error deleting column' });
@@ -411,31 +421,22 @@ app.post('/api/columns', async (req, res) => {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         const decoded = jwt.verify(token, 'PiePotato');
         const currentUser = await User.findById(decoded.userId);
-        const { title, boardId } = req.body;  // Get boardId from request
+        const { title, boardId, projectId } = req.body;  // Get boardId from request
 
-
-        // Check if the user has permission to create a column on this board
         const board = await Board.findById(boardId);
         if (!board) {
             return res.status(404).json({ message: 'Доска не найдена' });
         }
 
-
-        // Only admin or the board creator can create columns
         if (currentUser.role !== 'admin' && board.createdBy.toString() !== currentUser._id.toString()) {
             return res.status(403).json({ message: 'Нет прав для создания колонки на этой доске' });
         }
 
-
         const newColumn = new Column({ title, boardId });
         const savedColumn = await newColumn.save();
-        // await Board.findById(req.body.boardId, { $push: { column: savedColumn._id } })
         const populatedColumn = await Column.findById(savedColumn._id).populate('tasks');
-        console.log(boardId);
 
-        // console.log(populatedColumn);
-
-        io.to(boardId).emit("addColumn", populatedColumn);
+        io.to(projectId).emit("addColumn", populatedColumn);
 
         res.json(populatedColumn);
     } catch (error) {
@@ -476,7 +477,7 @@ app.post('/api/tasks', async (req, res) => {
         const savedTask = await newTask.save();
         const column = await Column.findById(req.body.columnId)
         await Column.findByIdAndUpdate(req.body.columnId, { $push: { tasks: savedTask._id } });
-        io.to(column.boardId.toString()).emit('addTask', savedTask);
+        io.to(req.body.projectId).emit('addTask', savedTask);
 
         res.json(savedTask);
     } catch (error) {

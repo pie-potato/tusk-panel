@@ -1,0 +1,15 @@
+.projects {
+    display: flex;
+}
+
+.project {
+    border: 2px solid #1876C2;
+    margin: 15px;
+    padding: 10px;
+    border-radius: 20px;
+}
+
+.members {
+    margin-top: 20px;
+    
+}

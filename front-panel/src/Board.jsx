@@ -2,25 +2,23 @@ import React, { useState, useEffect } from 'react';
 import Column from './Column';
 import { getColumnByIdBoard, addColumn } from './api/response';
 import { io } from "socket.io-client";
+import { useParams } from 'react-router-dom';
+import { useSocket } from './WebSocketContext';
 
 export default function Board({ boardId }) {
     const [newColumnName, setNewColumnName] = useState('');
     const [columns, setColumns] = useState([]);
+    const { socket, isConnected, joinRoom, leaveRoom } = useSocket()
+    const { projectId } = useParams()
     console.log(columns);
 
     const responseColumnById = async (boardId) => {
         const response = await getColumnByIdBoard(boardId)
         setColumns(response.data)
     }
-    useEffect(() => {
-        if (!boardId) return;
-        responseColumnById(boardId)
 
-        const socket = io(`ws://${window.location.hostname}:5000`); // Подключаемся к Socket.IO серверу
-        socket.on('connect', () => { // После установки соединения
-            console.log('Соединение с сервером установлено');
-            socket.emit('joinBoard', boardId); // Присоединяемся к комнате доски, используя activeBoard
-        });
+    useEffect(() => {
+        if (!socket) return;
         socket.on('addColumn', (newColumn) => { //  Добавление колонки
             setColumns(prevColumns => [...prevColumns, newColumn])
         });
@@ -92,7 +90,7 @@ export default function Board({ boardId }) {
                     return {
                         ...e, tasks: e.tasks.map(e => {
                             if (e._id === updatedTask.taskId) {
-                                return {...e, assignedTo: e.assignedTo.filter(e => e._id !== updatedTask.assignedTo._id)}
+                                return { ...e, assignedTo: e.assignedTo.filter(e => e._id !== updatedTask.assignedTo._id) }
                             }
                             return e
                         })
@@ -131,9 +129,11 @@ export default function Board({ boardId }) {
                 return e
             }))
         });
-        return () => {
-            socket.disconnect();
-        };
+    }, [socket])
+
+    useEffect(() => {
+        if (!boardId) return;
+        responseColumnById(boardId)
     }, [boardId]);
 
     return (
@@ -151,9 +151,9 @@ export default function Board({ boardId }) {
                                 value={newColumnName}
                                 onChange={(e) => setNewColumnName(e.target.value)}
                                 placeholder="Добавить колонку..."
-                                onKeyDown={event => { if (event.key === "Enter") addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user')) }}
+                                onKeyDown={event => { if (event.key === "Enter") addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user'), projectId) }}
                             />
-                            <button className='add_task' onClick={() => addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user'))}>Добавить колонку</button>
+                            <button className='add_task' onClick={() => addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user'), projectId)}>Добавить колонку</button>
                         </div>
                     </div>
                 </div>}

@@ -8,8 +8,7 @@ import AdminPanel from './AdminPanel';
 import Header from './Header';
 import Profile from './Profile';
 import ProjectList from './ProjectList';
-
-
+import { SocketProvider } from './WebSocketContext';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -25,7 +24,7 @@ function App() {
       setIsLoading(false); // Set loading to false after fetching user
     };
     fetchUser(); // Call the async function
-    
+
   }, []);
 
   if (isLoading) {  // Display loading message while fetching user data
@@ -44,31 +43,27 @@ function App() {
     }
   };
 
-
-
   const handleLogout = () => {
     localStorage.removeItem('user');
     setUser(null);
   };
 
-
-
-
   return (
-    <Router>
-      <Header handleLogout={handleLogout} />
-      <div className='main_container'>
-        <Routes>
-          <Route path="/login" element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
-          <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
-          <Route path="/admin" element={user && user.role === 'admin' ? <AdminPanel /> : <Navigate to="/" />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/" element={user ? <TaskBoard /> : <Navigate to="/login" />} /> {/* Перенаправление на /login, если пользователь не авторизован */}
-          <Route path="/project" element={<ProjectList />}/>
-        </Routes>
-      </div>
-    </Router>
+    <SocketProvider>
+      <Router>
+        <Header handleLogout={handleLogout} />
+        <div className='main_container'>
+          <Routes>
+            <Route path="/login" element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
+            <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+            <Route path="/admin" element={user && user.role === 'admin' ? <AdminPanel /> : <Navigate to="/" />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/project/:projectId" element={user ? <TaskBoard /> : <Navigate to="/login" />} /> {/* Перенаправление на /login, если пользователь не авторизован */}
+            <Route path="/project" element={<ProjectList />} />
+          </Routes>
+        </div>
+      </Router>
+    </SocketProvider>
   );
 }
-
 export default App;

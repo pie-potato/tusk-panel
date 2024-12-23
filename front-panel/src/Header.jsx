@@ -13,11 +13,12 @@ export default function Header({ handleLogout }) {
                     </>
                 )}
                 {JSON.parse(localStorage.getItem('user'))?.role === 'admin' && (
-                        <Link to="/admin">Панель администратора</Link>
+                    <Link to="/admin">Панель администратора</Link>
                 )}
                 {JSON.parse(localStorage.getItem('user')) && (
                     <>
                         <Link to="/">Доска задач</Link>
+                        <Link to="/project">Проекты</Link>
                         <Link to="/profile">Профиль</Link>
                     </>
                 )}
