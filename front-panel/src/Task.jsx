@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { deleteTask, editTaskTitle, fetchUsers, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription } from './api/response';
 import "./Task.css"
 import Modal from "./Modal/Modal";
+import { useParams } from "react-router-dom";
+
 
 export default function Task({ task }) {
 
@@ -16,14 +18,7 @@ export default function Task({ task }) {
     const [endDate, setEndDate] = useState(task.endDate ? new Date(task.endDate) : null);
     const contextElementRef = useRef()
     const contextDateInputRef = useRef()
-    console.log(startDate);
-    
-
-    useMemo(() => {
-        for (let i = 0; i < task?.assignedTo.length; i++) {
-            setUsers(prevUsers => prevUsers.filter(e => e._id !== task?.assignedTo[i]._id))
-        }
-    }, [task.assignedTo])
+    const {projectId} = useParams()
 
     useEffect(() => {
         fetchUsers(setUsers);
@@ -49,7 +44,7 @@ export default function Task({ task }) {
                                 onChange={event => setTaskName(event.target.value)}
                                 onKeyDown={event => {
                                     if (event.key === "Enter") {
-                                        editTaskTitle(task._id, taskName)
+                                        editTaskTitle(task._id, taskName, projectId)
                                         setEditTaskName(false)
                                     }
                                 }}
@@ -76,7 +71,7 @@ export default function Task({ task }) {
                                 onChange={event => setTaskDescription(event.target.value)}
                                 onKeyDown={event => {
                                     if (event.key === "Enter") {
-                                        editTaskDescription(task._id, taskDescription)
+                                        editTaskDescription(task._id, taskDescription, projectId)
                                         setEditingTaskDescription(false)
                                     }
                                 }}
@@ -97,7 +92,7 @@ export default function Task({ task }) {
                                         onChange={event => setTaskDescription(event.target.value)}
                                         onKeyDown={event => {
                                             if (event.key === "Enter") {
-                                                editTaskDescription(task._id, taskDescription)
+                                                editTaskDescription(task._id, taskDescription, projectId)
                                                 setEditingTaskDescription(false)
                                             }
                                         }}
@@ -112,7 +107,7 @@ export default function Task({ task }) {
                         <div className="title_header">
                             <div className="modal_title">Прикрепленные файлы</div>
                             <label className="delete_task" htmlFor="task_file">Загрузить файл</label>
-                            <input style={{ opacity: 0, height: 0, width: 0, position: "absolute" }} multiple id="task_file" name="task_file" type="file" className="delete_task" onChange={e => handleFileUpload(e, task)} />
+                            <input style={{ opacity: 0, height: 0, width: 0, position: "absolute" }} multiple id="task_file" name="task_file" type="file" className="delete_task" onChange={e => handleFileUpload(e, task, projectId)} />
                         </div>
                         <div>
                             {task.attachments && task.attachments.map((attachment) => (
@@ -120,17 +115,17 @@ export default function Task({ task }) {
                                     <a href={`http://${window.location.hostname}:5000/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
                                         {attachment.originalname}
                                     </a>
-                                    <button className="delete_task" onClick={() => handleDeleteAttachment(attachment.filename, task)}>Удалить</button>
+                                    <button className="delete_task" onClick={() => handleDeleteAttachment(attachment.filename, task, projectId)}>Удалить</button>
                                 </div>
                             ))}
                         </div>
                     </div>
                     <div className="modal_shadow">
                         <div className="modal_title">Исполнители задачи</div>
-                        {task?.assignedTo && task.assignedTo.map(e => <div key={e._id}>{e?.firstname || e?.username} <button onClick={() => unassignTask(task._id, e._id)}>Снять задачу</button></div>)}
+                        {task?.assignedTo && task.assignedTo.map(e => <div key={e._id}>{e?.firstname || e?.username} <button onClick={() => unassignTask(task._id, e._id, projectId)}>Снять задачу</button></div>)}
                         <select className="select_users" onChange={(e) => {
                             console.log(e.target.value)
-                            assignTask(task._id, e.target.value)
+                            assignTask(task._id, e.target.value, projectId)
                         }}>
                             <option value="">Назначить на:</option>
                             {users.map((user) => (
@@ -144,7 +139,7 @@ export default function Task({ task }) {
                     {isMouse && <div onMouseLeave={() => {
                         setIsMouse(false)
                     }} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left - 275}px, ${contextElementRef.current.getBoundingClientRect().top - 160}px)` }}>
-                        <button onClick={() => deleteTask(task._id)} className="delete_task">Удалить задчу</button>
+                        <button onClick={() => deleteTask(task._id, projectId)} className="delete_task">Удалить задчу</button>
                         <button onClick={() => {
                             setEditTaskName(true)
                             setTaskName(task.title)

@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Column from './Column';
 import { getColumnByIdBoard, addColumn } from './api/response';
-import { io } from "socket.io-client";
 import { useParams } from 'react-router-dom';
 import { useSocket } from './WebSocketContext';
 
 export default function Board({ boardId }) {
     const [newColumnName, setNewColumnName] = useState('');
     const [columns, setColumns] = useState([]);
-    const { socket, isConnected, joinRoom, leaveRoom } = useSocket()
+    const { socket } = useSocket()
     const { projectId } = useParams()
-    console.log(columns);
 
     const responseColumnById = async (boardId) => {
         const response = await getColumnByIdBoard(boardId)
@@ -25,7 +23,7 @@ export default function Board({ boardId }) {
         socket.on('updateColumn', (updatedColumn) => { //  Добавление колонки
             setColumns(prevColumns => prevColumns.map(e => {
                 if (e._id === updatedColumn._id) {
-                    return updatedColumn
+                    return {...e, title: updatedColumn.title}
                 }
                 return e
             }))
@@ -57,8 +55,6 @@ export default function Board({ boardId }) {
             }))
         });
         socket.on('deleteTask', (deletedtask) => { //  Добавление колонки
-            console.log(deletedtask);
-
             setColumns(prevColumns => prevColumns.map(e => {
                 if (e._id === deletedtask.columnId) {
                     return { ...e, tasks: e.tasks.filter(e => e._id !== deletedtask._id) }
@@ -129,6 +125,9 @@ export default function Board({ boardId }) {
                 return e
             }))
         });
+        return () => {
+            socket.off();
+        };
     }, [socket])
 
     useEffect(() => {

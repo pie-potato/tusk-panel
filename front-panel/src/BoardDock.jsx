@@ -8,16 +8,12 @@ export default function BoardDock({ activeBoard, setActiveBoard, allBoard }) {
     const [creaeteBoard, setCreateBoard] = useState(false)
     const [newColumnName, setNewColumnName] = useState('');
     const { projectId } = useParams()
-    console.log(projectId);
 
     const createBoard = () => {
         addBoard(newColumnName, setNewColumnName, localStorage.getItem('user'), projectId)
         setNewColumnName('')
         setCreateBoard(false)
     }
-
-
-
 
     return (
         <div className="board_dock">
@@ -36,8 +32,6 @@ export default function BoardDock({ activeBoard, setActiveBoard, allBoard }) {
                         onKeyDown={event => {
                             if (event.key === "Enter") {
                                 createBoard()
-                                console.log(window.location.href);
-
                             }
                         }}
                         onBlur={() => {

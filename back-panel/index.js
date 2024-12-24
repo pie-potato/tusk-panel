@@ -93,6 +93,9 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
             socket.on('addProject', (room, newProject) => {
                 socket.to(room).emit('addProject', newProject);
             });
+            socket.on('deleteProject', (room, deletedProject) => {
+                socket.to(room).emit('deleteProject', deletedProject);
+            });
             socket.on('leaveRoom', (room) => {
                 socket.leave(room);
                 console.log(`user left room: ${room}`);
@@ -202,12 +205,41 @@ app.post('/api/projects', async (req, res) => {
 // Route to get projects for a user (including project members)
 app.get('/api/projects', async (req, res) => {
     try {
-    //     const token = req.header('Authorization')?.replace('Bearer ', '');
-    //     const decoded = jwt.verify(token, 'your_secret_key');
-    //     const userId = decoded.userId;
-        const projects = await Project.find()
-            // .populate('members', 'username nickname')
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const decoded = jwt.verify(token, 'PiePotato');
+        const userId = decoded.userId;
+        const user = await User.findById(userId)
+        if (user.role === 'admin' || user.role === 'manager') {
+            const projects = await Project.find()
+            return res.json(projects);
+        }
+        const projects = await Project.find({ 'members._id': userId }).populate('members')
         res.json(projects);
+    } catch (error) {
+        res.status(500).json({ error: 'Ошибка при получении проектов.' });
+    }
+});
+
+app.delete('/api/project/:projectId', async (req, res) => {
+    try {
+        const projectId = req.params.projectId
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const decoded = jwt.verify(token, 'PiePotato');
+        const userId = decoded.userId;
+        const user = await User.findById(userId)
+        if (user.role === 'admin' || user.role === 'manager') {
+            const fetchAllBoards = await Board.find({projectId: projectId})
+            const fetchAllColumns = fetchAllBoards.forEach(async (e) => {
+                const column = await Column.find({boardId: e._id})
+                column.forEach(async (e) => await Task.deleteMany({columnId: e._id}))
+                await Column.deleteMany({boardId: e._id})
+            })
+            await Board.deleteMany({projectId: projectId})
+            const deleteProjects = await Project.findOneAndDelete(projectId)
+            io.to('/project').emit("deleteProject", deleteProjects)
+            return res.json(deleteProjects);
+        }
+        return res.status(403).json({message: 'Нет прав на удаление'})
     } catch (error) {
         res.status(500).json({ error: 'Ошибка при получении проектов.' });
     }
@@ -225,7 +257,7 @@ app.get('/api/projects/:projectId/boards', async (req, res) => {
 });
 
 
-app.post('/api/tasks/:taskId/upload', upload.single('file'), async (req, res) => {
+app.post('/api/:projectId/tasks/:taskId/upload', upload.single('file'), async (req, res) => {
     try {
         // ... (authentication/authorization logic, similar to other protected routes)
         if (!req.file) {
@@ -239,7 +271,7 @@ app.post('/api/tasks/:taskId/upload', upload.single('file'), async (req, res) =>
             fs.unlinkSync(req.file.path); // Remove the file from the server
             return res.status(404).json({ message: 'Задача не найдена.' });
         }
-
+        const projectId = req.params.projectId
         const column = await Column.findById(task.columnId)
         task.attachments = task.attachments || []; // Initialize attachments array if it doesn't exist
         const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8')
@@ -249,7 +281,7 @@ app.post('/api/tasks/:taskId/upload', upload.single('file'), async (req, res) =>
 
         await task.save();
         console.log({ filename: req.file.filename, originalname: originalName });
-        io.to(column.boardId.toString()).emit("addAttachmentsFile", { nameFile, taskId: task._id, columnId: column._id });
+        io.to(projectId).emit("addAttachmentsFile", { nameFile, taskId: task._id, columnId: column._id });
 
         res.json({ message: 'Файл успешно загружен.', nameFile });
     } catch (error) {
@@ -273,11 +305,11 @@ app.get('/api/uploads/:filename', (req, res) => {
     });
 });
 
-app.delete('/api/tasks/:taskId/attachments/:filename', async (req, res) => {
+app.delete('/api/:projectId/tasks/:taskId/attachments/:filename', async (req, res) => {
     try {
         // ... (authentication/authorization logic)
 
-
+        const projectId = req.params.projectId
         const task = await Task.findById(req.params.taskId);
         if (!task) {
             return res.status(404).json({ message: 'Задача не найдена.' });
@@ -302,7 +334,7 @@ app.delete('/api/tasks/:taskId/attachments/:filename', async (req, res) => {
         fs.unlinkSync(filePath);  // Delete the file
         console.log(filename, removedAttachment);
 
-        io.to(column.boardId.toString()).emit("deleteAttachmentsFile", { removedAttachment, taskId: task._id, columnId: column._id });
+        io.to(projectId).emit("deleteAttachmentsFile", { removedAttachment, taskId: task._id, columnId: column._id });
 
         res.json({ message: 'Вложение успешно удалено.' });
     } catch (error) {
@@ -322,8 +354,7 @@ app.post('/api/boards', async (req, res) => {
         }
         const { title, projectId } = req.body;
         const project = await Project.findById(projectId);
-        console.log(project);
-        
+
         if (!project) {
             return res.status(403).json({ message: 'Нет доступа к этому проекту.' });
         }
@@ -333,7 +364,7 @@ app.post('/api/boards', async (req, res) => {
             projectId
         });
         const savedBoard = await newBoard.save();
-        console.log(typeof req.headers.referer);
+        console.log(savedBoard);
 
         io.to(projectId).emit("addBoard", savedBoard);
 
@@ -416,13 +447,13 @@ app.get('/api/columns', async (req, res) => {
     }
 });
 
-app.post('/api/columns', async (req, res) => {
+app.post('/api/:projectId/columns', async (req, res) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         const decoded = jwt.verify(token, 'PiePotato');
         const currentUser = await User.findById(decoded.userId);
-        const { title, boardId, projectId } = req.body;  // Get boardId from request
-
+        const { title, boardId } = req.body;  // Get boardId from request
+        const projectId = req.params.projectId
         const board = await Board.findById(boardId);
         if (!board) {
             return res.status(404).json({ message: 'Доска не найдена' });
@@ -444,30 +475,31 @@ app.post('/api/columns', async (req, res) => {
     }
 });
 
-app.delete('/api/columns/:id', async (req, res) => {
+app.delete('/api/:projectId/columns/:id/', async (req, res) => {
     try {
 
         const column = await Column.findById(req.params.id);
-
+        const projectId = req.params.projectId
         if (!column) {
             return res.status(404).json({ message: 'Колонка не найдена.' });
         }
+        console.log(projectId);
 
         await Task.deleteMany({ columnId: req.params.id }); // Удаляем все задачи в колонке
         await Column.findByIdAndDelete(req.params.id);
-        io.to(column.boardId.toString()).emit('deleteColumn', req.params.id);
+        io.to(projectId).emit('deleteColumn', req.params.id);
         res.json({ message: 'Колонка успешно удалена.' });
     } catch (error) {
         res.status(500).json({ error: 'Error deleting column' });
     }
 });
 
-app.post('/api/tasks', async (req, res) => {
+app.post('/api/:projectId/tasks', async (req, res) => {
     try {
 
         const token = req.header('Authorization')?.replace('Bearer ', '');
         const decoded = jwt.verify(token, 'PiePotato');
-
+        const projectId = req.params.projectId
         const newTask = new Task({
             title: req.body.title,
             columnId: req.body.columnId,
@@ -477,7 +509,7 @@ app.post('/api/tasks', async (req, res) => {
         const savedTask = await newTask.save();
         const column = await Column.findById(req.body.columnId)
         await Column.findByIdAndUpdate(req.body.columnId, { $push: { tasks: savedTask._id } });
-        io.to(req.body.projectId).emit('addTask', savedTask);
+        io.to(projectId).emit('addTask', savedTask);
 
         res.json(savedTask);
     } catch (error) {
@@ -499,8 +531,9 @@ app.get('/api/boards/:boardId/columns', async (req, res) => {
     }
 });
 
-app.delete('/api/tasks/:id', async (req, res) => {
+app.delete('/api/:projectId/tasks/:id', async (req, res) => {
     try {
+        const projectId = req.params.projectId
         const task = await Task.findById(req.params.id);
         if (!task) {
             return res.status(404).json({ error: 'Task not found' });
@@ -508,26 +541,29 @@ app.delete('/api/tasks/:id', async (req, res) => {
         const column = await Column.findById(task.columnId)
         await Column.findByIdAndUpdate(task.columnId, { $pull: { tasks: task._id } });
         const deletedTask = await Task.findByIdAndDelete(req.params.id);
-        io.to(column.boardId.toString()).emit('deleteTask', deletedTask)
+        io.to(projectId).emit('deleteTask', deletedTask)
         res.json({ message: 'Task deleted' });
     } catch (error) {
         res.status(500).json({ error: 'Error deleting task' });
     }
 });
 
-app.put('/api/columns/:id', async (req, res) => {
+app.put('/api/:projectId/columns/:id', async (req, res) => {
     try {
         const updatedColumn = await Column.findByIdAndUpdate(req.params.id, { title: req.body.title }, { new: true });
         console.log(updatedColumn);
-        io.to(updatedColumn.boardId.toString()).emit('updateColumn', updatedColumn)
+
+        const projectId = req.params.projectId
+        io.to(projectId).emit('updateColumn', updatedColumn)
         res.json(updatedColumn);
     } catch (error) {
         res.status(500).json({ error: 'Error updating column' });
     }
 });
 
-app.put('/api/tasks/:id/description', async (req, res) => {
+app.put('/api/:projectId/tasks/:id/description', async (req, res) => {
     try {
+        const projectId = req.params.projectId
         const updatedTask = await Task.findByIdAndUpdate(req.params.id, { description: req.body.description }, { new: true })
             .populate('createdBy')
             .populate('assignedTo', 'username');
@@ -538,7 +574,7 @@ app.put('/api/tasks/:id/description', async (req, res) => {
         }
         console.log(updatedTask);
 
-        io.to(column.boardId.toString()).emit('updateTask', updatedTask);
+        io.to(projectId).emit('updateTask', updatedTask);
         res.json(updatedTask);
     } catch (error) {
         res.status(500).json({ error: 'Error updating task' });
@@ -546,8 +582,9 @@ app.put('/api/tasks/:id/description', async (req, res) => {
 });
 
 
-app.put('/api/tasks/:id', async (req, res) => {
+app.put('/api/:projectId/tasks/:id', async (req, res) => {
     try {
+        const projectId = req.params.projectId
         const updatedTask = await Task.findByIdAndUpdate(req.params.id, { title: req.body.title }, { new: true })
             .populate('createdBy')
             .populate('assignedTo', 'username');
@@ -556,7 +593,7 @@ app.put('/api/tasks/:id', async (req, res) => {
             return res.status(404).json({ message: 'Задача не найдена.' });
 
         }
-        io.to(column.boardId.toString()).emit('updateTask', updatedTask);
+        io.to(projectId).emit('updateTask', updatedTask);
         res.json(updatedTask);
     } catch (error) {
         res.status(500).json({ error: 'Error updating task' });
@@ -706,8 +743,9 @@ app.get('/api/users', async (req, res) => {
 });
 
 // Add a new route to handle task assignment
-app.put('/api/tasks/:taskId/assign', async (req, res) => {
+app.put('/api/:projectId/:tasks/:taskId/assign', async (req, res) => {
     try {
+        const projectId = req.params.projectId
         const { userId } = req.body;
         const updatedTask = await Task.findByIdAndUpdate(
             req.params.taskId,
@@ -716,7 +754,7 @@ app.put('/api/tasks/:taskId/assign', async (req, res) => {
         ).populate('createdBy').populate('assignedTo', 'username'); // Populate after updating
         const column = await Column.findById(updatedTask.columnId)
         const assignedUser = await User.findById(userId)
-        io.to(column.boardId.toString()).emit('addTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
+        io.to(projectId).emit('addTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
         console.log(assignedUser);
         res.json(updatedTask);
     } catch (error) {
@@ -724,8 +762,9 @@ app.put('/api/tasks/:taskId/assign', async (req, res) => {
     }
 });
 
-app.delete('/api/tasks/:taskId/assign/:userId', async (req, res) => {
+app.delete('/api/:projectId/tasks/:taskId/assign/:userId', async (req, res) => {
     try {
+        const projectId = req.params.projectId
         const taskId = req.params.taskId;
         const userIdToRemove = req.params.userId;
         const updatedTask = await Task.findByIdAndUpdate(
@@ -737,7 +776,7 @@ app.delete('/api/tasks/:taskId/assign/:userId', async (req, res) => {
             .populate('assignedTo', 'username');
         const column = await Column.findById(updatedTask.columnId)
         const assignedUser = await User.findById(userIdToRemove)
-        io.to(column.boardId.toString()).emit('deleteTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
+        io.to(projectId).emit('deleteTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
         console.log({ taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
 
         res.json(updatedTask);

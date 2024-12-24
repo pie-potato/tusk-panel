@@ -17,7 +17,7 @@ export default function Header({ handleLogout }) {
                 )}
                 {JSON.parse(localStorage.getItem('user')) && (
                     <>
-                        <Link to="/">Доска задач</Link>
+                        {/* <Link to="/">Доска задач</Link> */}
                         <Link to="/project">Проекты</Link>
                         <Link to="/profile">Профиль</Link>
                     </>

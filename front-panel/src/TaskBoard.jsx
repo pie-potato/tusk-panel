@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import "./App.css"
 import BoardDock from './BoardDock';
-import { getColumnByIdBoard, getBoardByProjectId } from './api/response';
+import { getBoardByProjectId } from './api/response';
 import Board from './Board';
 import { useSocket } from './WebSocketContext';
 import { useParams } from 'react-router-dom';
@@ -36,13 +36,14 @@ function TaskBoard() {
     socket.on('deleteBoard', (deletedBoard) => {
       setAllBoards(prevAllBoards => prevAllBoards.filter(e => e._id !== deletedBoard._id))
     });
+    return () => {
+      socket.off();
+    };
   }, [socket])
 
   useEffect(() => {
     getAllBoard(projectId)
   }, [])
-
-
 
   return (
     <div className="container">
@@ -51,5 +52,4 @@ function TaskBoard() {
     </div>
   );
 }
-
 export default TaskBoard;

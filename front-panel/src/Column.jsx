@@ -20,7 +20,7 @@ export default function Column({ column }) {
                     onChange={event => setColumnName(event.target.value)}
                     onKeyDown={event => {
                         if (event.key === "Enter") {
-                            handleColumnEditSave(column._id, columnName)
+                            handleColumnEditSave(column._id, columnName, projectId)
                             setEditColumn(false)
                         }
                     }}
@@ -28,7 +28,7 @@ export default function Column({ column }) {
                 : <h2 onDoubleClick={() => {
                     setEditColumn(true)
                     setColumnName(column.title)
-                }}>{column.title} <button className='delete_column' onClick={() => deleteColumn(column._id)}>Удалить колонку</button></h2>
+                }}>{column.title} <button className='delete_column' onClick={() => deleteColumn(column._id, projectId)}>Удалить колонку</button></h2>
             }
             <div>
                 {column.tasks.map((task) => (
