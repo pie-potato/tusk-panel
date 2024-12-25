@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { deleteTask, editTaskTitle, fetchUsers, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription } from './api/response';
 import "./Task.css"
 import Modal from "./Modal/Modal";
@@ -18,14 +18,14 @@ export default function Task({ task }) {
     const [endDate, setEndDate] = useState(task.endDate ? new Date(task.endDate) : null);
     const contextElementRef = useRef()
     const contextDateInputRef = useRef()
-    const {projectId} = useParams()
+    const { projectId } = useParams()
 
     useEffect(() => {
         fetchUsers(setUsers);
     }, []);
 
     return (
-        <div key={task._id} className="task" >
+        <div className="task" >
             <div className="container_task" onClick={() => setModalActive(true)}>
                 <div className="task_name">{task.title}</div>
             </div>
@@ -106,8 +106,8 @@ export default function Task({ task }) {
                     <div className="attachments_file modal_shadow">
                         <div className="title_header">
                             <div className="modal_title">Прикрепленные файлы</div>
-                            <label className="delete_task" htmlFor="task_file">Загрузить файл</label>
-                            <input style={{ opacity: 0, height: 0, width: 0, position: "absolute" }} multiple id="task_file" name="task_file" type="file" className="delete_task" onChange={e => handleFileUpload(e, task, projectId)} />
+                            <label className="delete_task" htmlFor={`task_file_${task._id}`}>Загрузить файл</label>
+                            <input style={{ opacity: 0, height: 0, width: 0, position: "absolute" }} multiple id={`task_file_${task._id}`} name={`task_file_${task._id}`} type="file" className="delete_task" onChange={e => handleFileUpload(e, task._id, projectId)} />
                         </div>
                         <div>
                             {task.attachments && task.attachments.map((attachment) => (

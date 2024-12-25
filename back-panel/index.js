@@ -108,6 +108,18 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
     })
     .catch((error) => console.error('Error connecting to MongoDB:', error));
 
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+    port: 465,
+    host: 'mail.surgu.ru',
+    secure: true,
+    auth: {
+        user: 'kartushin_is@surgu.ru',
+        pass: 'PiePotato120452' // Пароль приложения для Gmail, если включена двухфакторная аутентификация
+    }
+});
+
 // Models
 const Project = mongoose.model('Project', {
     title: { type: String, required: true },
@@ -228,18 +240,27 @@ app.delete('/api/project/:projectId', async (req, res) => {
         const userId = decoded.userId;
         const user = await User.findById(userId)
         if (user.role === 'admin' || user.role === 'manager') {
-            const fetchAllBoards = await Board.find({projectId: projectId})
+            const fetchAllBoards = await Board.find({ projectId: projectId })
             const fetchAllColumns = fetchAllBoards.forEach(async (e) => {
-                const column = await Column.find({boardId: e._id})
-                column.forEach(async (e) => await Task.deleteMany({columnId: e._id}))
-                await Column.deleteMany({boardId: e._id})
+                const column = await Column.find({ boardId: e._id })
+                column.forEach(async (e) => {
+                    const allColumnsTask = await Task.find({ columnId: e._id })
+                    allColumnsTask.forEach(e => {
+                        e.attachments.forEach(e => {
+                            const filePath = path.join(__dirname, 'uploads', e.filename);
+                            fs.unlinkSync(filePath);
+                        })
+                    })
+                    await Task.deleteMany({ columnId: e._id })
+                })
+                await Column.deleteMany({ boardId: e._id })
             })
-            await Board.deleteMany({projectId: projectId})
-            const deleteProjects = await Project.findOneAndDelete(projectId)
+            await Board.deleteMany({ projectId: projectId })
+            const deleteProjects = await Project.findOneAndDelete({ _id: projectId })
             io.to('/project').emit("deleteProject", deleteProjects)
             return res.json(deleteProjects);
         }
-        return res.status(403).json({message: 'Нет прав на удаление'})
+        return res.status(403).json({ message: 'Нет прав на удаление' })
     } catch (error) {
         res.status(500).json({ error: 'Ошибка при получении проектов.' });
     }
@@ -318,7 +339,6 @@ app.delete('/api/:projectId/tasks/:taskId/attachments/:filename', async (req, re
         const column = await Column.findById(task.columnId)
         const filename = req.params.filename;
 
-
         // Find the attachment index
         const attachmentIndex = task.attachments.findIndex(attachment => attachment.filename === filename);
         if (attachmentIndex === -1) {
@@ -331,6 +351,8 @@ app.delete('/api/:projectId/tasks/:taskId/attachments/:filename', async (req, re
 
         // Delete the file from the uploads directory
         const filePath = path.join(__dirname, 'uploads', removedAttachment.filename);
+        console.log(filePath);
+
         fs.unlinkSync(filePath);  // Delete the file
         console.log(filename, removedAttachment);
 
@@ -419,12 +441,20 @@ app.delete('/api/project/:projectId/boards/:boardId', async (req, res) => {
         }
 
         const fetchAllColumns = await Column.find({ boardId: req.params.boardId })
+        fetchAllColumns.forEach(async (e) => {
+            const allColumnTasks = await Task.find({ columnId: e._id })
+            allColumnTasks.forEach(e => {
+                e.attachments.forEach(e => {
+                    const filePath = path.join(__dirname, 'uploads', e.filename);
+                    fs.unlinkSync(filePath);
+                })
+            })
+        })
         fetchAllColumns.forEach(async (e) => await Task.deleteMany({ columnId: e._id }))
 
         await Column.deleteMany({ boardId: req.params.boardId });
         // Then, delete the column:
         const deletedBoard = await Board.findByIdAndDelete(req.params.boardId);
-        console.log(req.headers.referer);
 
         io.to(req.params.projectId).emit("deleteBoard", deletedBoard);
         res.json({ message: 'Column and associated tasks deleted' });
@@ -483,9 +513,16 @@ app.delete('/api/:projectId/columns/:id/', async (req, res) => {
         if (!column) {
             return res.status(404).json({ message: 'Колонка не найдена.' });
         }
-        console.log(projectId);
-
+        const tasks = await Task.find({ columnId: req.params.id })
+        tasks.forEach(e => {
+            e.attachments.forEach(e => {
+                const filePath = path.join(__dirname, 'uploads', e.filename)
+                fs.unlinkSync(filePath)
+            })
+        })
         await Task.deleteMany({ columnId: req.params.id }); // Удаляем все задачи в колонке
+        // console.log(tasks);
+
         await Column.findByIdAndDelete(req.params.id);
         io.to(projectId).emit('deleteColumn', req.params.id);
         res.json({ message: 'Колонка успешно удалена.' });
@@ -535,12 +572,19 @@ app.delete('/api/:projectId/tasks/:id', async (req, res) => {
     try {
         const projectId = req.params.projectId
         const task = await Task.findById(req.params.id);
+        console.log(task);
+
         if (!task) {
             return res.status(404).json({ error: 'Task not found' });
         }
         const column = await Column.findById(task.columnId)
         await Column.findByIdAndUpdate(task.columnId, { $pull: { tasks: task._id } });
         const deletedTask = await Task.findByIdAndDelete(req.params.id);
+        console.log(deletedTask);
+        deletedTask.attachments.forEach(e => {
+            const filePath = path.join(__dirname, 'uploads', e.filename)
+            fs.unlinkSync(filePath)
+        })
         io.to(projectId).emit('deleteTask', deletedTask)
         res.json({ message: 'Task deleted' });
     } catch (error) {
@@ -743,7 +787,7 @@ app.get('/api/users', async (req, res) => {
 });
 
 // Add a new route to handle task assignment
-app.put('/api/:projectId/:tasks/:taskId/assign', async (req, res) => {
+app.put('/api/:projectId/tasks/:taskId/assign', async (req, res) => {
     try {
         const projectId = req.params.projectId
         const { userId } = req.body;
@@ -754,6 +798,21 @@ app.put('/api/:projectId/:tasks/:taskId/assign', async (req, res) => {
         ).populate('createdBy').populate('assignedTo', 'username'); // Populate after updating
         const column = await Column.findById(updatedTask.columnId)
         const assignedUser = await User.findById(userId)
+        console.log(assignedUser);
+        // const mailOptions = {
+        //     from: 'kartushin_is@surgu.ru',
+        //     to: '',
+        //     subject: 'Тестовое письмо с для оповешения о назначении на задачу',
+        //     text: 'Это тестовое письмо, отправленное с сервера Картушиным Иваном Сергеевичем.\n Вот так я буду уведомлять пользователей, что на них назначена задача.'
+        // };
+        
+        // transporter.sendMail(mailOptions, (error, info) => {
+        //     if (error) {
+        //         console.log('Ошибка при отправке письма:', error);
+        //     } else {
+        //         console.log('Письмо успешно отправлено:', info.response);
+        //     }
+        // });
         io.to(projectId).emit('addTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
         console.log(assignedUser);
         res.json(updatedTask);

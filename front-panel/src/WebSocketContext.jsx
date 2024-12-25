@@ -6,7 +6,6 @@ const SocketContext = createContext(null);
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  // const [currentRoom, setCurrentRoom] = useState(null);
 
 
   useEffect(() => {
@@ -20,14 +19,7 @@ export const SocketProvider = ({ children }) => {
     newSocket.on('disconnect', () => {
       console.log('Socket.IO disconnected');
       setIsConnected(false);
-      // setCurrentRoom(null);
     });
-
-    // newSocket.on('reconnect', () => {
-    //   if (currentRoom) {
-    //     joinRoom(currentRoom);
-    //   }
-    // });
 
     setSocket(newSocket);
 
@@ -39,7 +31,6 @@ export const SocketProvider = ({ children }) => {
   const joinRoom = useCallback((room) => {
     if (socket && socket.connected) {
       socket.emit("joinRoom", room);
-      // setCurrentRoom(room);
     }
   }, [socket]);
 
@@ -47,7 +38,6 @@ export const SocketProvider = ({ children }) => {
   const leaveRoom = useCallback((room) => {
     if (socket && socket.connected) {
       socket.emit("leaveRoom", room);
-      // setCurrentRoom(null);
     }
   }, [socket]);
 

@@ -43,6 +43,7 @@ function TaskBoard() {
 
   useEffect(() => {
     getAllBoard(projectId)
+    // setActiveBoard(allBoard?.[0])
   }, [])
 
   return (

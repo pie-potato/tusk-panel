@@ -255,15 +255,17 @@ export const updateBoardNameById = async (updateColumnName, boardId) => {
   }
 }
 
-export const handleFileUpload = async (event, task, projectId) => {
+export const handleFileUpload = async (event, taskId, projectId) => {
   console.log(event);
   const file = event.target.files[0];
   if (!file) return;
   try {
+    console.log(taskId);
+    
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
     const formData = new FormData();
     formData.append('file', file);
-    await axios.post(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${task._id}/upload`, formData, {
+    await axios.post(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${taskId}/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`
@@ -300,3 +302,26 @@ export const fetchProjects = async (setProjects) => {
     console.log(error);
   }
 };
+
+export const deleteProject = async (projectId) => {
+  try {
+    console.log(projectId);
+
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    await axios.delete(`http://${window.location.hostname}:5000/api/project/${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const createProject = async (title, members = []) => {
+  try {
+    await axios.post(`http://${window.location.hostname}:5000/api/projects`, { title: title, members: members })
+  } catch (error) {
+    console.log(error)
+  }
+}

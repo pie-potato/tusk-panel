@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { getBoard, addBoard, deleteBoard } from './api/response';
+import React, { useState } from "react";
+import { addBoard, deleteBoard } from './api/response';
 import './BoardDock.css'
 import { useParams } from "react-router-dom";
 
@@ -7,6 +7,7 @@ export default function BoardDock({ activeBoard, setActiveBoard, allBoard }) {
 
     const [creaeteBoard, setCreateBoard] = useState(false)
     const [newColumnName, setNewColumnName] = useState('');
+    const [isMouse, setIsMouse] = useState(false)
     const { projectId } = useParams()
 
     const createBoard = () => {
