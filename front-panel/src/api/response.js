@@ -261,7 +261,7 @@ export const handleFileUpload = async (event, taskId, projectId) => {
   if (!file) return;
   try {
     console.log(taskId);
-    
+
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
     const formData = new FormData();
     formData.append('file', file);
@@ -321,6 +321,14 @@ export const deleteProject = async (projectId) => {
 export const createProject = async (title, members = []) => {
   try {
     await axios.post(`http://${window.location.hostname}:5000/api/projects`, { title: title, members: members })
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const addTuskDate = async (projectId, taskId, startDate, endDate) => {
+  try {
+    await axios.put(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${taskId}/date`, { startDate: startDate, endDate: endDate })
   } catch (error) {
     console.log(error)
   }

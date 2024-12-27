@@ -4,11 +4,11 @@ const fs = require('fs');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const bcrypt = require('bcrypt'); // Для хеширования паролей
-const jwt = require('jsonwebtoken'); // Для JWT
-const http = require('http'); // Import the http module
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const http = require('http');
 const socketIO = require('socket.io');
-
+const nodemailer = require('nodemailer');
 // Create a Socket.IO instance
 
 const app = express();
@@ -108,7 +108,7 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
     })
     .catch((error) => console.error('Error connecting to MongoDB:', error));
 
-const nodemailer = require('nodemailer');
+
 
 const transporter = nodemailer.createTransport({
     port: 465,
@@ -156,6 +156,7 @@ const User = mongoose.model('User', {
     firstname: { type: String, required: true }, // Add nickname field
     secondname: { type: String, required: true }, // Add nickname field
     thirdname: { type: String, required: true }, // Add nickname field
+    mail: { type: String, required: true },
     role: { type: String, enum: ['admin', 'manager', 'employee'], default: 'employee' } // Add role field
 });
 
@@ -625,6 +626,26 @@ app.put('/api/:projectId/tasks/:id/description', async (req, res) => {
     }
 });
 
+app.put('/api/:projectId/tasks/:id/date', async (req, res) => {
+    try {
+        const projectId = req.params.projectId
+        const updatedTask = await Task.findByIdAndUpdate(req.params.id, { startDate: req.body.startDate, endDate: req.body.endDate }, { new: true })
+            .populate('createdBy')
+            .populate('assignedTo', 'username');
+        const column = await Column.findById(updatedTask.columnId)
+        if (!updatedTask) {
+            return res.status(404).json({ message: 'Задача не найдена.' });
+
+        }
+        console.log(updatedTask);
+
+        io.to(projectId).emit('updateTask', updatedTask);
+        res.json(updatedTask);
+    } catch (error) {
+        res.status(500).json({ error: 'Error updating task' });
+    }
+});
+
 
 app.put('/api/:projectId/tasks/:id', async (req, res) => {
     try {
@@ -714,7 +735,6 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/admin/users', async (req, res) => {
     try {
-        //  Замените 'PiePotato' на реальный секретный ключ
         const token = req.header('Authorization')?.replace('Bearer ', '');
 
         const decoded = jwt.verify(token, 'PiePotato');
@@ -798,21 +818,21 @@ app.put('/api/:projectId/tasks/:taskId/assign', async (req, res) => {
         ).populate('createdBy').populate('assignedTo', 'username'); // Populate after updating
         const column = await Column.findById(updatedTask.columnId)
         const assignedUser = await User.findById(userId)
-        console.log(assignedUser);
-        // const mailOptions = {
-        //     from: 'kartushin_is@surgu.ru',
-        //     to: '',
-        //     subject: 'Тестовое письмо с для оповешения о назначении на задачу',
-        //     text: 'Это тестовое письмо, отправленное с сервера Картушиным Иваном Сергеевичем.\n Вот так я буду уведомлять пользователей, что на них назначена задача.'
-        // };
-        
-        // transporter.sendMail(mailOptions, (error, info) => {
-        //     if (error) {
-        //         console.log('Ошибка при отправке письма:', error);
-        //     } else {
-        //         console.log('Письмо успешно отправлено:', info.response);
-        //     }
-        // });
+        if (assignedUser?.mail) {
+            const mailOptions = {
+                from: `kartushin_is@surgu.ru`,
+                to: `${assignedUser.mail}`,
+                subject: 'Тестовое письмо с для оповешения о назначении на задачу',
+                text: 'Это тестовое письмо, отправленное с сервера Картушиным Иваном Сергеевичем.\n Вот так я буду уведомлять пользователей, что на них назначена задача.'
+            };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log('Ошибка при отправке письма:', error);
+                } else {
+                    console.log('Письмо успешно отправлено:', info.response);
+                }
+            });
+        }
         io.to(projectId).emit('addTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
         console.log(assignedUser);
         res.json(updatedTask);
@@ -836,8 +856,6 @@ app.delete('/api/:projectId/tasks/:taskId/assign/:userId', async (req, res) => {
         const column = await Column.findById(updatedTask.columnId)
         const assignedUser = await User.findById(userIdToRemove)
         io.to(projectId).emit('deleteTaskAssing', { taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
-        console.log({ taskId: updatedTask._id, columnId: updatedTask.columnId, assignedTo: assignedUser });
-
         res.json(updatedTask);
     } catch (error) {
         console.error('Error unassigning user:', error);

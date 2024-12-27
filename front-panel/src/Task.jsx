@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { deleteTask, editTaskTitle, fetchUsers, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription } from './api/response';
+import { deleteTask, editTaskTitle, fetchUsers, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription, addTuskDate } from './api/response';
 import "./Task.css"
 import Modal from "./Modal/Modal";
 import { useParams } from "react-router-dom";
-
 
 export default function Task({ task }) {
 
@@ -14,14 +13,82 @@ export default function Task({ task }) {
     const [editingTaskDescription, setEditingTaskDescription] = useState(false)
     const [users, setUsers] = useState([]);
     const [isMouse, setIsMouse] = useState(false)
+    const [editDate, setEditDate] = useState(false)
     const [startDate, setStartDate] = useState(task.startDate ? new Date(task.startDate) : null);
     const [endDate, setEndDate] = useState(task.endDate ? new Date(task.endDate) : null);
+    const [newDates, setNewDates] = useState({ newStartDate: task.startDate ? task.startDate : null, newEndDate: task.endDate ? task.endDate : null })
+    const [totalTime, setTotalTime] = useState(0);
+    const [remainingTime, setRemainingTime] = useState(0);
     const contextElementRef = useRef()
-    const contextDateInputRef = useRef()
+    // const contextDateInputRef = useRef()
     const { projectId } = useParams()
+    console.log(task.startDate);
+    console.log(new Date(Date.now()));
+    console.log(totalTime);
+
+    const fetchTaskDataFromApi = () => {
+        if (startDate && endDate) {
+            const total = Math.round((endDate - startDate) / 1000);
+            setTotalTime(total)
+            setRemainingTime(total); // Initial remaining time is equal to total
+        }
+    }
+
+    const calculateRemainingTime = () => {
+        if (!totalTime) {
+            return 0;
+        }
+        const now = new Date();
+        const endDate = new Date(Date.now() + totalTime * 1000); // Create endDate based on current date and total time
+        const remaining = Math.max(0, Math.round((endDate - now) / 1000));
+        return remaining
+    }
+
+      const calculateProgress = () => {
+        if (totalTime === 0) return 0;
+        return (100 * (totalTime - remainingTime)) / totalTime;
+      };
+
+    //   const startTimer = () => {
+    //       if (isRunning || remainingTime <= 0) {
+    //           return
+    //       }
+
+    //     setIsRunning(true);
+    //     intervalRef.current = setInterval(() => {
+    //         setRemainingTime(calculateRemainingTime());
+    //     }, 1000);
+    //   };
+
+    //   const pauseTimer = () => {
+    //     clearInterval(intervalRef.current);
+    //     setIsRunning(false);
+    //   };
+
+    //   const resetTimer = () => {
+    //     clearInterval(intervalRef.current);
+    //     setIsRunning(false);
+    //       setRemainingTime(totalTime);
+    //   };
+
+
+    //     useEffect(() => {
+    //         setRemainingTime(calculateRemainingTime());
+    //     }, [totalTime])
+
+    //   useEffect(() => {
+    //     return () => clearInterval(intervalRef.current);
+    //     // eslint-disable-next-line
+    //   }, []);
 
     useEffect(() => {
-        fetchUsers(setUsers);
+        setStartDate(task.startDate ? new Date(task.startDate) : null)
+        setEndDate(task.endDate ? new Date(task.endDate) : null)
+    }, [task]);
+
+    useEffect(() => {
+        fetchUsers(setUsers)
+        fetchTaskDataFromApi()
     }, []);
 
     return (
@@ -147,10 +214,36 @@ export default function Task({ task }) {
                     </div>
                     }
                 </div>
-                <div>
-                    <input ref={contextDateInputRef} onChange={e => setStartDate(e.target.value)} type="date" name="" id="" />
-                </div>
+                {(startDate && endDate) ?
+                    <>
+                        {editDate
+                            ?
+                            <div className="task_date">
+                                <input onChange={e => setNewDates(prevNewDates => ({ ...prevNewDates, newStartDate: e.target.value }))} type="date" name="" id="" />
+                                <input onChange={e => setNewDates(prevNewDates => ({ ...prevNewDates, newEndDate: e.target.value }))} type="date" name="" id="" />
+                                <button onClick={() => {
+                                    addTuskDate(projectId, task._id, newDates.newStartDate, newDates.newEndDate)
+                                    setEditDate(false)
+                                }}>Назначить даты</button>
+                            </div>
+                            :
+                            <div className="task_date">
+                                <div >{startDate?.getDate()}.{startDate?.getMonth() + 1 < 10 ? <>0{startDate?.getMonth() + 1}</> : endDate?.getMonth() + 1}.{startDate?.getFullYear()}</div>
+                                <div >{endDate?.getDate()}.{endDate?.getMonth() + 1 < 10 ? <>0{endDate?.getMonth() + 1}</> : endDate?.getMonth() + 1}.{endDate?.getFullYear()}</div>
+                                {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
+                                    <button onClick={() => setEditDate(true)}>Изменить даты</button>
+                                }
+                            </div>
+                        }
+                    </>
+                    :
+                    <div className="task_date">
+                        <input onChange={e => setStartDate(e.target.value)} type="date" name="" id="" />
+                        <input onChange={e => setEndDate(e.target.value)} type="date" name="" id="" />
+                        <button onClick={() => addTuskDate(projectId, task._id, startDate, endDate)}>Назначить даты</button>
+                    </div>
+                }
             </Modal>
-        </div>
+        </div >
     )
 }

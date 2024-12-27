@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getUsers, handleCreateUser, handleUpdateUser } from './api/response';
 
 function AdminPanel() {
-    const [newUser, setNewUser] = useState({ username: '', firstname: '', secondname: '', thirdname: '', password: '', role: 'employee' });
+    const [newUser, setNewUser] = useState({ username: '', firstname: '', secondname: '', thirdname: '', password: '', mail: '', role: 'employee' });
     const [users, setUsers] = useState([])
     const [editingUser, setEditingUser] = useState(null);
     const [editPassword, setEditPassword] = useState('');
@@ -60,6 +60,15 @@ function AdminPanel() {
                             type="text"
                             value={newUser.thirdname}
                             onChange={(e) => setNewUser({ ...newUser, thirdname: e.target.value })}
+                            placeholder="New username"
+                        />
+                    </div>
+                    <div>
+                        <div>Почта</div>
+                        <input
+                            type="text"
+                            value={newUser.mail}
+                            onChange={(e) => setNewUser({ ...newUser, mail: e.target.value })}
                             placeholder="New username"
                         />
                     </div>

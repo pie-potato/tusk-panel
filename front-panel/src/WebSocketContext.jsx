@@ -7,7 +7,6 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
-
   useEffect(() => {
     const newSocket = io(`http://${window.location.hostname}:5000`);
 
@@ -34,13 +33,11 @@ export const SocketProvider = ({ children }) => {
     }
   }, [socket]);
 
-
   const leaveRoom = useCallback((room) => {
     if (socket && socket.connected) {
       socket.emit("leaveRoom", room);
     }
   }, [socket]);
-
 
   // Возвращаем только сокет и статус соединения
   return (

@@ -115,3 +115,11 @@
 .select_users:active {
     border: 0;
 }
+
+.task_date {
+    display: flex;
+}
+
+.task_date>* {
+    margin: 0 10px 0 10px;
+}

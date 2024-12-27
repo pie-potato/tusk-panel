@@ -13,7 +13,6 @@ export default function ProjectList() {
     const { socket, isConnected, joinRoom, leaveRoom } = useSocket()
     const { pathname } = useLocation()
 
-
     useEffect(() => {
         if (isConnected && pathname) {
             joinRoom(pathname);
