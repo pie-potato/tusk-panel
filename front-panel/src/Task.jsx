@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { deleteTask, editTaskTitle, fetchUsers, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription, addTuskDate } from './api/response';
 import "./Task.css"
 import Modal from "./Modal/Modal";
@@ -17,69 +17,31 @@ export default function Task({ task }) {
     const [startDate, setStartDate] = useState(task.startDate ? new Date(task.startDate) : null);
     const [endDate, setEndDate] = useState(task.endDate ? new Date(task.endDate) : null);
     const [newDates, setNewDates] = useState({ newStartDate: task.startDate ? task.startDate : null, newEndDate: task.endDate ? task.endDate : null })
-    const [totalTime, setTotalTime] = useState(0);
-    const [remainingTime, setRemainingTime] = useState(0);
+    const [progress, setProgress] = useState(0)
+    const [progressBarColor, setProgressBarColor] = useState('')
     const contextElementRef = useRef()
-    // const contextDateInputRef = useRef()
     const { projectId } = useParams()
-    console.log(task.startDate);
-    console.log(new Date(Date.now()));
-    console.log(totalTime);
 
-    const fetchTaskDataFromApi = () => {
-        if (startDate && endDate) {
-            const total = Math.round((endDate - startDate) / 1000);
-            setTotalTime(total)
-            setRemainingTime(total); // Initial remaining time is equal to total
+    useMemo(() => {
+        const now = new Date().getTime();
+        if (now < startDate) {
+            setProgress(0)
+            return;
         }
-    }
 
-    const calculateRemainingTime = () => {
-        if (!totalTime) {
-            return 0;
+        if (now >= endDate) {
+            setProgress(100)
+            return;
         }
-        const now = new Date();
-        const endDate = new Date(Date.now() + totalTime * 1000); // Create endDate based on current date and total time
-        const remaining = Math.max(0, Math.round((endDate - now) / 1000));
-        return remaining
-    }
+        const totalTime = endDate - startDate;
+        const elapsedTime = now - startDate;
 
-      const calculateProgress = () => {
-        if (totalTime === 0) return 0;
-        return (100 * (totalTime - remainingTime)) / totalTime;
-      };
-
-    //   const startTimer = () => {
-    //       if (isRunning || remainingTime <= 0) {
-    //           return
-    //       }
-
-    //     setIsRunning(true);
-    //     intervalRef.current = setInterval(() => {
-    //         setRemainingTime(calculateRemainingTime());
-    //     }, 1000);
-    //   };
-
-    //   const pauseTimer = () => {
-    //     clearInterval(intervalRef.current);
-    //     setIsRunning(false);
-    //   };
-
-    //   const resetTimer = () => {
-    //     clearInterval(intervalRef.current);
-    //     setIsRunning(false);
-    //       setRemainingTime(totalTime);
-    //   };
-
-
-    //     useEffect(() => {
-    //         setRemainingTime(calculateRemainingTime());
-    //     }, [totalTime])
-
-    //   useEffect(() => {
-    //     return () => clearInterval(intervalRef.current);
-    //     // eslint-disable-next-line
-    //   }, []);
+        const progressValue = (elapsedTime / totalTime) * 100;
+        setProgress(progressValue > 100 ? 100 : progressValue)
+        if (progress < 30) setProgressBarColor('#00ff00');
+        if (progress < 70 && progress > 30) setProgressBarColor('#007bff');
+        if (progress > 70) setProgressBarColor('#ff0000');
+    }, [startDate, endDate, progress])
 
     useEffect(() => {
         setStartDate(task.startDate ? new Date(task.startDate) : null)
@@ -88,13 +50,18 @@ export default function Task({ task }) {
 
     useEffect(() => {
         fetchUsers(setUsers)
-        fetchTaskDataFromApi()
     }, []);
 
     return (
         <div className="task" >
-            <div className="container_task" onClick={() => setModalActive(true)}>
+            <div onClick={() => setModalActive(true)}>
                 <div className="task_name">{task.title}</div>
+                <div className="progress-bar">
+                    <div
+                        className="progress-bar-fill"
+                        style={{ width: `${progress}%`, backgroundColor: `${progressBarColor}` }}
+                    ></div>
+                </div>
             </div>
             <Modal active={modalActive} setActive={setModalActive}>
                 <div className="modal_shadow">
@@ -228,7 +195,7 @@ export default function Task({ task }) {
                             </div>
                             :
                             <div className="task_date">
-                                <div >{startDate?.getDate()}.{startDate?.getMonth() + 1 < 10 ? <>0{startDate?.getMonth() + 1}</> : endDate?.getMonth() + 1}.{startDate?.getFullYear()}</div>
+                                <div >{startDate?.getDate()}.{startDate?.getMonth() + 1 < 10 ? <>0{startDate?.getMonth() + 1}</> : startDate?.getMonth() + 1}.{startDate?.getFullYear()}</div>
                                 <div >{endDate?.getDate()}.{endDate?.getMonth() + 1 < 10 ? <>0{endDate?.getMonth() + 1}</> : endDate?.getMonth() + 1}.{endDate?.getFullYear()}</div>
                                 {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
                                     <button onClick={() => setEditDate(true)}>Изменить даты</button>

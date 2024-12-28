@@ -123,3 +123,27 @@
 .task_date>* {
     margin: 0 10px 0 10px;
 }
+
+.progress-bar {
+    width: 100%;
+    margin-top: 10px;
+    height: 10px;
+    background-color: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.project_element_member {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 5px;
+    margin: 3px 0;
+    border: 2px solid #1876C2;
+    border-radius: 20px;
+}
