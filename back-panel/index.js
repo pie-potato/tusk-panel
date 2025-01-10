@@ -96,6 +96,9 @@ mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' 
             socket.on('deleteProject', (room, deletedProject) => {
                 socket.to(room).emit('deleteProject', deletedProject);
             });
+            socket.on('updateProject', (room, updatedProject) => {
+                socket.to(room).emit('updateProject', updatedProject);
+            });
             socket.on('leaveRoom', (room) => {
                 socket.leave(room);
                 console.log(`user left room: ${room}`);
@@ -326,6 +329,13 @@ app.get('/api/uploads/:filename', (req, res) => {
         }
     });
 });
+
+app.put('/api/:projectId/:userId', async (req, res) => {
+    const updateProject = await Project.findByIdAndUpdate(req.params.projectId, { $pull: { members: { _id: req.params.userId } } }, { new: true })
+        // .populate("title")
+    console.log(updateProject);
+    io.to('/project').emit('updateProject', updateProject)
+})
 
 app.delete('/api/:projectId/tasks/:taskId/attachments/:filename', async (req, res) => {
     try {

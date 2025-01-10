@@ -333,3 +333,11 @@ export const addTuskDate = async (projectId, taskId, startDate, endDate) => {
     console.log(error)
   }
 }
+
+export const deleteMemberFromProject = async (projectId, userId) => {
+  try {
+    await axios.put(`http://${window.location.hostname}:5000/api/${projectId}/${userId}`)
+  } catch (error) {
+    console.log(error)
+  }
+}

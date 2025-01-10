@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { fetchUsers, fetchProjects, createProject } from './api/response';
 import { useSocket } from './WebSocketContext';
 import { useLocation } from 'react-router-dom';
@@ -14,6 +14,12 @@ export default function ProjectList() {
     const { socket, isConnected, joinRoom, leaveRoom } = useSocket()
     const [modalActive, setModalActive] = useState(false)
     const { pathname } = useLocation()
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+
+    useMemo(() => {
+        setSearchResults(users.filter(e => e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())))
+    }, [searchTerm, projectMembers])
 
     useEffect(() => {
         if (isConnected && pathname) {
@@ -37,6 +43,15 @@ export default function ProjectList() {
             console.log(deletedProject);
             setProjects(prevProjects => prevProjects.filter(e => e._id !== deletedProject._id))
         })
+        socket.on('updateProject', (updateProject) => {
+            console.log(updateProject);
+            setProjects(prevProjects => prevProjects.map(e => {
+                if (e._id === updateProject._id) {
+                    return updateProject
+                }
+                return e
+            }))
+        })
         return () => {
             socket.off()
         }
@@ -55,11 +70,11 @@ export default function ProjectList() {
         <div>
             {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
                 <>
-                    <button onClick={() => setModalActive(true)}>Создать проект</button>
                     <Modal active={modalActive} setActive={setModalActive}>
                         <div className='create_project'>
-                            <input
+                            <textarea
                                 type="text"
+                                className='project_name'
                                 value={projectTitle}
                                 onChange={e => setProjectTitle(e.target.value)}
                                 onKeyDown={e => {
@@ -69,29 +84,49 @@ export default function ProjectList() {
                                     }
                                 }}
                             />
-                            <select className="select_users" onChange={(e) => {
-                                setProjectMembers(prevProjectMembers => [...prevProjectMembers, JSON.parse(e.target.value)])
-                            }}>
-                                <option value="">Участники проекта</option>
-                                {users.map((user) => (
-                                    <option className="user" key={user._id} value={JSON.stringify(user)}>
-                                        {user?.secondname || user.username} {user?.firstname && user?.firstname[0] + '.'} {user?.thirdname && user?.thirdname[0] + '.'}
-                                    </option>
-                                ))}
-                            </select>
-                            {projectMembers.map(e => <div>
-                                <div key={e._id}>{e?.secondname} {e?.firstname}</div>
-                                <button onClick={() => removeUserByProject(e._id)}>Убрать пользователля</button>
-                            </div>)}
-                            <button onClick={() => {
-                                createProject(projectTitle, projectMembers)
-                                setProjectTitle('')
-                            }}>Создать проект</button>
+                            <div className='create_project_bottom'>
+                                <div>
+                                    <div className='search_users'>
+                                        <input
+                                            type="text"
+                                            className='input_search_users'
+                                            placeholder="Найти сотрудника..."
+                                            value={searchTerm}
+                                            onChange={e => setSearchTerm(e.target.value)}
+                                        />
+                                        <div className='searced_users'>
+                                            {searchResults.map(e => <div onClick={() => setProjectMembers(prevProjectMembers => [...prevProjectMembers, e])} className='project_user' key={e._id}>{e?.secondname} {e?.firstname}</div>)}
+                                        </div>
+                                    </div>
+                                    {/* <select className="select_users" onChange={(e) => {
+                                        setProjectMembers(prevProjectMembers => [...prevProjectMembers, JSON.parse(e.target.value)])
+                                    }}>
+                                        <option value="">Участники проекта</option>
+                                        {users.map((user) => (
+                                            <option className="user" key={user._id} value={JSON.stringify(user)}>
+                                                {user?.secondname || user.username} {user?.firstname && user?.firstname[0] + '.'} {user?.thirdname && user?.thirdname[0] + '.'}
+                                            </option>
+                                        ))}
+                                    </select> */}
+                                    {projectMembers.map(e => <div className='project_user'>
+                                        <div key={e._id}>{e?.secondname} {e?.firstname}</div>
+                                        <img onClick={() => removeUserByProject(e._id)} className="trash" src="./media/trash.svg" alt="Мусорка" />
+                                    </div>)}
+                                </div>
+                                <button
+                                    className='create_project_button'
+                                    onClick={() => {
+                                        createProject(projectTitle, projectMembers)
+                                        setProjectTitle('')
+                                    }}>Сохранить</button>
+                            </div>
                         </div>
                     </Modal>
                 </>
             }
-            <h2>Projects</h2>
+            <h2 className='projects_h2'>Проекты</h2>
+            {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
+                <button className='create_project_button' onClick={() => setModalActive(true)}>Создать проект</button>}
             <div className='projects'>
                 {projects.map(e => <ProjectElement key={e._id} project={e} />)}
             </div>
