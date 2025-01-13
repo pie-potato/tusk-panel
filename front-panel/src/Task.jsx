@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { deleteTask, editTaskTitle, fetchUsers, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription, addTuskDate } from './api/response';
 import "./Task.css"
-import Modal from "./Modal/Modal";
+import Modal from "./UI/Modal/Modal";
 import { useParams } from "react-router-dom";
 
 export default function Task({ task }) {

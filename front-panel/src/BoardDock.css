@@ -29,3 +29,20 @@
     background: none;
     cursor: pointer;
 }
+
+.board_dock_add_input {
+    border: 2px solid #1876C2;
+    border-radius: 10px;
+    padding: 5px 10px 5px 10px;
+    box-shadow: 0 0 10px rgba(50, 100, 120, 0.5);
+    width: 150px;
+}
+
+.board_dosk_add_button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1876C2;
+}

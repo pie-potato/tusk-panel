@@ -7,6 +7,7 @@ import { useSocket } from './WebSocketContext';
 export default function Board({ boardId }) {
     const [newColumnName, setNewColumnName] = useState('');
     const [columns, setColumns] = useState([]);
+    const [addColumnInput, setAddColumnInput] = useState(false)
     const { socket } = useSocket()
     const { projectId } = useParams()
 
@@ -23,7 +24,7 @@ export default function Board({ boardId }) {
         socket.on('updateColumn', (updatedColumn) => { //  Добавление колонки
             setColumns(prevColumns => prevColumns.map(e => {
                 if (e._id === updatedColumn._id) {
-                    return {...e, title: updatedColumn.title}
+                    return { ...e, title: updatedColumn.title }
                 }
                 return e
             }))
@@ -144,15 +145,28 @@ export default function Board({ boardId }) {
                     ))}
                     <div>
                         <div>
-                            <input
-                                type="text"
-                                className='add_column'
-                                value={newColumnName}
-                                onChange={(e) => setNewColumnName(e.target.value)}
-                                placeholder="Добавить колонку..."
-                                onKeyDown={event => { if (event.key === "Enter") addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user'), projectId) }}
-                            />
-                            <button className='add_task' onClick={() => addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user'), projectId)}>Добавить колонку</button>
+                            {addColumnInput
+                                ? <div className='add_column'>
+                                    <input
+                                        type="text"
+                                        className='add_column_input'
+                                        value={newColumnName}
+                                        onChange={(e) => setNewColumnName(e.target.value)}
+                                        placeholder="Добавить колонку..."
+                                        onKeyDown={event => {
+                                            if (event.key === "Enter") {
+                                                addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user'), projectId)
+                                                setAddColumnInput(false)
+                                            }
+                                        }}
+                                    />
+                                    <div className='add_task' onClick={() => {
+                                        addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user'), projectId)
+                                        setAddColumnInput(false)
+                                    }}>+</div>
+                                </div>
+                                : <button className='add_task' onClick={() => setAddColumnInput(true)}>Добавить колонку</button>
+                            }
                         </div>
                     </div>
                 </div>}

@@ -4,7 +4,7 @@ import { useSocket } from './WebSocketContext';
 import { useLocation } from 'react-router-dom';
 import './ProjectsList.css'
 import ProjectElement from './ProjectElement';
-import Modal from './Modal/Modal';
+import Modal from './UI/Modal/Modal';
 
 export default function ProjectList() {
     const [projects, setProjects] = useState([])

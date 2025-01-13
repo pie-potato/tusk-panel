@@ -47,7 +47,7 @@
 
 .board_columns {
     display: flex;
-    /* height: 100%; */
+    align-items: flex-start;
 }
 
 .board_container::-webkit-scrollbar {
@@ -69,7 +69,14 @@
     border: 1px solid #1876C2;
     border-radius: 20px;
     padding: 5px;
+    display: flex;
+}
+
+.add_column_input {
     background: none;
+    border: none;
+    padding: 5px;
+    border-radius: 20px;
 }
 
 .input_task {
