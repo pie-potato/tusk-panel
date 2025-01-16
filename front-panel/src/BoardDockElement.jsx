@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { deleteBoard } from "./api/response";
+import ContextMenu from "./UI/ContextMenu/ContextMenu";
 
 export default function BoardDockElement({ boardInfo, activeBoard, setActiveBoard, projectId }) {
 
@@ -10,13 +11,10 @@ export default function BoardDockElement({ boardInfo, activeBoard, setActiveBoar
         <div className={activeBoard === boardInfo._id ? 'board_dock_element active' : 'board_dock_element'}>
             <div onClick={() => setActiveBoard(boardInfo._id)}>{boardInfo.title}</div>
             <div onClick={() => { setIsMouse(true) }} className="board_delete_button" ref={contextBoardMenuRef}>...</div>
-            {isMouse && <div onMouseLeave={() => {
-                setIsMouse(false)
-            }} className="context_menu" style={{ transform: `translate(${contextBoardMenuRef.current.getBoundingClientRect().left - 5}px, ${contextBoardMenuRef.current.getBoundingClientRect().top + 20}px)` }}>
+            {isMouse && <ContextMenu onMouseLeave={() => setIsMouse(false)} refelement={contextBoardMenuRef} corectx={-5} corecty={20}>
                 <button onClick={async () => await deleteBoard(boardInfo._id, localStorage.getItem('user'), projectId)} className="delete_task">Удалить доску</button>
                 <button onClick={() => { }} className="delete_task">Редактировать задачу</button>
-            </div>
-            }
+            </ContextMenu>}
         </div>
     )
 }

@@ -33,7 +33,7 @@ function App() {
 
   const handleLogin = async (credentials) => {
     try {
-      const response = await axios.post(`http://${window.location.hostname}:5000/api/login`, credentials);
+      const response = await axios.post(`http://${window.location.hostname}:8080/api/login`, credentials);
       const user = response.data;
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
@@ -59,7 +59,8 @@ function App() {
             <Route path="/admin" element={user && user.role === 'admin' ? <AdminPanel /> : <Navigate to="/" />} />
             <Route path="/profile" element={user && <Profile />} />
             <Route path="/project/:projectId" element={user ? <TaskBoard /> : <Navigate to="/login" />} /> {/* Перенаправление на /login, если пользователь не авторизован */}
-            <Route path="/project" element={user && <ProjectList />} />
+            <Route path="/project" element={user ? <ProjectList /> : <Navigate to="/login" />} />
+            <Route path="/" element={user ? <Navigate to="/project" /> : <Navigate to="/login" />} />
           </Routes>
         </div>
       </Router>

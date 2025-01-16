@@ -61,6 +61,7 @@
     border: 1px solid;
     padding: 10px;
     border-radius: 20px;
+    margin-right: 10px;
 }
 
 .input_search_users {
@@ -68,4 +69,6 @@
 }
 
 .searced_users {
+    display: flex;
+    justify-content: space-between;
 }

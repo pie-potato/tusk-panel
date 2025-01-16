@@ -40,7 +40,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017', { // Replace 'your_database_name' with your DB name
+mongoose.connect('mongodb://localhost:55055', { // Replace 'your_database_name' with your DB name
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
@@ -798,7 +798,12 @@ async function createDefaultAdmin() {
         const newAdmin = new User({
             username: 'admin',
             password: hashedPassword,
-            role: 'admin' // Set the role to 'admin'
+            role: 'admin', // Set the role to 'admin'
+            mail: " ",
+            firstname: 'a',
+            secondname: 'a',
+            thirdname: 'a'
+
         });
         await newAdmin.save();
         console.log('Default admin user created successfully.');

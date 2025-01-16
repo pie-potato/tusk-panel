@@ -22,8 +22,8 @@
     padding: 20px;
     border-radius: 20px;
     background-color: white;
-    transform: scale(0.5);
-    transition: 0.4s all;
+    transform: scale(0.3);
+    transition: 0.6s all;
     width: 70vw;
 }
 

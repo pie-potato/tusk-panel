@@ -69,60 +69,50 @@ export default function ProjectList() {
     return (
         <div>
             {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
-                <>
-                    <Modal active={modalActive} setActive={setModalActive}>
-                        <div className='create_project'>
-                            <textarea
-                                type="text"
-                                className='project_name'
-                                value={projectTitle}
-                                onChange={e => setProjectTitle(e.target.value)}
-                                onKeyDown={e => {
-                                    if (e.key === "Enter") {
-                                        createProject(projectTitle, projectMembers)
-                                        setProjectTitle('')
-                                    }
-                                }}
-                            />
-                            <div className='create_project_bottom'>
-                                <div>
-                                    <div className='search_users'>
-                                        <input
-                                            type="text"
-                                            className='input_search_users'
-                                            placeholder="Найти сотрудника..."
-                                            value={searchTerm}
-                                            onChange={e => setSearchTerm(e.target.value)}
-                                        />
-                                        <div className='searced_users'>
-                                            {searchResults.map(e => <div onClick={() => setProjectMembers(prevProjectMembers => [...prevProjectMembers, e])} className='project_user' key={e._id}>{e?.secondname} {e?.firstname}</div>)}
-                                        </div>
+                modalActive && <Modal active={modalActive} setActive={setModalActive}>
+                    <div className='create_project'>
+                        <textarea
+                            type="text"
+                            className='project_name'
+                            value={projectTitle}
+                            onChange={e => setProjectTitle(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === "Enter") {
+                                    createProject(projectTitle, projectMembers)
+                                    setProjectTitle('')
+                                }
+                            }}
+                        />
+                        <div className='create_project_bottom'>
+                            <div className='searced_users'>
+                                <div className='search_users'>
+                                    <input
+                                        type="text"
+                                        className='input_search_users'
+                                        placeholder="Найти сотрудника..."
+                                        value={searchTerm}
+                                        onChange={e => setSearchTerm(e.target.value)}
+                                    />
+                                    <div>
+                                        {searchResults.map(e => <div onClick={() => setProjectMembers(prevProjectMembers => [...prevProjectMembers, e])} className='project_user' key={e._id}>{e?.secondname} {e?.firstname}</div>)}
                                     </div>
-                                    {/* <select className="select_users" onChange={(e) => {
-                                        setProjectMembers(prevProjectMembers => [...prevProjectMembers, JSON.parse(e.target.value)])
-                                    }}>
-                                        <option value="">Участники проекта</option>
-                                        {users.map((user) => (
-                                            <option className="user" key={user._id} value={JSON.stringify(user)}>
-                                                {user?.secondname || user.username} {user?.firstname && user?.firstname[0] + '.'} {user?.thirdname && user?.thirdname[0] + '.'}
-                                            </option>
-                                        ))}
-                                    </select> */}
+                                </div>
+                                <div>
                                     {projectMembers.map(e => <div className='project_user'>
                                         <div key={e._id}>{e?.secondname} {e?.firstname}</div>
                                         <img onClick={() => removeUserByProject(e._id)} className="trash" src="./media/trash.svg" alt="Мусорка" />
                                     </div>)}
                                 </div>
-                                <button
-                                    className='create_project_button'
-                                    onClick={() => {
-                                        createProject(projectTitle, projectMembers)
-                                        setProjectTitle('')
-                                    }}>Сохранить</button>
                             </div>
+                            <button
+                                className='create_project_button'
+                                onClick={() => {
+                                    createProject(projectTitle, projectMembers)
+                                    setProjectTitle('')
+                                }}>Сохранить</button>
                         </div>
-                    </Modal>
-                </>
+                    </div>
+                </Modal>
             }
             <h2 className='projects_h2'>Проекты</h2>
             {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&

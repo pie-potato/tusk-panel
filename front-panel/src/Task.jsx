@@ -3,6 +3,7 @@ import { deleteTask, editTaskTitle, fetchUsers, assignTask, unassignTask, handle
 import "./Task.css"
 import Modal from "./UI/Modal/Modal";
 import { useParams } from "react-router-dom";
+import ContextMenu from "./UI/ContextMenu/ContextMenu";
 
 export default function Task({ task }) {
 
@@ -63,7 +64,7 @@ export default function Task({ task }) {
                     ></div>
                 </div>
             </div>
-            <Modal active={modalActive} setActive={setModalActive}>
+            {modalActive && <Modal active={modalActive} setActive={setModalActive}>
                 <div className="modal_shadow">
                     <div className="title_header">
                         <div className="modal_title">Название задачи</div>
@@ -146,7 +147,7 @@ export default function Task({ task }) {
                         <div>
                             {task.attachments && task.attachments.map((attachment) => (
                                 <div key={attachment.filename}>
-                                    <a href={`http://${window.location.hostname}:5000/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
+                                    <a href={`http://${window.location.hostname}:8080/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
                                         {attachment.originalname}
                                     </a>
                                     <button className="delete_task" onClick={() => handleDeleteAttachment(attachment.filename, task, projectId)}>Удалить</button>
@@ -170,16 +171,18 @@ export default function Task({ task }) {
                         </select>
                     </div>
                     {/* <div>Создатель задачи: {<>{task?.createdBy?.secondname} {task?.createdBy?.firstname[0] + '.'}</> || task?.createdBy?.username || 'Unknown'}</div> */}
-                    {isMouse && <div onMouseLeave={() => {
-                        setIsMouse(false)
-                    }} className="context_menu" style={{ transform: `translate(${contextElementRef.current.getBoundingClientRect().left - 275}px, ${contextElementRef.current.getBoundingClientRect().top - 160}px)` }}>
+                    {isMouse && <ContextMenu
+                        onMouseLeave={() => setIsMouse(false)}
+                        refelement={contextElementRef}
+                        corectx={-220}
+                        corecty={-195}
+                    >
                         <button onClick={() => deleteTask(task._id, projectId)} className="delete_task">Удалить задчу</button>
                         <button onClick={() => {
                             setEditTaskName(true)
                             setTaskName(task.title)
                         }} className="delete_task">Редактировать задачу</button>
-                    </div>
-                    }
+                    </ContextMenu>}
                 </div>
                 {(startDate && endDate) ?
                     <>
@@ -210,7 +213,7 @@ export default function Task({ task }) {
                         <button onClick={() => addTuskDate(projectId, task._id, startDate, endDate)}>Назначить даты</button>
                     </div>
                 }
-            </Modal>
+            </Modal>}
         </div >
     )
 }

@@ -1,10 +1,14 @@
 import React from "react";
 import "./ContextMenu.css"
 
-export default function ContextMenu ({children, elementRef, corectX, corectY}) {
+export default function ContextMenu({ children, refelement, corectx, corecty, ...props }) {
     return (
-        <div className="context_menu">
+        <div
+            {...props}
+            className="context_menu"
+            style={{ transform: `translate(${refelement.current.getBoundingClientRect().left + corectx}px, ${refelement.current.getBoundingClientRect().top + corecty}px)` }}
+        >
             {children}
         </div>
-    ) 
+    )
 } 
