@@ -9,6 +9,12 @@ const jwt = require('jsonwebtoken');
 const http = require('http');
 const socketIO = require('socket.io');
 const nodemailer = require('nodemailer');
+const Project = require('./mongooseModels/Project.js')
+const Board = require('./mongooseModels/Board.js')
+const Column = require('./mongooseModels/Column.js')
+const Task = require('./mongooseModels/Task.js')
+const User = require('./mongooseModels/User.js')
+const SocketEvents = require('./socket/SocketEvents.js')
 // Create a Socket.IO instance
 
 const app = express();
@@ -35,78 +41,14 @@ const storage = multer.diskStorage({
     }
 });
 
-
-
 const upload = multer({ storage: storage });
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:55055', { // Replace 'your_database_name' with your DB name
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect('mongodb://localhost:27017')
     .then(() => {
         console.log('Connected to MongoDB')
         createDefaultAdmin();
-        io.on('connection', (socket) => { // Подключение нового клиента
-            console.log('Пользователь подключился');
-
-            socket.on('joinRoom', (room) => { // Клиент присоединяется к комнате доски
-                socket.join(room);
-                console.log(`Socket ${socket.id} joined room ${room}`);
-            });
-            socket.on('addColumn', (room, newColumn) => {
-                socket.to(room).emit('addColumn', newColumn);
-            });
-            socket.on('updateColumn', (room, updateColumn) => { // Клиент обновил задачу
-                socket.to(room).emit('updateColumn', updateColumn);
-            });
-            socket.on('deleteColumn', (room, columnId) => { // получаем boardId вместе с columnId
-                socket.to(room).emit('deleteColumn', columnId);
-            });
-            socket.on('addTask', (room, newTask) => {
-                socket.to(room).emit('addTask', newTask);
-            });
-            socket.on('updateTask', (room, updateTask) => {
-                socket.to(room).emit('updateTask', updateTask);
-            });
-            socket.on('deleteTask', (room, taskId) => { // Клиент обновил задачу
-                socket.to(room).emit('deleteTask', taskId);
-            });
-            socket.on('addTaskAssing', (room, assignedUser) => { // Клиент обновил задачу
-                socket.to(room).emit('addTaskAssing', assignedUser);
-            });
-            socket.on('deleteTaskAssing', (room, unAssignedUser) => { // Клиент обновил задачу
-                socket.to(room).emit('deleteTaskAssing', unAssignedUser);
-            });
-            socket.on('addAttachmentsFile', (room, attachmentsFile) => { // Клиент обновил задачу
-                socket.to(room).emit('addAttachmentsFile', attachmentsFile);
-            });
-            socket.on('deleteAttachmentsFile', (room, deletedAttachmentsFile) => { // Клиент обновил задачу
-                socket.to(room).emit('deleteAttachmentsFile', deletedAttachmentsFile);
-            });
-            socket.on('addBoard', (room, newBoard) => {
-                socket.to(room).emit('addBoard', newBoard);
-            });
-            socket.on('deleteBoard', (room, deletedBoard) => {
-                socket.to(room).emit('deleteBoard', deletedBoard);
-            });
-            socket.on('addProject', (room, newProject) => {
-                socket.to(room).emit('addProject', newProject);
-            });
-            socket.on('deleteProject', (room, deletedProject) => {
-                socket.to(room).emit('deleteProject', deletedProject);
-            });
-            socket.on('updateProject', (room, updatedProject) => {
-                socket.to(room).emit('updateProject', updatedProject);
-            });
-            socket.on('leaveRoom', (room) => {
-                socket.leave(room);
-                console.log(`user left room: ${room}`);
-            });
-            socket.on('disconnect', () => { // Отключение клиента
-                console.log('Пользователь отключился');
-            });
-        });
+        SocketEvents(io)
         server.listen(port, () => console.log(`Server listening on port ${port}`));
     })
     .catch((error) => console.error('Error connecting to MongoDB:', error));
@@ -121,46 +63,6 @@ const transporter = nodemailer.createTransport({
         user: 'kartushin_is@surgu.ru',
         pass: 'PiePotato120452' // Пароль приложения для Gmail, если включена двухфакторная аутентификация
     }
-});
-
-// Models
-const Project = mongoose.model('Project', {
-    title: { type: String, required: true },
-    members: { type: mongoose.Schema.Types.Array, ref: 'User' }, // Users with access
-});
-
-const Board = mongoose.model('Board', {
-    title: { type: String, required: true },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    column: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Column' }],
-    projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true }
-});
-
-const Column = mongoose.model('Column', {
-    title: { type: String, required: true },
-    boardId: { type: mongoose.Schema.Types.ObjectId, ref: 'Board', required: true }, // Add boardId
-    tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }],
-});
-
-const Task = mongoose.model('Task', {
-    title: String,
-    description: String,
-    columnId: { type: mongoose.Schema.Types.ObjectId, ref: 'Column' },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Add createdBy field
-    assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],  //  New field for assigned user
-    attachments: [{ filename: String, originalname: String }],
-    startDate: { type: Date },
-    endDate: { type: Date },
-});
-
-const User = mongoose.model('User', {
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    firstname: { type: String, required: true }, // Add nickname field
-    secondname: { type: String, required: true }, // Add nickname field
-    thirdname: { type: String, required: true }, // Add nickname field
-    mail: { type: String, required: true },
-    role: { type: String, enum: ['admin', 'manager', 'employee'], default: 'employee' } // Add role field
 });
 
 app.post('/api/projects/:projectId/members', async (req, res) => {
@@ -332,7 +234,7 @@ app.get('/api/uploads/:filename', (req, res) => {
 
 app.put('/api/:projectId/:userId', async (req, res) => {
     const updateProject = await Project.findByIdAndUpdate(req.params.projectId, { $pull: { members: { _id: req.params.userId } } }, { new: true })
-        // .populate("title")
+    // .populate("title")
     console.log(updateProject);
     io.to('/project').emit('updateProject', updateProject)
 })

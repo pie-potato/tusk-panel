@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const fetchColumns = async () => {
   try {
-    const response = await axios.get(`http://${window.location.hostname}:8080/api/columns`);
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/columns`);
     return response
   } catch (error) {
     console.error('Error fetching columns:', error);
@@ -12,7 +12,7 @@ export const fetchColumns = async () => {
 export const addColumn = async (newColumnName, setNewColumnName, boardId, user, projectId) => {
   try {
     const token = user ? JSON.parse(user).token : null;
-    await axios.post(`http://${window.location.hostname}:8080/api/${projectId}/columns`, { title: newColumnName, boardId: boardId }, {
+    await axios.post(`http://${window.location.hostname}:5000/api/${projectId}/columns`, { title: newColumnName, boardId: boardId }, {
       headers: {
         Authorization: `Bearer ${token}`,
       }
@@ -30,7 +30,7 @@ export const addTask = async (newTask, setNewTask, user, projectId) => {
   }
   try {
     const token = user ? JSON.parse(user).token : null;
-    await axios.post(`http://${window.location.hostname}:8080/api/${projectId}/tasks`, newTask, {
+    await axios.post(`http://${window.location.hostname}:5000/api/${projectId}/tasks`, newTask, {
       headers: {
         Authorization: `Bearer ${token}`,
       }
@@ -44,7 +44,7 @@ export const addTask = async (newTask, setNewTask, user, projectId) => {
 
 export const deleteColumn = async (id, projectId) => {
   try {
-    await axios.delete(`http://${window.location.hostname}:8080/api/${projectId}/columns/${id}/`);
+    await axios.delete(`http://${window.location.hostname}:5000/api/${projectId}/columns/${id}/`);
   } catch (error) {
     console.error('Error deleting column:', error);
   }
@@ -53,7 +53,7 @@ export const deleteColumn = async (id, projectId) => {
 export const deleteBoard = async (boardId, user, projectId) => {
   try {
     const token = user ? JSON.parse(user).token : null;
-    await axios.delete(`http://${window.location.hostname}:8080/api/project/${projectId}/boards/${boardId}`, {
+    await axios.delete(`http://${window.location.hostname}:5000/api/project/${projectId}/boards/${boardId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       }
@@ -65,7 +65,7 @@ export const deleteBoard = async (boardId, user, projectId) => {
 
 export const deleteTask = async (id, projectId) => {
   try {
-    await axios.delete(`http://${window.location.hostname}:8080/api/${projectId}/tasks/${id}`);
+    await axios.delete(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${id}`);
     fetchColumns(); // Refresh columns after deleting task
   } catch (error) {
     console.error('Error deleting task:', error);
@@ -74,7 +74,7 @@ export const deleteTask = async (id, projectId) => {
 
 export const handleColumnEditSave = async (columnId, columnName, projectId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:8080/api/${projectId}/columns/${columnId}`, { title: columnName });
+    await axios.put(`http://${window.location.hostname}:5000/api/${projectId}/columns/${columnId}`, { title: columnName });
   } catch (error) {
     console.error('Error updating column:', error);
   }
@@ -82,7 +82,7 @@ export const handleColumnEditSave = async (columnId, columnName, projectId) => {
 
 export const editTaskTitle = async (taskId, taskTitle, projectId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:8080/api/${projectId}/tasks/${taskId}`, { title: taskTitle });
+    await axios.put(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${taskId}`, { title: taskTitle });
   } catch (error) {
     console.error('Error updating task:', error);
   }
@@ -90,7 +90,7 @@ export const editTaskTitle = async (taskId, taskTitle, projectId) => {
 
 export const editTaskDescription = async (taskId, taskDescription, projectId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:8080/api/${projectId}/tasks/${taskId}/description`, { description: taskDescription });
+    await axios.put(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${taskId}/description`, { description: taskDescription });
   } catch (error) {
     console.error('Error updating task:', error);
   }
@@ -98,7 +98,7 @@ export const editTaskDescription = async (taskId, taskDescription, projectId) =>
 
 export const fetchUsers = async (setUsers) => {
   try {
-    const response = await axios.get(`http://${window.location.hostname}:8080/api/users`); // New route to get all users
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/users`); // New route to get all users
     setUsers(response.data);
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -107,7 +107,7 @@ export const fetchUsers = async (setUsers) => {
 
 export const assignTask = async (taskId, userId, projectId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:8080/api/${projectId}/tasks/${taskId}/assign`, { userId });
+    await axios.put(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${taskId}/assign`, { userId });
   } catch (error) {
     console.error('Error assigning task:', error);
   }
@@ -115,7 +115,7 @@ export const assignTask = async (taskId, userId, projectId) => {
 
 export const unassignTask = async (taskId, unAssignedUserId, projectId) => {
   try {
-    await axios.delete(`http://${window.location.hostname}:8080/api/${projectId}/tasks/${taskId}/assign/${unAssignedUserId}`, { userId: unAssignedUserId }); // Send null userId to unassign
+    await axios.delete(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${taskId}/assign/${unAssignedUserId}`, { userId: unAssignedUserId }); // Send null userId to unassign
   } catch (error) {
     console.error('Error unassigning task:', error);
   }
@@ -124,7 +124,7 @@ export const unassignTask = async (taskId, unAssignedUserId, projectId) => {
 export const handleCreateUser = async (newUser, setNewUser) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    await axios.post(`http://${window.location.hostname}:8080/api/admin/users`, newUser, {
+    await axios.post(`http://${window.location.hostname}:5000/api/admin/users`, newUser, {
       headers: {
         Authorization: `Bearer ${token}`, // Send the token in the Authorization header
       }
@@ -138,7 +138,7 @@ export const handleCreateUser = async (newUser, setNewUser) => {
 
 export const handleUpdateRole = async (userId, newRole) => {
   try {
-    await axios.put(`http://${window.location.hostname}:8080/api/admin/users/${userId}/role`, { role: newRole });
+    await axios.put(`http://${window.location.hostname}:5000/api/admin/users/${userId}/role`, { role: newRole });
   } catch (error) {
     console.log(error);
 
@@ -148,7 +148,7 @@ export const handleUpdateRole = async (userId, newRole) => {
 export const handleEditNickname = async (user, name, setUser, setIsEditing) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    await axios.put(`http://${window.location.hostname}:8080/api/profile`, name, {
+    await axios.put(`http://${window.location.hostname}:5000/api/profile`, name, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -163,7 +163,7 @@ export const handleEditNickname = async (user, name, setUser, setIsEditing) => {
 export const fetchUserData = async (name, setUser, setNewNickname) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    const response = await axios.get(`http://${window.location.hostname}:8080/api/profile`, { // New route for profile data
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/profile`, { // New route for profile data
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -177,7 +177,7 @@ export const fetchUserData = async (name, setUser, setNewNickname) => {
 
 export const getUsers = async (setUsers) => {
   try {
-    const response = await axios.get(`http://${window.location.hostname}:8080/api/admin/users`);
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/admin/users`);
     setUsers(response.data)
   } catch (error) {
     console.log(error)
@@ -193,7 +193,7 @@ export const handleUpdateUser = async (editingUser, editPassword, setEditingUser
       updateData.password = editPassword;
     }
 
-    await axios.put(`http://${window.location.hostname}:8080/api/admin/users/${editingUser._id}`, updateData);
+    await axios.put(`http://${window.location.hostname}:5000/api/admin/users/${editingUser._id}`, updateData);
     setEditingUser(null);
     setEditPassword('');
   } catch (error) {
@@ -203,7 +203,7 @@ export const handleUpdateUser = async (editingUser, editPassword, setEditingUser
 
 export const getBoard = async () => {
   try {
-    const response = await axios.get(`http://${window.location.hostname}:8080/api/boards`);
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/boards`);
     return response
   } catch (error) {
     console.log(error)
@@ -212,7 +212,7 @@ export const getBoard = async () => {
 
 export const getBoardByProjectId = async (projectId) => {
   try {
-    const response = await axios.get(`http://${window.location.hostname}:8080/api/projects/${projectId}/boards`);
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/projects/${projectId}/boards`);
     return response
   } catch (error) {
     console.log(error)
@@ -222,7 +222,7 @@ export const getBoardByProjectId = async (projectId) => {
 export const addBoard = async (newBoard, setNewBoard, user, projectId) => {
   try {
     const token = user ? JSON.parse(user).token : null;
-    await axios.post(`http://${window.location.hostname}:8080/api/boards`, { title: newBoard, projectId: projectId }, {
+    await axios.post(`http://${window.location.hostname}:5000/api/boards`, { title: newBoard, projectId: projectId }, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -235,7 +235,7 @@ export const addBoard = async (newBoard, setNewBoard, user, projectId) => {
 
 export const getColumnByIdBoard = async (boardId) => {
   try {
-    const response = await axios.get(`http://${window.location.hostname}:8080/api/boards/${boardId}/columns`);
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/boards/${boardId}/columns`);
     return response
   } catch (error) {
     console.log(error)
@@ -245,7 +245,7 @@ export const getColumnByIdBoard = async (boardId) => {
 export const updateBoardNameById = async (updateColumnName, boardId) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    await axios.put(`http://${window.location.hostname}:8080/api/boards/${boardId}`, { title: updateColumnName }, {
+    await axios.put(`http://${window.location.hostname}:5000/api/boards/${boardId}`, { title: updateColumnName }, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -265,7 +265,7 @@ export const handleFileUpload = async (event, taskId, projectId) => {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
     const formData = new FormData();
     formData.append('file', file);
-    await axios.post(`http://${window.location.hostname}:8080/api/${projectId}/tasks/${taskId}/upload`, formData, {
+    await axios.post(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${taskId}/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`
@@ -279,7 +279,7 @@ export const handleFileUpload = async (event, taskId, projectId) => {
 export const handleDeleteAttachment = async (filename, task, projectId) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    await axios.delete(`http://${window.location.hostname}:8080/api/${projectId}/tasks/${task._id}/attachments/${filename}`, {
+    await axios.delete(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${task._id}/attachments/${filename}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -292,7 +292,7 @@ export const handleDeleteAttachment = async (filename, task, projectId) => {
 export const fetchProjects = async (setProjects) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    const response = await axios.get(`http://${window.location.hostname}:8080/api/projects`, {
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/projects`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -308,7 +308,7 @@ export const deleteProject = async (projectId) => {
     console.log(projectId);
 
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    await axios.delete(`http://${window.location.hostname}:8080/api/project/${projectId}`, {
+    await axios.delete(`http://${window.location.hostname}:5000/api/project/${projectId}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -320,7 +320,7 @@ export const deleteProject = async (projectId) => {
 
 export const createProject = async (title, members = []) => {
   try {
-    await axios.post(`http://${window.location.hostname}:8080/api/projects`, { title: title, members: members })
+    await axios.post(`http://${window.location.hostname}:5000/api/projects`, { title: title, members: members })
   } catch (error) {
     console.log(error)
   }
@@ -328,7 +328,7 @@ export const createProject = async (title, members = []) => {
 
 export const addTuskDate = async (projectId, taskId, startDate, endDate) => {
   try {
-    await axios.put(`http://${window.location.hostname}:8080/api/${projectId}/tasks/${taskId}/date`, { startDate: startDate, endDate: endDate })
+    await axios.put(`http://${window.location.hostname}:5000/api/${projectId}/tasks/${taskId}/date`, { startDate: startDate, endDate: endDate })
   } catch (error) {
     console.log(error)
   }
@@ -336,7 +336,7 @@ export const addTuskDate = async (projectId, taskId, startDate, endDate) => {
 
 export const deleteMemberFromProject = async (projectId, userId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:8080/api/${projectId}/${userId}`)
+    await axios.put(`http://${window.location.hostname}:5000/api/${projectId}/${userId}`)
   } catch (error) {
     console.log(error)
   }

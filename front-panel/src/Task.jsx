@@ -147,7 +147,7 @@ export default function Task({ task }) {
                         <div>
                             {task.attachments && task.attachments.map((attachment) => (
                                 <div key={attachment.filename}>
-                                    <a href={`http://${window.location.hostname}:8080/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
+                                    <a href={`http://${window.location.hostname}:5000/api/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
                                         {attachment.originalname}
                                     </a>
                                     <button className="delete_task" onClick={() => handleDeleteAttachment(attachment.filename, task, projectId)}>Удалить</button>
