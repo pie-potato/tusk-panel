@@ -1,4 +1,4 @@
-const attachmentsFileEvents = require("./eventsGroups/attachmentsFileevents");
+const attachmentsFileEvents = require("./eventsGroups/attachmentsFileEvents");
 const boardEvents = require("./eventsGroups/boardEvents");
 const columnEvents = require("./eventsGroups/columnEvents");
 const projectEvents = require("./eventsGroups/projectevents");

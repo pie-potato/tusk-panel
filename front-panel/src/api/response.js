@@ -53,7 +53,7 @@ export const deleteColumn = async (id, projectId) => {
 export const deleteBoard = async (boardId, user, projectId) => {
   try {
     const token = user ? JSON.parse(user).token : null;
-    await axios.delete(`http://${window.location.hostname}:5000/api/project/${projectId}/boards/${boardId}`, {
+    await axios.delete(`http://${window.location.hostname}:5000/api/board/${boardId}/${projectId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       }
@@ -212,7 +212,7 @@ export const getBoard = async () => {
 
 export const getBoardByProjectId = async (projectId) => {
   try {
-    const response = await axios.get(`http://${window.location.hostname}:5000/api/projects/${projectId}/boards`);
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/board/${projectId}`);
     return response
   } catch (error) {
     console.log(error)
@@ -222,7 +222,7 @@ export const getBoardByProjectId = async (projectId) => {
 export const addBoard = async (newBoard, setNewBoard, user, projectId) => {
   try {
     const token = user ? JSON.parse(user).token : null;
-    await axios.post(`http://${window.location.hostname}:5000/api/boards`, { title: newBoard, projectId: projectId }, {
+    await axios.post(`http://${window.location.hostname}:5000/api/board`, { title: newBoard, projectId: projectId }, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -292,7 +292,7 @@ export const handleDeleteAttachment = async (filename, task, projectId) => {
 export const fetchProjects = async (setProjects) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    const response = await axios.get(`http://${window.location.hostname}:5000/api/projects`, {
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/project`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -320,7 +320,7 @@ export const deleteProject = async (projectId) => {
 
 export const createProject = async (title, members = []) => {
   try {
-    await axios.post(`http://${window.location.hostname}:5000/api/projects`, { title: title, members: members })
+    await axios.post(`http://${window.location.hostname}:5000/api/project`, { title: title, members: members })
   } catch (error) {
     console.log(error)
   }

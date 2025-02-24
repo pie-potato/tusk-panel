@@ -1,6 +1,10 @@
+const Project = require('../mongooseModels/Project.js');
+const User = require('../mongooseModels/User.js');
+const Column = require('../mongooseModels/Column.js');
+const Board = require('../mongooseModels/Board.js');
 const jwt = require('jsonwebtoken');
-const User = require('./mongooseModels/User.js');
 const projectservice = require('../services/projectservice.js');
+const { emitEventToRoom } = require('../socket/socketService.js');
 
 class projectController {
     async getAllProject(req, res) {
@@ -21,7 +25,7 @@ class projectController {
             const { title, members } = req.body;
             const newProject = new Project({ title, members });
             const savedProject = await newProject.save();
-            io.to('/project').emit('addProject', savedProject)
+            emitEventToRoom('/project', 'addProject', savedProject)
             res.json(savedProject);
         } catch (error) {
             res.status(500).json({ error: 'Ошибка при создании проекта.' });
@@ -53,7 +57,7 @@ class projectController {
                 })
                 await Board.deleteMany({ projectId: projectId })
                 const deleteProjects = await Project.findOneAndDelete({ _id: projectId })
-                io.to('/project').emit("deleteProject", deleteProjects)
+                emitEventToRoom('/project', "deleteProject", deleteProjects)
                 return res.json(deleteProjects);
             }
             return res.status(403).json({ message: 'Нет прав на удаление' })

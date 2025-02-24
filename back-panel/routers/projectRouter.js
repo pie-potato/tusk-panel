@@ -3,8 +3,8 @@ const projectControllers = require('../controllers/projectControllers');
 
 const projectRouter = new Router()
 
-projectRouter.get('/api/projects', projectControllers.getAllProject);
+projectRouter.get('', projectControllers.getAllProject);
+projectRouter.post('', projectControllers.createProject);
+projectRouter.delete('/:projectId', projectControllers.deleteProject);
 
-projectRouter.post('/api/projects', projectControllers.createProject);
-
-projectRouter.delete('/api/project/:projectId', projectControllers.deleteProject);
+module.exports = projectRouter
