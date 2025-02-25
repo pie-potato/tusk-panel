@@ -3,5 +3,15 @@ const userController = require('../controllers/userController.js')
 
 const userRouter = new Router()
 
-userRouter.post('/api/projects/:projectId/members', userController.addMemberToProject)
-userRouter.delete('/api/projects/:projectId/members/:userId', userController.deleteMemberToProject)
+userRouter.get('', userController.getUserData)
+userRouter.get('/profile', userController.getUserProfile)
+userRouter.get('/admin', userController.getAllUserData)
+
+userRouter.post('/login', userController.loginUser)
+userRouter.post('/admin', userController.adminUser)
+
+userRouter.put('/profile', userController.changeUserData)
+userRouter.put('/admin/role/:userId', userController.changeUserRole)
+userRouter.put('/admin/:userId', userController.updateUserData)
+
+module.exports = userRouter

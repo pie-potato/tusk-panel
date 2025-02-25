@@ -1,22 +1,23 @@
-const { Router } = require("express")
+const { Router } = require("express");
+const taskController = require("../controllers/taskController");
+const { upload } = require("../fileStorage");
+
 
 const taskRouter = new Router()
 
-taskRouter.post('/api/:projectId/tasks', async (req, res) => {
+taskRouter.get('/uploads/:filename', taskController.getTaskFile)
 
-});
-taskRouter.put('/api/:projectId/tasks/:taskId/assign', async (req, res) => {
+taskRouter.post('/:projectId', taskController.createTask);
 
-})
-taskRouter.put('/api/:projectId/tasks/:id', async (req, res) => {
+taskRouter.post('/:taskId/upload/:projectId', upload.single('file'), taskController.addTaskFile)
 
-})
-taskRouter.put('/api/:projectId/tasks/:id/date', async (req, res) => {
+taskRouter.put('/:taskId/assign/:projectId', taskController.changeTaskAssign)
+taskRouter.put('/:id/:projectId', taskController.changeTask)
+taskRouter.put('/:id/date/:projectId', taskController.changeTaskDate);
+taskRouter.put('/description/:id/:projectId', taskController.changeTaskDescription);
+taskRouter.delete('/:taskId/assign/:userId/:projectId', taskController.deleteTaskAssign)
+taskRouter.delete('/:taskId/:projectId', taskController.deleteTask)
 
-});
-taskRouter.put('/api/:projectId/tasks/:id/description', async (req, res) => {
+taskRouter.delete('/:taskId/attachments/:filename/:projectId', taskController.deleteTaskFile)
 
-});
-taskRouter.delete('/api/:projectId/tasks/:taskId/assign/:userId', async (req, res) => {
-
-})
+module.exports = taskRouter

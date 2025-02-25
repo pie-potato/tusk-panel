@@ -1,6 +1,9 @@
 const Board = require("../mongooseModels/Board");
 const Column = require("../mongooseModels/Column");
+const Task = require("../mongooseModels/Task");
 const User = require("../mongooseModels/User");
+const jwt = require('jsonwebtoken');
+const { emitEventToRoom } = require("../socket/socketService");
 
 class columnController {
     async getAllColumns(req, res) {
@@ -47,7 +50,7 @@ class columnController {
 
     async changeColumn(req, res) {
         try {
-            const updatedColumn = await Column.findByIdAndUpdate(req.params.id, { title: req.body.title }, { new: true });
+            const updatedColumn = await Column.findByIdAndUpdate(req.params.columnId, { title: req.body.title }, { new: true });
             console.log(updatedColumn);
 
             const projectId = req.params.projectId
@@ -61,23 +64,23 @@ class columnController {
     async deleteColumn(req, res) {
         try {
 
-            const column = await Column.findById(req.params.id);
+            const column = await Column.findById(req.params.columnId);
             const projectId = req.params.projectId
             if (!column) {
                 return res.status(404).json({ message: 'Колонка не найдена.' });
             }
-            const tasks = await Task.find({ columnId: req.params.id })
+            const tasks = await Task.find({ columnId: req.params.columnId })
             tasks.forEach(e => {
                 e.attachments.forEach(e => {
                     const filePath = path.join(__dirname, 'uploads', e.filename)
                     fs.unlinkSync(filePath)
                 })
             })
-            await Task.deleteMany({ columnId: req.params.id }); // Удаляем все задачи в колонке
+            await Task.deleteMany({ columnId: req.params.columnId }); // Удаляем все задачи в колонке
             // console.log(tasks);
 
-            await Column.findByIdAndDelete(req.params.id);
-            emitEventToRoom(projectId, 'deleteColumn', req.params.id);
+            await Column.findByIdAndDelete(req.params.columnId);
+            emitEventToRoom(projectId, 'deleteColumn', req.params.columnId);
             res.json({ message: 'Колонка успешно удалена.' });
         } catch (error) {
             res.status(500).json({ error: 'Error deleting column' });

@@ -65,6 +65,13 @@ class projectController {
             res.status(500).json({ error: 'Ошибка при получении проектов.' });
         }
     }
+
+    async deleteUserFromProject(req, res) {
+        const updateProject = await Project.findByIdAndUpdate(req.params.projectId, { $pull: { members: { _id: req.params.userId } } }, { new: true })
+        // .populate("title")
+        console.log(updateProject);
+        emitEventToRoom('/project', 'updateProject', updateProject)
+    }
 }
 
 module.exports = new projectController()
