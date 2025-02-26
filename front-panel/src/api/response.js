@@ -319,7 +319,12 @@ export const deleteProject = async (projectId) => {
 
 export const createProject = async (title, members = []) => {
   try {
-    await axios.post(`http://${window.location.hostname}:5000/api/project`, { title: title, members: members })
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    await axios.post(`http://${window.location.hostname}:5000/api/project`, { title: title, members: members }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
   } catch (error) {
     console.log(error)
   }

@@ -3,16 +3,13 @@ const User = require('../mongooseModels/User.js');
 const Column = require('../mongooseModels/Column.js');
 const Board = require('../mongooseModels/Board.js');
 const jwt = require('jsonwebtoken');
-const projectservice = require('../services/projectservice.js');
+const projectService = require('../services/projectService.js');
 const { emitEventToRoom } = require('../socket/socketService.js');
 
 class projectController {
     async getAllProject(req, res) {
         try {
-            const token = req.header('Authorization')?.replace('Bearer ', '');
-            const decodedUserId = jwt.verify(token, 'PiePotato').userId;
-            const user = await User.findById(decodedUserId)
-            const projects = await projectservice.getAllProject(user)
+            const projects = await projectService.getAllProject(req.userId)
             res.json(projects);
         } catch (error) {
             res.status(500).json({ error: 'Ошибка при получении проектов.' });
@@ -21,10 +18,8 @@ class projectController {
 
     async createProject(req, res) {
         try {
-            // ... (authentication/authorization - only admins can create projects)
             const { title, members } = req.body;
-            const newProject = new Project({ title, members });
-            const savedProject = await newProject.save();
+            const savedProject = await projectService.createProject(req.userId, title, members);
             emitEventToRoom('/project', 'addProject', savedProject)
             res.json(savedProject);
         } catch (error) {

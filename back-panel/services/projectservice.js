@@ -1,7 +1,9 @@
 const Project = require('../mongooseModels/Project.js');
+const User = require('../mongooseModels/User.js');
 
 class projectService {
-    async getAllProject(user) {
+    async getAllProject(userId) {
+        const user = await User.findById(userId)
         if (user.role === 'admin' || user.role === 'manager') {
             const projects = await Project.find()
             return projects;
@@ -10,13 +12,15 @@ class projectService {
         return projects
     }
 
-    async createProject(req, res) {
-        // ... (authentication/authorization - only admins can create projects)
-        const { title, members } = req.body;
-        const newProject = new Project({ title, members });
-        const savedProject = await newProject.save();
-        io.to('/project').emit('addProject', savedProject)
-        res.json(savedProject);
+    async createProject(userId, title, members) {
+        const user = await User.findById(userId)
+        if (user.role === 'admin') {
+            const newProject = new Project({ title, members });
+            const saveProject = await newProject.save()
+            return saveProject
+        }
+        throw new Error(401, "Недостаточно прав");
+        return;
     }
 
     async deleteProject(req, res) {

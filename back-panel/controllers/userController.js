@@ -38,24 +38,16 @@ class userController {
         try {
             const { username, password } = req.body;
             const user = await User.findOne({ username });
-
-
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
-
-
             const isPasswordValid = await bcrypt.compare(password, user.password);
             if (isPasswordValid) {
-
-
                 // Создаем JWT
                 const token = jwt.sign({ userId: user._id, isAdmin: user.role === 'admin' }, 'PiePotato');
-                const userData = await User.findOne({ username }, '-password')
-
-                res.json({ ...userData.toObject(), token }); // Возвращаем isAdmin
-
-
+                const userData = await User.findOne({ username }, '-_id -password -__v')
+                const response = { ...userData.toObject(), token }
+                res.json(response); // Возвращаем isAdmin
             } else {
                 res.status(401).json({ message: 'Invalid password' });
             }
@@ -67,18 +59,14 @@ class userController {
     async adminUser(req, res) {
         try {
             const token = req.header('Authorization')?.replace('Bearer ', '');
-
             const decoded = jwt.verify(token, 'PiePotato');
             const currentUser = await User.findById(decoded.userId);
-
             if (!token) {
                 return res.status(401).json({ message: 'Authentication required' });
             }
-
             if (currentUser.role !== 'admin') { // Check role instead of isAdmin
                 return res.status(403).json({ message: 'Admin privileges required' });
             }
-
             try {
                 const decoded = jwt.verify(token, 'PiePotato');
                 if (!decoded.isAdmin) {
@@ -87,16 +75,11 @@ class userController {
             } catch (err) {
                 return res.status(401).json({ message: 'Invalid token' });
             }
-
             const password = req.body.password;
-
             const hashedPassword = await bcrypt.hash(password, 10);
-
             const newUser = new User({ ...req.body, password: hashedPassword });
-
             await newUser.save();
             res.json({ message: 'User created successfully' });
-
         } catch (error) {
             if (error.code === 11000) { // Обработка ошибки дубликата имени пользователя
                 return res.status(400).json({ error: 'Username already exists' });
