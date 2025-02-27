@@ -3,104 +3,49 @@ const Column = require("../mongooseModels/Column");
 const Project = require("../mongooseModels/Project");
 const Task = require("../mongooseModels/Task");
 const User = require("../mongooseModels/User");
+const boardService = require("../services/boardService");
 const { emitEventToRoom } = require("../socket/socketService");
 const jwt = require('jsonwebtoken');
+
 class boardController {
-    async getAllBoards(req, res) {
+    async getAllBoards(req, res, next) {
         try {
-            const boards = await Board.find({ projectId: req.params.projectId }).populate('createdBy', 'username');
+            const boards = await boardService.getAllBoards(req.params.projectId)
             res.json(boards);
         } catch (error) {
-            // Обработка ошибок
-            res.status(500).json({ error: "Ошибка при получении досок." })
+            next(error)
         }
     }
 
-    async createBoard(req, res) {
+    async createBoard(req, res, next) {
         try {
-            const token = req.header('Authorization')?.replace('Bearer ', '');
-            const decoded = jwt.verify(token, 'PiePotato');
-            const currentUser = await User.findById(decoded.userId);
-            if (currentUser.role !== 'admin' && currentUser.role !== 'manager') {
-                return res.status(403).json({ message: 'Нет прав для создания доски.' });
-            }
-            const { title, projectId } = req.body;
-            const project = await Project.findById(projectId);
-
-            if (!project) {
-                return res.status(403).json({ message: 'Нет доступа к этому проекту.' });
-            }
-            const newBoard = new Board({
-                title,
-                createdBy: currentUser._id,
-                projectId
-            });
-            const savedBoard = await newBoard.save();
-            console.log(savedBoard);
-
-            emitEventToRoom(projectId, "addBoard", savedBoard);
-
-            res.json(savedBoard);
+            const { projectId } = req.params
+            const { title } = req.body;
+            const newBoard = await boardService.createBoard(req.userId, projectId, title)
+            emitEventToRoom(projectId, "addBoard", newBoard);
+            res.json(newBoard);
         } catch (error) {
-            res.status(500).json({ error: 'Ошибка при создании доски.' });
+            next(error)
         }
     }
 
-    async changeBoard(req, res) {
+    async changeBoard(req, res, next) {
         try {
-            const token = req.header('Authorization')?.replace('Bearer ', '');
-            const decoded = jwt.verify(token, 'PiePotato');
-            const currentUser = await User.findById(decoded.userId);
-            const board = await Board.findById(req.params.boardId);
-
-            if (!board) {
-                return res.status(404).json({ message: 'Доска не найдена.' });
-            }
-
-            if (currentUser.role === 'admin' && currentUser.role !== 'manager' || currentUser.role !== 'admin' && currentUser.role === 'manager') { // Check if current user is admin or the creator of the board
-                return res.status(403).json({ message: 'Нет прав для редактирования этой доски.' });
-            }
-
-            board.title = req.body.title;
-            const updatedBoard = await board.save();
-
+            const updatedBoard = await boardService.changeBoard(req.userId, req.params.boardId, req.body.title)
+            emitEventToRoom(req.params.projectId, "addBoard", newBoard);
             res.json(updatedBoard);
-
         } catch (error) {
-            res.status(500).json({ error: 'Ошибка при обновлении доски.' });
+            next(error)
         }
     }
 
-    async deleteBoard(req, res) {
+    async deleteBoard(req, res, next) {
         try {
-            // First, delete all associated tasks:
-            const token = req.header('Authorization')?.replace('Bearer ', '');
-            const decoded = jwt.verify(token, 'PiePotato');
-            const currentUser = await User.findById(decoded.userId);
-            if (currentUser.role !== 'admin' && currentUser.role !== 'manager') { // Check if current user is admin or the creator of the board
-                return res.status(403).json({ message: 'Нет прав для редактирования этой доски.' });
-            }
-
-            const fetchAllColumns = await Column.find({ boardId: req.params.boardId })
-            fetchAllColumns.forEach(async (e) => {
-                const allColumnTasks = await Task.find({ columnId: e._id })
-                allColumnTasks.forEach(e => {
-                    e.attachments.forEach(e => {
-                        const filePath = path.join(__dirname, 'uploads', e.filename);
-                        fs.unlinkSync(filePath);
-                    })
-                })
-            })
-            fetchAllColumns.forEach(async (e) => await Task.deleteMany({ columnId: e._id }))
-
-            await Column.deleteMany({ boardId: req.params.boardId });
-            // Then, delete the column:
-            const deletedBoard = await Board.findByIdAndDelete(req.params.boardId);
-
+            const deletedBoard = await boardService.deleteBoard(req.userId, req.params.boardId);
             emitEventToRoom(req.params.projectId, "deleteBoard", deletedBoard);
             res.json({ message: 'Column and associated tasks deleted' });
         } catch (error) {
-            res.status(500).json({ error: 'Error deleting column' });
+            next(error)
         }
     }
 }

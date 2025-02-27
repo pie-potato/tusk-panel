@@ -12,7 +12,7 @@ export const fetchColumns = async () => {
 export const addColumn = async (newColumnName, setNewColumnName, boardId, user, projectId) => {
   try {
     const token = user ? JSON.parse(user).token : null;
-    await axios.post(`http://${window.location.hostname}:5000/api/column/${projectId}`, { title: newColumnName, boardId: boardId }, {
+    await axios.post(`http://${window.location.hostname}:5000/api/column/${boardId}/${projectId}`, { title: newColumnName }, {
       headers: {
         Authorization: `Bearer ${token}`,
       }
@@ -44,7 +44,12 @@ export const addTask = async (newTask, setNewTask, user, projectId) => {
 
 export const deleteColumn = async (id, projectId) => {
   try {
-    await axios.delete(`http://${window.location.hostname}:5000/api/column/${id}/${projectId}`);
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    await axios.delete(`http://${window.location.hostname}:5000/api/column/${id}/${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
   } catch (error) {
     console.error('Error deleting column:', error);
   }
@@ -73,7 +78,12 @@ export const deleteTask = async (id, projectId) => {
 
 export const handleColumnEditSave = async (columnId, columnName, projectId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:5000/api/${projectId}/columns/${columnId}`, { title: columnName });
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    await axios.put(`http://${window.location.hostname}:5000/api/column/${columnId}/${projectId}`, { title: columnName }, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Send the token in the Authorization header
+      }
+    });
   } catch (error) {
     console.error('Error updating column:', error);
   }
@@ -221,7 +231,7 @@ export const getBoardByProjectId = async (projectId) => {
 export const addBoard = async (newBoard, setNewBoard, user, projectId) => {
   try {
     const token = user ? JSON.parse(user).token : null;
-    await axios.post(`http://${window.location.hostname}:5000/api/board`, { title: newBoard, projectId: projectId }, {
+    await axios.post(`http://${window.location.hostname}:5000/api/board/${projectId}`, { title: newBoard }, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -340,7 +350,12 @@ export const addTuskDate = async (projectId, taskId, startDate, endDate) => {
 
 export const deleteMemberFromProject = async (projectId, userId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:5000/api/project/${projectId}/${userId}`)
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    await axios.put(`http://${window.location.hostname}:5000/api/project/${projectId}/${userId}`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
   } catch (error) {
     console.log(error)
   }

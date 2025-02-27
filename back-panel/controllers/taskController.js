@@ -5,20 +5,22 @@ const User = require("../mongooseModels/User");
 const { emitEventToRoom } = require("../socket/socketService");
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
+const ApiError = require("../exeptions/apiError");
 
 
 class taskController {
 
-    async getTaskFile(req, res) {
-        res.sendFile(filePath(req.params.filename), (err) => {
-            if (err) {
-                console.error("Ошибка при отправке файла:", err);
-                res.status(404).json({ message: 'Файл не найден.' });
-            }
-        });
+    async getTaskFile(req, res, next) {
+        try {
+            res.sendFile(filePath(req.params.filename), (err) => {
+                next(ApiError.NotFound())
+            });
+        } catch (error) {
+            next(error)
+        }
     }
 
-    async createTask(req, res) {
+    async createTask(req, res, next) {
         try {
             const token = req.header('Authorization')?.replace('Bearer ', '');
             const decoded = jwt.verify(token, 'PiePotato');
@@ -38,7 +40,7 @@ class taskController {
         }
     }
 
-    async addTaskFile(req, res) {
+    async addTaskFile(req, res, next) {
         try {
             // ... (authentication/authorization logic, similar to other protected routes)
             if (!req.file) {
@@ -75,7 +77,7 @@ class taskController {
         }
     }
 
-    async changeTaskAssign(req, res) {
+    async changeTaskAssign(req, res, next) {
         try {
             const projectId = req.params.projectId
             const { userId } = req.body;
@@ -109,7 +111,7 @@ class taskController {
         }
     }
 
-    async changeTask(req, res) {
+    async changeTask(req, res, next) {
         try {
             const projectId = req.params.projectId
             const updatedTask = await Task.findByIdAndUpdate(req.params.id, { title: req.body.title }, { new: true })
@@ -127,7 +129,7 @@ class taskController {
         }
     }
 
-    async changeTaskDate(req, res) {
+    async changeTaskDate(req, res, next) {
         try {
             const projectId = req.params.projectId
             const updatedTask = await Task.findByIdAndUpdate(req.params.id, { startDate: req.body.startDate, endDate: req.body.endDate }, { new: true })
@@ -147,7 +149,7 @@ class taskController {
         }
     }
 
-    async changeTaskDescription(req, res) {
+    async changeTaskDescription(req, res, next) {
         try {
             const projectId = req.params.projectId
             const updatedTask = await Task.findByIdAndUpdate(req.params.id, { description: req.body.description }, { new: true })
@@ -166,7 +168,7 @@ class taskController {
             res.status(500).json({ error: 'Error updating task' });
         }
     }
-    async deleteTaskAssign(req, res) {
+    async deleteTaskAssign(req, res, next) {
         try {
             const projectId = req.params.projectId
             const taskId = req.params.taskId;
@@ -187,7 +189,7 @@ class taskController {
             res.status(500).json({ error: 'Ошибка при удалении назначения.' });
         }
     }
-    async deleteTask(req, res) {
+    async deleteTask(req, res, next) {
         try {
             const projectId = req.params.projectId
             const taskId = req.params.taskId;
@@ -199,7 +201,7 @@ class taskController {
             res.status(500).json({ error: 'Ошибка при удалении назначения.' });
         }
     }
-    async deleteTaskFile(req, res) {
+    async deleteTaskFile(req, res, next) {
         try {
             // ... (authentication/authorization logic)
 
