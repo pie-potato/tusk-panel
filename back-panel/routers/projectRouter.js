@@ -1,10 +1,10 @@
 const { Router } = require('express');
 const projectControllers = require('../controllers/projectControllers');
-const verifyUserAccess = require('../middleware/verificationUserAccess.js')
+const verifyUserAccess = require('../middleware/verifyUserAccess.js')
 
 const projectRouter = new Router()
 
-projectRouter.get('', verifyUserAccess, projectControllers.getAllProject);
+projectRouter.get('', projectControllers.getAllProject);
 projectRouter.post('', verifyUserAccess, projectControllers.createProject);
 projectRouter.put('/:projectId/:userId', verifyUserAccess, projectControllers.deleteUserFromProject)
 projectRouter.delete('/:projectId', verifyUserAccess, projectControllers.deleteProject);

@@ -3,28 +3,27 @@ const Board = require('../mongooseModels/Board.js');
 const Column = require('../mongooseModels/Column.js');
 const Project = require('../mongooseModels/Project.js');
 const Task = require('../mongooseModels/Task.js');
-const User = require('../mongooseModels/User.js');
 const ApiError = require('../exeptions/apiError.js');
 const { filePath } = require('../fileStorage.js');
+const User = require('../mongooseModels/User.js');
 
 
 class projectService {
-    async getAllProject(userId, userRole) {
-        if (userRole === 'admin' || userRole === 'manager') {
-            const projects = await Project.find()
-            return projects;
+    async getAllProject(userId) {
+        const user = await User.findById(userId)
+        if (user.role === 'admin' || user.role === 'manager') {
+            return await Project.find()
         }
-        const projects = await Project.find({ 'members._id': userId }).populate('members')
-        return projects
+        return await Project.find({ 'members._id': userId }).populate('members')
     }
 
-    async createProject(userId, title, members) {
+    async createProject(title, members) {
         const newProject = new Project({ title, members });
         const saveProject = await newProject.save()
         return saveProject
     }
 
-    async deleteProject(userId, projectId) {
+    async deleteProject(projectId) {
         const fetchAllBoards = await Board.find({ projectId: projectId })
         fetchAllBoards.forEach(async (e) => {
             const column = await Column.find({ boardId: e._id })
@@ -44,13 +43,9 @@ class projectService {
         return deleteProjects
     }
 
-    async deleteUserFromProject(userId, projectId, deletedUserId) {
-        const user = await User.findById(userId)
-        if (user.role === "admin" || user.role === 'manager') {
-            const updatedProject = await Project.findByIdAndUpdate(projectId, { $pull: { members: { _id: deletedUserId } } }, { new: true })
-            return updatedProject
-        }
-        throw ApiError.AccessDenied()
+    async deleteUserFromProject(projectId, deletedUserId) {
+        const updatedProject = await Project.findByIdAndUpdate(projectId, { $pull: { members: { _id: deletedUserId } } }, { new: true })
+        return updatedProject
     }
 }
 

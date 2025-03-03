@@ -70,7 +70,12 @@ export const deleteBoard = async (boardId, user, projectId) => {
 
 export const deleteTask = async (id, projectId) => {
   try {
-    await axios.delete(`http://${window.location.hostname}:5000/api/task/${id}/${projectId}`);
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    await axios.delete(`http://${window.location.hostname}:5000/api/task/${id}/${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
   } catch (error) {
     console.error('Error deleting task:', error);
   }
@@ -91,7 +96,12 @@ export const handleColumnEditSave = async (columnId, columnName, projectId) => {
 
 export const editTaskTitle = async (taskId, taskTitle, projectId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:5000/api/task/${taskId}/${projectId}`, { title: taskTitle });
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    await axios.put(`http://${window.location.hostname}:5000/api/task/${taskId}/${projectId}`, { title: taskTitle }, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Send the token in the Authorization header
+      }
+    });
   } catch (error) {
     console.error('Error updating task:', error);
   }
@@ -99,7 +109,12 @@ export const editTaskTitle = async (taskId, taskTitle, projectId) => {
 
 export const editTaskDescription = async (taskId, taskDescription, projectId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:5000/api/task/description/${taskId}/${projectId}`, { description: taskDescription });
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    await axios.put(`http://${window.location.hostname}:5000/api/task/description/${taskId}/${projectId}`, { description: taskDescription }, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Send the token in the Authorization header
+      }
+    });
   } catch (error) {
     console.error('Error updating task:', error);
   }
@@ -116,7 +131,12 @@ export const fetchUsers = async (setUsers) => {
 
 export const assignTask = async (taskId, userId, projectId) => {
   try {
-    await axios.put(`http://${window.location.hostname}:5000/api/task/${taskId}/assign/${projectId}`, { userId });
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    await axios.put(`http://${window.location.hostname}:5000/api/task/${taskId}/assign/${projectId}`, { userId }, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Send the token in the Authorization header
+      }
+    });
   } catch (error) {
     console.error('Error assigning task:', error);
   }
@@ -124,7 +144,12 @@ export const assignTask = async (taskId, userId, projectId) => {
 
 export const unassignTask = async (taskId, unAssignedUserId, projectId) => {
   try {
-    await axios.delete(`http://${window.location.hostname}:5000/api/task/${taskId}/assign/${unAssignedUserId}/${projectId}`, { userId: unAssignedUserId }); // Send null userId to unassign
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    await axios.delete(`http://${window.location.hostname}:5000/api/task/${taskId}/assign/${unAssignedUserId}/${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
   } catch (error) {
     console.error('Error unassigning task:', error);
   }
@@ -210,18 +235,14 @@ export const handleUpdateUser = async (editingUser, editPassword, setEditingUser
   }
 };
 
-export const getBoard = async () => {
-  try {
-    const response = await axios.get(`http://${window.location.hostname}:5000/api/boards`);
-    return response
-  } catch (error) {
-    console.log(error)
-  }
-}
-
 export const getBoardByProjectId = async (projectId) => {
   try {
-    const response = await axios.get(`http://${window.location.hostname}:5000/api/board/${projectId}`);
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/board/${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response
   } catch (error) {
     console.log(error)
@@ -244,7 +265,12 @@ export const addBoard = async (newBoard, setNewBoard, user, projectId) => {
 
 export const getColumnByIdBoard = async (boardId) => {
   try {
-    const response = await axios.get(`http://${window.location.hostname}:5000/api/column/${boardId}`);
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    const response = await axios.get(`http://${window.location.hostname}:5000/api/column/${boardId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response
   } catch (error) {
     console.log(error)
@@ -274,6 +300,7 @@ export const handleFileUpload = async (event, taskId, projectId) => {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
     const formData = new FormData();
     formData.append('file', file);
+    console.log(event.target.files)
     await axios.post(`http://${window.location.hostname}:5000/api/task/${taskId}/upload/${projectId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',

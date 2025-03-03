@@ -21,9 +21,9 @@ const port = 5000;
 app.use(cors());
 app.use(express.json());
 app.use('/api/project', decodedUserId, projectRouter)
-app.use('/api/board', boardRouter)
-app.use('/api/column', columnRouter)
-app.use('/api/task', taskRouter)
+app.use('/api/board', decodedUserId, boardRouter)
+app.use('/api/column', decodedUserId, columnRouter)
+app.use('/api/task', decodedUserId, taskRouter)
 app.use('/api/user', userRouter)
 app.use(errorMiddleware)
 const server = http.createServer(app);

@@ -87,7 +87,7 @@ export default function Board({ boardId }) {
                     return {
                         ...e, tasks: e.tasks.map(e => {
                             if (e._id === updatedTask.taskId) {
-                                return { ...e, assignedTo: e.assignedTo.filter(e => e._id !== updatedTask.assignedTo._id) }
+                                return { ...e, assignedTo: e.assignedTo.filter(e => e._id !== updatedTask.assignedTo) }
                             }
                             return e
                         })
