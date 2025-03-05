@@ -102,19 +102,6 @@ class taskController {
     }
     async deleteTaskFile(req, res, next) {
         try {
-            // const task = await Task.findById(req.params.taskId);
-            // if (!task) {
-            //     return res.status(404).json({ message: 'Задача не найдена.' });
-            // }
-            // const column = await Column.findById(task.columnId)
-            // const filename = req.params.filename;
-            // const attachmentIndex = task.attachments.findIndex(attachment => attachment.filename === filename);
-            // if (attachmentIndex === -1) {
-            //     return res.status(404).json({ message: 'Вложение не найдено.' });
-            // }
-            // const removedAttachment = task.attachments.splice(attachmentIndex, 1)[0];
-            // await task.save();
-            // fs.unlinkSync(filePath(removedAttachment.filename))
             const task = await taskService.deleteTaskFile(req.params.taskId, req.params.filename)
             emitEventToRoom(req.params.projectId, "deleteAttachmentsFile", task);
             res.json({ message: 'Вложение успешно удалено.' });

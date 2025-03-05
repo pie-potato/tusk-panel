@@ -1,0 +1,32 @@
+.login {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.login_element {
+    display: flex;
+    justify-content: space-between;
+}
+
+.login_input {
+    border: 1px solid #1876C2;
+    border-radius: 20px;
+    padding: 10px;
+    background: none;
+    margin: 5px;
+}
+
+.submit_button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #1876C2;
+}
+
+.login_form {
+    text-align: center;
+}

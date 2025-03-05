@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { deleteBoard } from "./api/response";
+import { deleteBoard } from "./api/response/boardResponse.js";
 import ContextMenu from "./UI/ContextMenu/ContextMenu";
 
 export default function BoardDockElement({ boardInfo, activeBoard, setActiveBoard, projectId }) {

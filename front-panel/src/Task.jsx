@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { deleteTask, editTaskTitle, fetchUsers, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription, addTuskDate } from './api/response';
+import { fetchUsers } from './api/response';
+import { deleteTask, editTaskTitle, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription, addTuskDate } from "./api/response/taskResponse"
 import "./Task.css"
 import Modal from "./UI/Modal/Modal";
 import { useParams } from "react-router-dom";
@@ -17,11 +18,20 @@ export default function Task({ task }) {
     const [editDate, setEditDate] = useState(false)
     const [startDate, setStartDate] = useState(task.startDate ? new Date(task.startDate) : null);
     const [endDate, setEndDate] = useState(task.endDate ? new Date(task.endDate) : null);
+    const [assignTaskDate, setAssignTaskDate] = useState(false)
     const [newDates, setNewDates] = useState({ newStartDate: task.startDate ? task.startDate : null, newEndDate: task.endDate ? task.endDate : null })
     const [progress, setProgress] = useState(0)
     const [progressBarColor, setProgressBarColor] = useState('')
     const contextElementRef = useRef()
     const { projectId } = useParams()
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+
+    useMemo(() => {
+        searchTerm
+            ? setSearchResults(users.filter(e => e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())))
+            : setSearchResults([])
+    }, [searchTerm])
 
     useMemo(() => {
         const now = new Date().getTime();
@@ -147,7 +157,7 @@ export default function Task({ task }) {
                         <div>
                             {task.attachments && task.attachments.map((attachment) => (
                                 <div key={attachment.filename}>
-                                    <a href={`http://${window.location.hostname}:5000/api/task/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
+                                    <a href={`http://${window.location.hostname}/api/task/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
                                         {attachment.originalname}
                                     </a>
                                     <button className="delete_task" onClick={() => handleDeleteAttachment(attachment.filename, task, projectId)}>Удалить</button>
@@ -158,19 +168,27 @@ export default function Task({ task }) {
                     <div className="modal_shadow">
                         <div className="modal_title">Исполнители задачи</div>
                         {task?.assignedTo && task.assignedTo.map(e => <div key={e._id}>{e?.firstname || e?.username} <button onClick={() => unassignTask(task._id, e._id, projectId)}>Снять задачу</button></div>)}
-                        <select className="select_users" onChange={(e) => {
-                            console.log(e.target.value)
-                            assignTask(task._id, e.target.value, projectId)
-                        }}>
-                            <option value="">Назначить на:</option>
-                            {users.map((user) => (
-                                <option className="user" key={user._id} value={user._id}>
-                                    {user?.secondname || user.username} {user?.firstname && user?.firstname[0] + '.'} {user?.thirdname && user?.thirdname[0] + '.'}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="user_search">
+                            <input
+                                type="text"
+                                className="task_assign_input"
+                                placeholder="Найти сотрудника..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                            />
+                            <div className="find">
+                                {searchResults.map(e => {
+                                    return <div
+                                        onClick={() => assignTask(task._id, e._id, projectId)}
+                                        className='project_user'
+                                        key={e._id}
+                                    >
+                                        {e?.secondname} {e?.firstname}
+                                    </div>
+                                })}
+                            </div>
+                        </div>
                     </div>
-                    {/* <div>Создатель задачи: {<>{task?.createdBy?.secondname} {task?.createdBy?.firstname[0] + '.'}</> || task?.createdBy?.username || 'Unknown'}</div> */}
                     {isMouse && <ContextMenu
                         onMouseLeave={() => setIsMouse(false)}
                         refelement={contextElementRef}
@@ -184,7 +202,7 @@ export default function Task({ task }) {
                         }} className="delete_task">Редактировать задачу</button>
                     </ContextMenu>}
                 </div>
-                {(startDate && endDate) ?
+                {assignTaskDate || (task.startDate && task.endDate) ?
                     <>
                         {editDate
                             ?
@@ -208,9 +226,12 @@ export default function Task({ task }) {
                     </>
                     :
                     <div className="task_date">
-                        <input onChange={e => setStartDate(e.target.value)} type="date" name="" id="" />
-                        <input onChange={e => setEndDate(e.target.value)} type="date" name="" id="" />
-                        <button onClick={() => addTuskDate(projectId, task._id, startDate, endDate)}>Назначить даты</button>
+                        <input onChange={e => setStartDate(new Date(e.target.value))} type="date" name="" id="" />
+                        <input onChange={e => setEndDate(new Date(e.target.value))} type="date" name="" id="" />
+                        <button onClick={() => {
+                            addTuskDate(projectId, task._id, startDate, endDate)
+                            setAssignTaskDate(true)
+                        }}>Назначить даты</button>
                     </div>
                 }
             </Modal>}

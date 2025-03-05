@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import "./App.css"
 import BoardDock from './BoardDock';
-import { getBoardByProjectId } from './api/response';
+import { getBoardByProjectId } from './api/response/boardResponse.js';
 import Board from './Board';
 import { useSocket } from './WebSocketContext';
 import { useParams } from 'react-router-dom';

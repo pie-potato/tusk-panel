@@ -43,22 +43,24 @@ class taskService {
         if (!task) {
             throw ApiError.BadRequest()
         }
-        // if (assignedUser?.mail) {
-        //     const mailOptions = {
-        //         from: `kartushin_is@surgu.ru`,
-        //         to: `${assignedUser.mail}`,
-        //         subject: 'Тестовое письмо с для оповешения о назначении на задачу',
-        //         text: 'Это тестовое письмо, отправленное с сервера Картушиным Иваном Сергеевичем.\n Вот так я буду уведомлять пользователей, что на них назначена задача.'
-        //     };
-        //     transporter.sendMail(mailOptions, (error, info) => {
-        //         if (error) {
-        //             console.log('Ошибка при отправке письма:', error);
-        //         } else {
-        //             console.log('Письмо успешно отправлено:', info.response);
-        //         }
-        //     });
-        // }
-        const assignedUser = await User.findById(assignedUserId, '-_id -password -__v')
+        /*
+            if (assignedUser?.mail) {
+                const mailOptions = {
+                    from: `kartushin_is@surgu.ru`,
+                    to: `${assignedUser.mail}`,
+                    subject: 'Тестовое письмо с для оповешения о назначении на задачу',
+                    text: 'Это тестовое письмо, отправленное с сервера Картушиным Иваном Сергеевичем.\n Вот так я буду уведомлять пользователей, что на них назначена задача.'
+                };
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log('Ошибка при отправке письма:', error);
+                    } else {
+                        console.log('Письмо успешно отправлено:', info.response);
+                    }
+                });
+            }
+        */
+        const assignedUser = await User.findById(assignedUserId, ' -password -__v')
         return { taskId: task._id, columnId: task.columnId, assignedTo: assignedUser }
     }
 

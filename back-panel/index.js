@@ -27,7 +27,7 @@ app.use('/api/task', decodedUserId, taskRouter)
 app.use('/api/user', userRouter)
 app.use(errorMiddleware)
 const server = http.createServer(app);
-initializeWebSocketServer(server)
+initializeWebSocketServer(server) 
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017')

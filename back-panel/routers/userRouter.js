@@ -1,17 +1,20 @@
 const { Router } = require("express");
-const userController = require('../controllers/userController.js')
+const userController = require('../controllers/userController.js');
+const verifyAdminAccess = require("../middleware/verifyAdminAccess.js");
+const verifyUserAccess = require("../middleware/verifyUserAccess.js");
+const decodedUserId = require("../middleware/decodedUserId.js");
 
 const userRouter = new Router()
 
-userRouter.get('', userController.getUserData)
+userRouter.get('', decodedUserId, verifyUserAccess, userController.getUserData)
 userRouter.get('/profile', userController.getUserProfile)
-userRouter.get('/admin', userController.getAllUserData)
+userRouter.get('/admin', decodedUserId, verifyAdminAccess, userController.getAllUserData)
 
 userRouter.post('/login', userController.loginUser)
-userRouter.post('/admin', userController.adminUser)
+userRouter.post('/admin', decodedUserId, verifyAdminAccess, userController.adminUser)
 
-userRouter.put('/profile', userController.changeUserData)
-userRouter.put('/admin/role/:userId', userController.changeUserRole)
-userRouter.put('/admin/:userId', userController.updateUserData)
+userRouter.put('/profile', decodedUserId, verifyAdminAccess, userController.changeUserData)
+userRouter.put('/admin/role/:userId', decodedUserId, verifyAdminAccess, userController.changeUserRole)
+userRouter.put('/admin/:userId', decodedUserId, verifyAdminAccess, userController.updateUserData)
 
 module.exports = userRouter

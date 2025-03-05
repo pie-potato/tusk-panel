@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchUsers, fetchProjects, createProject } from './api/response';
+import { fetchUsers } from './api/response';
+import { fetchProjects, createProject } from './api/response/projectResponse.js'
 import { useSocket } from './WebSocketContext';
 import { useLocation } from 'react-router-dom';
 import './ProjectsList.css'
@@ -18,7 +19,9 @@ export default function ProjectList() {
     const [searchResults, setSearchResults] = useState([]);
 
     useMemo(() => {
-        setSearchResults(users.filter(e => e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())))
+        searchTerm
+            ? setSearchResults(users.filter(e => e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())))
+            : setSearchResults([])
     }, [searchTerm, projectMembers])
 
     useEffect(() => {
@@ -94,7 +97,15 @@ export default function ProjectList() {
                                         onChange={e => setSearchTerm(e.target.value)}
                                     />
                                     <div>
-                                        {searchResults.map(e => <div onClick={() => setProjectMembers(prevProjectMembers => [...prevProjectMembers, e])} className='project_user' key={e._id}>{e?.secondname} {e?.firstname}</div>)}
+                                        {searchResults.map(e => {
+                                            return <div
+                                                onClick={() => setProjectMembers(prevProjectMembers => [...prevProjectMembers, e])}
+                                                className='project_user'
+                                                key={e._id}
+                                            >
+                                                {e?.secondname} {e?.firstname}
+                                            </div>
+                                        })}
                                     </div>
                                 </div>
                                 <div>

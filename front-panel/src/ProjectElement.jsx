@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { deleteProject, deleteMemberFromProject } from "./api/response";
+import { deleteMemberFromProject } from "./api/response/projectResponse.js";
+import {deleteProject} from "./api/response/projectResponse.js"
 import './ProjectElement.css'
 import ContextMenu from "./UI/ContextMenu/ContextMenu";
 

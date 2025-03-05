@@ -147,3 +147,28 @@
     border: 2px solid #1876C2;
     border-radius: 20px;
 }
+
+.task_assign_input {
+    border-radius: 20px;
+    outline: 0;
+    outline-offset: 0;
+    border: 1px solid #1876C2;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(50, 100, 120, 0.5);
+}
+
+.user_search {
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #1876C2;
+    width: 24.2%;
+}
+
+.find {
+    position: relative;
+    top: 0;
+    left: 0;
+    /* height: 0px; */
+    border-radius: 5px solid #1876C2;
+    background: gray;
+}

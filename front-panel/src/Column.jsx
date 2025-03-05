@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import "./Column.css"
-import { addTask, deleteColumn, handleColumnEditSave } from './api/response';
+import { addTask } from "./api/response/taskResponse"
+import { deleteColumn, handleColumnEditSave } from './api/response/columnResponse';
 import Task from './Task';
 import { useParams } from 'react-router-dom';
 

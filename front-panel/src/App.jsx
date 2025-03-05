@@ -33,7 +33,7 @@ function App() {
 
   const handleLogin = async (credentials) => {
     try {
-      const response = await axios.post(`http://${window.location.hostname}:5000/api/user/login`, credentials);
+      const response = await axios.post(`http://${window.location.hostname}/api/user/login`, credentials);
       const user = response.data;
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);

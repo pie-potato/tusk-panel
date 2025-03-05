@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Column from './Column';
-import { getColumnByIdBoard, addColumn } from './api/response';
+import { getColumnByIdBoard, addColumn } from './api/response/columnResponse';
 import { useParams } from 'react-router-dom';
 import { useSocket } from './WebSocketContext';
 

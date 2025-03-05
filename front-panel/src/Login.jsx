@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import "./Login.css"
 
 function Login({ onLogin }) {
     const [username, setUsername] = useState('');
@@ -10,12 +11,13 @@ function Login({ onLogin }) {
     };
 
     return (
-        <div>
-            <h2>Вход</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
+        <div className='login'>
+            <h1>Вход</h1>
+            <form onSubmit={handleSubmit} className='login_form'>
+                <div className='login_element'>
                     <label htmlFor="username">Имя пользователя:</label>
                     <input
+                        className='login_input'
                         type="text"
                         id="username"
                         value={username}
@@ -23,9 +25,10 @@ function Login({ onLogin }) {
                         required
                     />
                 </div>
-                <div>
+                <div className='login_element'>
                     <label htmlFor="password">Пароль:</label>
                     <input
+                        className='login_input'
                         type="password"
                         id="password"
                         value={password}
@@ -33,7 +36,7 @@ function Login({ onLogin }) {
                         required
                     />
                 </div>
-                <button type="submit">Войти</button>
+                <button type="submit" className='submit_button'><h3>Войти</h3></button>
             </form>
         </div>
     );
