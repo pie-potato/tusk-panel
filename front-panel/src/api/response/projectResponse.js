@@ -3,7 +3,7 @@ import axios from "axios"
 export const fetchProjects = async (setProjects) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        const response = await axios.get(`http://${window.location.hostname}/api/project`, {
+        const response = await axios.get(`http://${process.env.PUBLIC_BACKEND_URL}/api/project`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -17,7 +17,7 @@ export const fetchProjects = async (setProjects) => {
 export const createProject = async (title, members = []) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.post(`http://${window.location.hostname}/api/project`, { title: title, members: members }, {
+        await axios.post(`http://${process.env.PUBLIC_BACKEND_URL}/api/project`, { title: title, members: members }, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -30,7 +30,7 @@ export const createProject = async (title, members = []) => {
 export const deleteProject = async (projectId) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.delete(`http://${window.location.hostname}/api/project/${projectId}`, {
+        await axios.delete(`http://${process.env.PUBLIC_BACKEND_URL}/api/project/${projectId}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -43,7 +43,7 @@ export const deleteProject = async (projectId) => {
 export const deleteMemberFromProject = async (projectId, userId) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`http://${window.location.hostname}/api/project/${projectId}/${userId}`, {}, {
+        await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/project/${projectId}/${userId}`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

@@ -8,7 +8,7 @@ export const SocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io(`http://${window.location.hostname}`, { path: '/socket.io' });
+    const newSocket = io(`http://${process.env.PUBLIC_BACKEND_URL}`, { path: '/socket.io' });
 
     newSocket.on('connect', () => {
       console.log('Socket.IO connected');

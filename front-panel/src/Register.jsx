@@ -10,7 +10,7 @@ function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`http://${window.location.hostname}/api/register`, { username, password });
+            await axios.post(`http://${process.env.PUBLIC_BACKEND_URL}/api/register`, { username, password });
             navigate('/login'); // Redirect to login after successful registration
         } catch (error) {
             console.error("Registration error:", error);

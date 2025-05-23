@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchUsers } from './api/response';
 import { deleteTask, editTaskTitle, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription, addTuskDate } from "./api/response/taskResponse"
-import "./Task.css"
+import "/styles/Task.css"
 import Modal from "./UI/Modal/Modal";
 import { useParams } from "react-router-dom";
 import ContextMenu from "./UI/ContextMenu/ContextMenu";
@@ -157,7 +157,7 @@ export default function Task({ task }) {
                         <div>
                             {task.attachments && task.attachments.map((attachment) => (
                                 <div key={attachment.filename}>
-                                    <a href={`http://${window.location.hostname}/api/task/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
+                                    <a href={`http://${process.env.PUBLIC_BACKEND_URL}/api/task/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
                                         {attachment.originalname}
                                     </a>
                                     <button className="delete_task" onClick={() => handleDeleteAttachment(attachment.filename, task, projectId)}>Удалить</button>

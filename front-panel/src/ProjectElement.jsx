@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { deleteMemberFromProject } from "./api/response/projectResponse.js";
 import {deleteProject} from "./api/response/projectResponse.js"
-import './ProjectElement.css'
+import '/styles/ProjectElement.css'
 import ContextMenu from "./UI/ContextMenu/ContextMenu";
 
 export default function ProjectElement({ project }) {

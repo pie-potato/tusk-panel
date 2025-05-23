@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "./Column.css"
+import "/styles/Column.css"
 import { addTask } from "./api/response/taskResponse"
 import { deleteColumn, handleColumnEditSave } from './api/response/columnResponse';
 import Task from './Task';

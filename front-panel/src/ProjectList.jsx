@@ -3,7 +3,7 @@ import { fetchUsers } from './api/response';
 import { fetchProjects, createProject } from './api/response/projectResponse.js'
 import { useSocket } from './WebSocketContext';
 import { useLocation } from 'react-router-dom';
-import './ProjectsList.css'
+import '/styles/ProjectsList.css'
 import ProjectElement from './ProjectElement';
 import Modal from './UI/Modal/Modal';
 
