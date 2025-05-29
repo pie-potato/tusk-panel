@@ -3,7 +3,7 @@ import axios from "axios";
 export const getBoardByProjectId = async (projectId) => {
     try {
       const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-      const response = await axios.get(`http://${process.env.PUBLIC_BACKEND_URL}/api/board/${projectId}`, {
+      const response = await axios.get(`${process.env.PUBLIC_BACKEND_URL}/api/board/${projectId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -17,7 +17,7 @@ export const getBoardByProjectId = async (projectId) => {
 export const addBoard = async (newBoard, setNewBoard, user, projectId) => {
     try {
       const token = user ? JSON.parse(user).token : null;
-      await axios.post(`http://${process.env.PUBLIC_BACKEND_URL}/api/board/${projectId}`, { title: newBoard }, {
+      await axios.post(`${process.env.PUBLIC_BACKEND_URL}/api/board/${projectId}`, { title: newBoard }, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -31,7 +31,7 @@ export const addBoard = async (newBoard, setNewBoard, user, projectId) => {
 export const updateBoardNameById = async (updateColumnName, boardId) => {
     try {
       const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-      await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/boards/${boardId}`, { title: updateColumnName }, {
+      await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/boards/${boardId}`, { title: updateColumnName }, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -44,7 +44,7 @@ export const updateBoardNameById = async (updateColumnName, boardId) => {
 export const deleteBoard = async (boardId, user, projectId) => {
     try {
       const token = user ? JSON.parse(user).token : null;
-      await axios.delete(`http://${process.env.PUBLIC_BACKEND_URL}/api/board/${boardId}/${projectId}`, {
+      await axios.delete(`${process.env.PUBLIC_BACKEND_URL}/api/board/${boardId}/${projectId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         }

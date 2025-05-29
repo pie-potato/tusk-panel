@@ -14,8 +14,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "rsbuild dev",
-    "build": "rsbuild build",
+    "start": "rsbuild dev --env-mode develop",
+    "build": "rsbuild build --env-mode production",
     "preview": "rsbuild preview"
   },
   "eslintConfig": {

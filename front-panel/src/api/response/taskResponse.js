@@ -7,7 +7,7 @@ export const addTask = async (newTask, setNewTask, user, projectId) => {
     }
     try {
         const token = user ? JSON.parse(user).token : null;
-        await axios.post(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/${projectId}`, newTask, {
+        await axios.post(`${process.env.PUBLIC_BACKEND_URL}/api/task/${projectId}`, newTask, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }
@@ -21,7 +21,7 @@ export const addTask = async (newTask, setNewTask, user, projectId) => {
 export const addTuskDate = async (projectId, taskId, startDate, endDate) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/date/${projectId}`, { startDate: startDate, endDate: endDate }, {
+        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/date/${projectId}`, { startDate: startDate, endDate: endDate }, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -39,7 +39,7 @@ export const handleFileUpload = async (event, taskId, projectId) => {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
         const formData = new FormData();
         formData.append('file', file);
-        await axios.post(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/upload/${projectId}`, formData, {
+        await axios.post(`${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/upload/${projectId}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 Authorization: `Bearer ${token}`
@@ -53,7 +53,7 @@ export const handleFileUpload = async (event, taskId, projectId) => {
 export const unassignTask = async (taskId, unAssignedUserId, projectId) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.delete(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/assign/${unAssignedUserId}/${projectId}`, {
+        await axios.delete(`${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/assign/${unAssignedUserId}/${projectId}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -66,7 +66,7 @@ export const unassignTask = async (taskId, unAssignedUserId, projectId) => {
 export const assignTask = async (taskId, userId, projectId) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/assign/${projectId}`, { userId }, {
+        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/assign/${projectId}`, { userId }, {
             headers: {
                 Authorization: `Bearer ${token}`, // Send the token in the Authorization header
             }
@@ -79,7 +79,7 @@ export const assignTask = async (taskId, userId, projectId) => {
 export const editTaskDescription = async (taskId, taskDescription, projectId) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/description/${taskId}/${projectId}`, { description: taskDescription }, {
+        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/task/description/${taskId}/${projectId}`, { description: taskDescription }, {
             headers: {
                 Authorization: `Bearer ${token}`, // Send the token in the Authorization header
             }
@@ -92,7 +92,7 @@ export const editTaskDescription = async (taskId, taskDescription, projectId) =>
 export const editTaskTitle = async (taskId, taskTitle, projectId) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/${projectId}`, { title: taskTitle }, {
+        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/${projectId}`, { title: taskTitle }, {
             headers: {
                 Authorization: `Bearer ${token}`, // Send the token in the Authorization header
             }
@@ -105,7 +105,7 @@ export const editTaskTitle = async (taskId, taskTitle, projectId) => {
 export const deleteTask = async (id, projectId) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.delete(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/${id}/${projectId}`, {
+        await axios.delete(`${process.env.PUBLIC_BACKEND_URL}/api/task/${id}/${projectId}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }
@@ -118,7 +118,7 @@ export const deleteTask = async (id, projectId) => {
 export const handleDeleteAttachment = async (filename, task, projectId) => {
     try {
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.delete(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/${task._id}/attachments/${filename}/${projectId}`, {
+        await axios.delete(`${process.env.PUBLIC_BACKEND_URL}/api/task/${task._id}/attachments/${filename}/${projectId}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

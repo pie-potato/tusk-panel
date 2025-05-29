@@ -32,7 +32,7 @@ function App() {
 
   const handleLogin = async (credentials) => {
     try {
-      const response = await axios.post(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/login`, credentials);
+      const response = await axios.post(`${process.env.PUBLIC_BACKEND_URL}/api/user/login`, credentials);
       const user = response.data;
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
@@ -49,7 +49,7 @@ function App() {
 
   return (
     <SocketProvider>
-      <Router>
+      <Router basename={process.env.PUBLIC_BASE_NAME_URL}>
         <Header handleLogout={handleLogout} />
         <div className='main_container'>
           <Routes>

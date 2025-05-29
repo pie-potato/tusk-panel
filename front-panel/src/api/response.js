@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const fetchColumns = async () => {
   try {
-    const response = await axios.get(`http://${process.env.PUBLIC_BACKEND_URL}/api/columns`);
+    const response = await axios.get(`${process.env.PUBLIC_BACKEND_URL}/api/columns`);
     return response
   } catch (error) {
     console.error('Error fetching columns:', error);
@@ -12,7 +12,7 @@ export const fetchColumns = async () => {
 export const fetchUsers = async (setUsers) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    const response = await axios.get(`http://${process.env.PUBLIC_BACKEND_URL}/api/user`, {
+    const response = await axios.get(`${process.env.PUBLIC_BACKEND_URL}/api/user`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -26,7 +26,7 @@ export const fetchUsers = async (setUsers) => {
 export const handleCreateUser = async (newUser, setNewUser) => {
   const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
   try {
-    await axios.post(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/admin`, newUser, {
+    await axios.post(`${process.env.PUBLIC_BACKEND_URL}/api/user/admin`, newUser, {
       headers: {
         Authorization: `Bearer ${token}`, // Send the token in the Authorization header
       }
@@ -40,7 +40,7 @@ export const handleCreateUser = async (newUser, setNewUser) => {
 
 export const handleUpdateRole = async (userId, newRole) => {
   try {
-    await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/admin/role/${userId}`, { role: newRole });
+    await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/user/admin/role/${userId}`, { role: newRole });
   } catch (error) {
     console.log(error);
 
@@ -50,7 +50,7 @@ export const handleUpdateRole = async (userId, newRole) => {
 export const handleEditNickname = async (user, name, setUser, setIsEditing) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/profile`, name, {
+    await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/user/profile`, name, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -65,7 +65,7 @@ export const handleEditNickname = async (user, name, setUser, setIsEditing) => {
 export const fetchUserData = async (setUser) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-    const response = await axios.get(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/profile`, { // New route for profile data
+    const response = await axios.get(`${process.env.PUBLIC_BACKEND_URL}/api/user/profile`, { // New route for profile data
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -80,7 +80,7 @@ export const fetchUserData = async (setUser) => {
 export const getUsers = async (setUsers) => {
   const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
   try {
-    const response = await axios.get(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/admin`, { // New route for profile data
+    const response = await axios.get(`${process.env.PUBLIC_BACKEND_URL}/api/user/admin`, { // New route for profile data
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -102,7 +102,7 @@ export const handleUpdateUser = async (editingUser, editPassword, setEditingUser
       updateData.password = editPassword;
     }
 
-    await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/admin/${editingUser._id}`, updateData, { // New route for profile data
+    await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/user/admin/${editingUser._id}`, updateData, { // New route for profile data
       headers: {
         Authorization: `Bearer ${token}`,
       },
