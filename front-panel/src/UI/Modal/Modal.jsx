@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import "./Modal.css"
+import styles from "./Modal.module.css"
 
-export default function Modal({ children, active, setActive }) {
+export default function Modal({ children, active, setActive, className }) {
 
     const modalRef = useRef()
     useEffect(() => {
@@ -13,8 +13,8 @@ export default function Modal({ children, active, setActive }) {
     }, [active])
 
     return (
-        <div className={active ? "modal active" : "modal"} onClick={() => setActive(false)}>
-            <div ref={modalRef} className="modal_content" onClick={e => e.stopPropagation()}>
+        <div className={active ? `${styles.modal} ${styles.active}` : styles.modal} onClick={() => setActive(false)}>
+            <div ref={modalRef} className={active ? `${styles.modal_content} ${styles.active} ${className}` : `${styles.modal_content} ${className}`} onClick={e => e.stopPropagation()}>
                 {children}
             </div>
         </div>

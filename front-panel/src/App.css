@@ -1,9 +1,6 @@
-.input {
-    margin: 10px;
-}
-
 body {
-    background-color: #1876c21a;
+    /* background: #181826; */
+    background: rgb(245, 245, 245);
     /* background-image: url('../public/media/поле.jpg');
     background-repeat: no-repeat;
     background-size: 100vw 100vh; */
@@ -12,8 +9,10 @@ body {
         sans-serif;
 }
 
-/* .main_container {
-    background-image: url('../public/media/photo_2024-12-20_11-28-42.jpg');
-    background-repeat: no-repeat;
-    background-size: 100vw 100vh;
-} */
+h1, h2 {
+    margin: 0;
+}
+
+.input {
+    margin: 10px;
+}

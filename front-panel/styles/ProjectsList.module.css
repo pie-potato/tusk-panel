@@ -1,0 +1,38 @@
+.projects {
+    display: flex;
+}
+
+.projects_h1 {
+    margin: 5px;
+    text-align: center;
+}
+
+.members {
+    margin-top: 20px;
+}
+
+.create_project_button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #1143c0;
+    font-size: 14px;
+    font-weight: 550;
+}
+
+.project_name {
+    padding: 10px;
+    border-radius: 20px;
+}
+
+
+
+.project_remove_user {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #1143c0;
+}
+
+
+

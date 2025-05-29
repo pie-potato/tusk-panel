@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { handleEditNickname, fetchUserData } from './api/response';
+import Input from './UI/Input/Input';
+import Button from './UI/Button/Button';
+import Modal from './UI/Modal/Modal';
 
 function Profile() {
     const [user, setUser] = useState(null);
@@ -7,7 +10,7 @@ function Profile() {
     const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
-        fetchUserData(name, setUser, setName);
+        fetchUserData(setUser);
     }, []);
 
 
@@ -18,23 +21,30 @@ function Profile() {
     return (
         <div>
             <h2>Профиль пользователя</h2>
-
-            {isEditing ? (
+            <Modal active={isEditing} setActive={setIsEditing}>
                 <div>
                     <div>
-                        <input type="text" value={name.firstname} onChange={(e) => setName({ ...name, firstname: e.target.value })} />
-                        <input type="text" value={name.secondname} onChange={(e) => setName({ ...name, secondname: e.target.value })} />
-                        <input type="text" value={name.thirdname} onChange={(e) => setName({ ...name, thirdname: e.target.value })} />
+                        <div>
+                            <div>Имя</div>
+                            <Input type="text" value={user.firstname} onChange={(e) => setUser({ ...user, firstname: e.target.value })} />
+                        </div>
+                        <div>
+                            <div>Фамилия</div>
+                            <Input type="text" value={user.secondname} onChange={(e) => setUser({ ...user, secondname: e.target.value })} />
+                        </div>
+                        <div>
+                            <div>Отчество</div>
+                            <Input type="text" value={user.thirdname} onChange={(e) => setUser({ ...user, thirdname: e.target.value })} />
+                        </div>
                     </div>
-                    <button onClick={() => handleEditNickname(user, name, setUser, setIsEditing)}>Save</button>
-                    <button onClick={() => setIsEditing(false)}>Cancel</button>
+                    <Button onClick={() => handleEditNickname(user, name, setUser, setIsEditing)}>Сохранить</Button>
+                    <Button onClick={() => setIsEditing(false)}>Закрыть</Button>
                 </div>
-            ) : (
-                <div>
-                    <p>ФИО: {user.firstname || user.nickname || 'Not set'} {user.secondname || user.nickname || 'Not set'}</p>
-                    <button onClick={() => setIsEditing(true)}>Edit Nickname</button>
-                </div>
-            )}
+            </Modal>
+            <div>
+                <p>ФИО: {user.firstname || user.username || 'Not set'} {user.secondname || user.username || 'Not set'}</p>
+                <Button onClick={() => setIsEditing(true)}>Редактировать ФИО</Button>
+            </div>
 
         </div>
     );

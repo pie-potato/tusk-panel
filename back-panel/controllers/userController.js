@@ -27,7 +27,7 @@ class userController {
     async getAllUserData(req, res) {
         // ... (authentication/authorization as before)
         try {
-            const users = await User.find({}, 'username _id role nickname'); // Include role
+            const users = await User.find({}, '-__v -password'); // Include role
             res.json(users);
         } catch (error) {
             console.log(error)
@@ -115,12 +115,12 @@ class userController {
     }
 
     async updateUserData(req, res) {
-        // ... auth
         try {
             const { role, password } = req.body;
-            const updateData = { role };
+            const updateData = req.body;
+console.log(req.body);
 
-            if (password) {
+            if (updateData.password) {
                 updateData.password = await bcrypt.hash(password, 10); // Hash the new password
             }
 

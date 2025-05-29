@@ -1,0 +1,102 @@
+.button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #1143c0;
+    margin: 5px;
+}
+
+.link_to_project {
+    color: #1143c0;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.project {
+    border: 2px solid #1143c0;
+    margin: 15px;
+    padding: 10px;
+    border-radius: 20px;
+    background: white;
+}
+
+.submenu {
+    display: none;
+    background-color: white;
+    border: 2px solid #1143c0;
+    border-radius: 20px;
+    padding: 10px;
+    position: absolute;
+    flex-direction: column;
+}
+
+.submenu:hover {
+    display: flex;
+}
+
+.menu {
+    cursor: pointer;
+}
+
+.menu:focus>.submenu {
+    display: flex;
+}
+
+.link_and_context_menu {
+    display: flex;
+    justify-content: space-between;
+}
+
+.create_project {
+    display: flex;
+    flex-direction: column;
+}
+
+.create_project>* {
+    margin: 10px;
+}
+
+.create_project_modal {
+    width: 70vw;
+}
+
+.project_user {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    margin: 10px 0;
+
+    padding: 5px;
+}
+
+.search_users {
+    padding: 10px;
+    border-radius: 20px;
+    margin-right: 10px;
+}
+
+.input_search_users {
+    border: none;
+}
+
+.searced_users {
+    display: flex;
+    justify-content: space-between;
+}
+
+.create_project_bottom {
+    display: flex;
+    justify-content: space-between;
+}
+
+.users {
+    border: 1px dashed;
+    border-radius: 20px;
+    max-height: 300px;
+    overflow-x: auto;
+    display: none;
+}
+
+.users.active {
+    display: block;
+}

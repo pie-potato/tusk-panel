@@ -1,0 +1,24 @@
+.board_container {
+    overflow-y: hidden;
+    height: 89vh;
+}
+
+.board_columns {
+    display: flex;
+    align-items: flex-start;
+}
+
+.board_container::-webkit-scrollbar {
+    height: 10px;
+    border-radius: 20px;
+}
+
+.board_container::-webkit-scrollbar-track {
+    -webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+    background-color: #f9f9fd;
+}
+
+.board_container::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color: #356184;
+}

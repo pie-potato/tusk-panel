@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import "./App.css"
-import BoardDock from './BoardDock';
-import { getBoardByProjectId } from './api/response/boardResponse.js';
-import Board from './Board';
-import { useSocket } from './WebSocketContext';
+import { useState, useEffect } from 'react';
+import "../App.css"
+import BoardDock from '../components/BoardDock.jsx';
+import { getBoardByProjectId } from '../api/response/boardResponse.js';
+import Board from '../components/Board.jsx';
+import { useSocket } from '../WebSocketContext';
 import { useParams } from 'react-router-dom';
 
 function TaskBoard() {

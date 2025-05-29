@@ -1,14 +1,12 @@
-import React from "react";
-import "./ContextMenu.css"
+import styles from "./ContextMenu.module.css"
 
-export default function ContextMenu({ children, refelement, corectx, corecty, ...props }) {
+export default function ContextMenu({ children, ...props }) {
     return (
-        <div
-            {...props}
-            className="context_menu"
-            style={{ transform: `translate(${refelement.current.getBoundingClientRect().left + corectx}px, ${refelement.current.getBoundingClientRect().top + corecty}px)` }}
-        >
-            {children}
+        <div {...props} className={styles.menu} tabIndex={0}>
+            <div>...</div>
+            <div className={styles.submenu}>
+                {children}
+            </div>
         </div>
     )
 } 

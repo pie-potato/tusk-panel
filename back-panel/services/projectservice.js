@@ -47,6 +47,11 @@ class projectService {
         const updatedProject = await Project.findByIdAndUpdate(projectId, { $pull: { members: { _id: deletedUserId } } }, { new: true })
         return updatedProject
     }
+
+    async updateProject(projectId, title, members) {
+        const updatedProject = await Project.findByIdAndUpdate(projectId, { title: title, members: members }, { new: true })
+        return updatedProject
+    }
 }
 
 module.exports = new projectService()

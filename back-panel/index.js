@@ -14,18 +14,17 @@ const userRouter = require('./routers/userRouter.js');
 const decodedUserId = require('./middleware/decodedUserId.js');
 const errorMiddleware = require('./middleware/error.js')
 
-
 const app = express();
 const port = 5000;
 
 app.use(cors());
 app.use(express.json());
 app.use('/api/project', decodedUserId, projectRouter)
-app.use('/api/board', decodedUserId, boardRouter)
+app.use('/api/board', decodedUserId, boardRouter) 
 app.use('/api/column', decodedUserId, columnRouter)
 app.use('/api/task', decodedUserId, taskRouter)
 app.use('/api/user', userRouter)
-app.use(errorMiddleware)
+app.use(errorMiddleware) 
 const server = http.createServer(app);
 initializeWebSocketServer(server) 
 
@@ -40,11 +39,11 @@ mongoose.connect('mongodb://localhost:27017')
 
 const transporter = nodemailer.createTransport({
     port: 465,
-    host: 'mail.surgu.ru',
+    host: '',
     secure: true,
     auth: {
-        user: 'kartushin_is@surgu.ru',
-        pass: 'PiePotato120452' // Пароль приложения для Gmail, если включена двухфакторная аутентификация
+        user: '',
+        pass: '' // Пароль приложения для Gmail, если включена двухфакторная аутентификация
     }
 });
 
@@ -56,15 +55,15 @@ async function createDefaultAdmin() {
             return;
         }
 
-        const hashedPassword = await bcrypt.hash('pie', 10); // Replace 'admin_password' with a strong password
+        const hashedPassword = await bcrypt.hash('pie', 10);
         const newAdmin = new User({
-            username: 'admin',
+            username: process.env.ADMIN_USERNAME,
             password: hashedPassword,
-            role: 'admin', // Set the role to 'admin'
-            mail: " ",
-            firstname: 'a',
-            secondname: 'a',
-            thirdname: 'a'
+            role: 'admin',
+            mail: process.env.ADMIN_FIRSTNAME || " ",
+            firstname: process.env.ADMIN_FIRSTNAME, 
+            secondname: process.env.ADMIN_SECONDNAME,
+            thirdname: process.env.ADMIN_THIRDNAME
 
         });
         await newAdmin.save();

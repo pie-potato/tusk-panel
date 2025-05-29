@@ -24,15 +24,15 @@ export const fetchUsers = async (setUsers) => {
 };
 
 export const handleCreateUser = async (newUser, setNewUser) => {
+  const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
   try {
-    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
     await axios.post(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/admin`, newUser, {
       headers: {
         Authorization: `Bearer ${token}`, // Send the token in the Authorization header
       }
     });
-    setNewUser({ username: '', password: '', role: 'employee' });
-    alert('User created successfully!');  // Или другое уведомление об успехе
+    setNewUser({ username: '', firstname: '', secondname: '', thirdname: '', password: '', mail: '', role: 'employee' });
+    // alert('User created successfully!');  // Или другое уведомление об успехе
   } catch (error) {
     console.error("Error creating user:", error);
   }
@@ -62,7 +62,7 @@ export const handleEditNickname = async (user, name, setUser, setIsEditing) => {
   }
 };
 
-export const fetchUserData = async (name, setUser, setNewNickname) => {
+export const fetchUserData = async (setUser) => {
   try {
     const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
     const response = await axios.get(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/profile`, { // New route for profile data
@@ -70,16 +70,21 @@ export const fetchUserData = async (name, setUser, setNewNickname) => {
         Authorization: `Bearer ${token}`,
       },
     });
+    
     setUser(response.data);
-    setNewNickname({ ...name, firstname: response.data.firstame || '' }); // Set initial nickname
   } catch (error) {
     console.error("Error fetching user data:", error);
   }
 };
 
 export const getUsers = async (setUsers) => {
+  const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
   try {
-    const response = await axios.get(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/admin`);
+    const response = await axios.get(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/admin`, { // New route for profile data
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     setUsers(response.data)
   } catch (error) {
     console.log(error)
@@ -87,16 +92,22 @@ export const getUsers = async (setUsers) => {
 }
 
 export const handleUpdateUser = async (editingUser, editPassword, setEditingUser, setEditPassword) => {
+  const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+
   try {
 
-    const updateData = { role: editingUser.role };
+    const updateData = editingUser;
 
     if (editPassword) { // Only send password if it's changed
       updateData.password = editPassword;
     }
 
-    await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/admin/${editingUser._id}`, updateData);
-    setEditingUser(null);
+    await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/user/admin/${editingUser._id}`, updateData, { // New route for profile data
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setEditingUser({ username: '', firstname: '', secondname: '', thirdname: '', password: '', mail: '', role: 'employee' });
     setEditPassword('');
   } catch (error) {
     console.log(error);

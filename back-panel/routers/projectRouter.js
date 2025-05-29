@@ -7,6 +7,7 @@ const projectRouter = new Router()
 projectRouter.get('', projectControllers.getAllProject);
 projectRouter.post('', verifyUserAccess, projectControllers.createProject);
 projectRouter.put('/:projectId/:userId', verifyUserAccess, projectControllers.deleteUserFromProject)
+projectRouter.put('/:projectId', verifyUserAccess, projectControllers.updateProject)
 projectRouter.delete('/:projectId', verifyUserAccess, projectControllers.deleteProject);
 
 module.exports = projectRouter

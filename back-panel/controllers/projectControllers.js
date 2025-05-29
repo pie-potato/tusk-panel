@@ -40,6 +40,16 @@ class projectController {
             next(error)
         }
     }
+
+    async updateProject(req, res, next) {
+        try {
+            const updateProject = await projectService.updateProject(req.params.projectId, req.body.title, req.body.members)
+            emitEventToRoom('/project', 'updateProject', updateProject)
+            return res.json(updateProject);
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 module.exports = new projectController()

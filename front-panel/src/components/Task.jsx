@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { fetchUsers } from './api/response';
-import { deleteTask, editTaskTitle, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription, addTuskDate } from "./api/response/taskResponse"
-import "/styles/Task.css"
-import Modal from "./UI/Modal/Modal";
+import { fetchUsers } from '../api/response';
+import { deleteTask, editTaskTitle, assignTask, unassignTask, handleFileUpload, handleDeleteAttachment, editTaskDescription, addTuskDate } from "../api/response/taskResponse"
+import styles from "../../styles/Task.module.css"
+import Modal from "../UI/Modal/Modal";
 import { useParams } from "react-router-dom";
-import ContextMenu from "./UI/ContextMenu/ContextMenu";
+import ContextMenu from "../UI/ContextMenu/ContextMenu";
+import Button from "../UI/Button/Button";
+import Input from "../UI/Input/Input";
 
 export default function Task({ task }) {
 
@@ -64,27 +66,33 @@ export default function Task({ task }) {
     }, []);
 
     return (
-        <div className="task" >
+        <div className={styles.task} >
             <div onClick={() => setModalActive(true)}>
-                <div className="task_name">{task.title}</div>
-                <div className="progress-bar">
+                <div className={styles.task_name}>{task.title}</div>
+                <div className={styles.progress_bar}>
                     <div
-                        className="progress-bar-fill"
+                        className={styles.progress_bar_fill}
                         style={{ width: `${progress}%`, backgroundColor: `${progressBarColor}` }}
                     ></div>
                 </div>
             </div>
-            {modalActive && <Modal active={modalActive} setActive={setModalActive}>
-                <div className="modal_shadow">
-                    <div className="title_header">
-                        <div className="modal_title">Название задачи</div>
-                        <div onMouseDown={() => setIsMouse(true)} className="context_menu_button" ref={contextElementRef}>...</div>
+            <Modal active={modalActive} setActive={setModalActive} className={styles.task_modal}>
+                <div className={styles.modal_shadow}>
+                    <div className={styles.title_header}>
+                        <div className={styles.modal_title}>Название задачи</div>
+                        <ContextMenu>
+                            <Button onClick={() => deleteTask(task._id, projectId)} className={styles.delete_task}>Удалить задчу</Button>
+                            <Button onClick={() => {
+                                setEditTaskName(true)
+                                setTaskName(task.title)
+                            }} className={styles.delete_task}>Редактировать задачу</Button>
+                        </ContextMenu>
                     </div>
-                    <div className="container_task_modal">
+                    <div className={styles.container_task_modal}>
                         {editTaskName
                             ? <textarea
                                 type="text"
-                                className="text"
+                                className={styles.text}
                                 value={taskName}
                                 onChange={event => setTaskName(event.target.value)}
                                 onKeyDown={event => {
@@ -99,19 +107,19 @@ export default function Task({ task }) {
                             <div onDoubleClick={() => {
                                 setTaskName(task.title)
                                 setEditTaskName(true)
-                            }} className="task_name">
+                            }} className={styles.task_name}>
                                 {task.title}
                             </div>
                         }
                     </div>
                 </div>
-                <div className="modal_shadow">
-                    <div className="modal_title">Описание задачи</div>
-                    <div className="container_task_modal">
+                <div className={styles.modal_shadow}>
+                    <div className={styles.modal_title}>Описание задачи</div>
+                    <div className={styles.container_task_modal}>
                         {editingTaskDescription
                             ? <textarea
                                 type="text"
-                                className="text"
+                                className={styles.text}
                                 value={taskDescription}
                                 onChange={event => setTaskDescription(event.target.value)}
                                 onKeyDown={event => {
@@ -127,12 +135,12 @@ export default function Task({ task }) {
                                 {task?.description ? <div onDoubleClick={() => {
                                     setTaskDescription(task.description)
                                     setEditingTaskDescription(true)
-                                }} className="task_name">
+                                }} className={styles.task_name}>
                                     {task.description}
                                 </div>
                                     : <textarea
                                         type="text"
-                                        className="text"
+                                        className={styles.text}
                                         value={taskDescription}
                                         onChange={event => setTaskDescription(event.target.value)}
                                         onKeyDown={event => {
@@ -147,12 +155,12 @@ export default function Task({ task }) {
                         }
                     </div>
                 </div>
-                <div className="bottom_input">
-                    <div className="attachments_file modal_shadow">
-                        <div className="title_header">
-                            <div className="modal_title">Прикрепленные файлы</div>
-                            <label className="delete_task" htmlFor={`task_file_${task._id}`}>Загрузить файл</label>
-                            <input style={{ opacity: 0, height: 0, width: 0, position: "absolute" }} multiple id={`task_file_${task._id}`} name={`task_file_${task._id}`} type="file" className="delete_task" onChange={e => handleFileUpload(e, task._id, projectId)} />
+                <div className={styles.bottom_input}>
+                    <div className={`${styles.attachments_file} ${styles.modal_shadow}`}>
+                        <div className={styles.title_header}>
+                            <div className={styles.modal_title}>Прикрепленные файлы</div>
+                            <label className={styles.delete_task} htmlFor={`task_file_${task._id}`}>Загрузить файл</label>
+                            <input style={{ opacity: 0, height: 0, width: 0, position: "absolute" }} multiple id={`task_file_${task._id}`} name={`task_file_${task._id}`} type="file" className={styles.delete_task} onChange={e => handleFileUpload(e, task._id, projectId)} />
                         </div>
                         <div>
                             {task.attachments && task.attachments.map((attachment) => (
@@ -160,81 +168,71 @@ export default function Task({ task }) {
                                     <a href={`http://${process.env.PUBLIC_BACKEND_URL}/api/task/uploads/${attachment.filename}`} target="_blank" rel="noopener noreferrer" download={attachment.originalname}>
                                         {attachment.originalname}
                                     </a>
-                                    <button className="delete_task" onClick={() => handleDeleteAttachment(attachment.filename, task, projectId)}>Удалить</button>
+                                    <button className={styles.delete_task} onClick={() => handleDeleteAttachment(attachment.filename, task, projectId)}>Удалить</button>
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <div className="modal_shadow">
-                        <div className="modal_title">Исполнители задачи</div>
-                        {task?.assignedTo && task.assignedTo.map(e => <div key={e._id}>{e?.firstname || e?.username} <button onClick={() => unassignTask(task._id, e._id, projectId)}>Снять задачу</button></div>)}
-                        <div className="user_search">
-                            <input
-                                type="text"
-                                className="task_assign_input"
-                                placeholder="Найти сотрудника..."
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
-                            />
-                            <div className="find">
-                                {searchResults.map(e => {
-                                    return <div
-                                        onClick={() => assignTask(task._id, e._id, projectId)}
-                                        className='project_user'
-                                        key={e._id}
-                                    >
-                                        {e?.secondname} {e?.firstname}
-                                    </div>
-                                })}
+                    <div className={styles.modal_shadow}>
+                        <div className={styles.modal_title}>Исполнители задачи</div>
+                        <div className={styles.user_search}>
+                            <div>
+                                <Input
+                                    type="text"
+                                    className={styles.task_assign_input}
+                                    placeholder="Найти сотрудника..."
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                />
+                                <div className={styles.find}>
+                                    {searchResults.map(e => {
+                                        return <div
+                                            onClick={() => assignTask(task._id, e._id, projectId)}
+                                            className='project_user'
+                                            key={e._id}
+                                        >
+                                            {e?.secondname} {e?.firstname}
+                                        </div>
+                                    })}
+                                </div>
                             </div>
+                            {task?.assignedTo && task.assignedTo.map(e => <div key={e._id}>{e?.firstname || e?.username} <img onClick={() => unassignTask(task._id, e._id, projectId)} src="/media/trash.svg"/></div>)}
                         </div>
                     </div>
-                    {isMouse && <ContextMenu
-                        onMouseLeave={() => setIsMouse(false)}
-                        refelement={contextElementRef}
-                        corectx={-220}
-                        corecty={-195}
-                    >
-                        <button onClick={() => deleteTask(task._id, projectId)} className="delete_task">Удалить задчу</button>
-                        <button onClick={() => {
-                            setEditTaskName(true)
-                            setTaskName(task.title)
-                        }} className="delete_task">Редактировать задачу</button>
-                    </ContextMenu>}
                 </div>
                 {assignTaskDate || (task.startDate && task.endDate) ?
                     <>
                         {editDate
                             ?
-                            <div className="task_date">
-                                <input onChange={e => setNewDates(prevNewDates => ({ ...prevNewDates, newStartDate: e.target.value }))} type="date" name="" id="" />
-                                <input onChange={e => setNewDates(prevNewDates => ({ ...prevNewDates, newEndDate: e.target.value }))} type="date" name="" id="" />
-                                <button onClick={() => {
+                            <div className={styles.task_date}>
+                                <Input onChange={e => setNewDates(prevNewDates => ({ ...prevNewDates, newStartDate: e.target.value }))} type="date" name="" id="" />
+                                <Input onChange={e => setNewDates(prevNewDates => ({ ...prevNewDates, newEndDate: e.target.value }))} type="date" name="" id="" />
+                                <Button onClick={() => {
                                     addTuskDate(projectId, task._id, newDates.newStartDate, newDates.newEndDate)
                                     setEditDate(false)
-                                }}>Назначить даты</button>
+                                }}>Назначить даты</Button>
                             </div>
                             :
-                            <div className="task_date">
+                            <div className={styles.task_date}>
                                 <div >{startDate?.getDate()}.{startDate?.getMonth() + 1 < 10 ? <>0{startDate?.getMonth() + 1}</> : startDate?.getMonth() + 1}.{startDate?.getFullYear()}</div>
                                 <div >{endDate?.getDate()}.{endDate?.getMonth() + 1 < 10 ? <>0{endDate?.getMonth() + 1}</> : endDate?.getMonth() + 1}.{endDate?.getFullYear()}</div>
                                 {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
-                                    <button onClick={() => setEditDate(true)}>Изменить даты</button>
+                                    <Button onClick={() => setEditDate(true)}>Изменить даты</Button>
                                 }
                             </div>
                         }
                     </>
                     :
-                    <div className="task_date">
+                    <div className={styles.task_date}>
                         <input onChange={e => setStartDate(new Date(e.target.value))} type="date" name="" id="" />
                         <input onChange={e => setEndDate(new Date(e.target.value))} type="date" name="" id="" />
-                        <button onClick={() => {
+                        <Button onClick={() => {
                             addTuskDate(projectId, task._id, startDate, endDate)
                             setAssignTaskDate(true)
-                        }}>Назначить даты</button>
+                        }}>Назначить даты</Button>
                     </div>
                 }
-            </Modal>}
+            </Modal>
         </div >
     )
 }

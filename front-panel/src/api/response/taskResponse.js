@@ -20,7 +20,6 @@ export const addTask = async (newTask, setNewTask, user, projectId) => {
 
 export const addTuskDate = async (projectId, taskId, startDate, endDate) => {
     try {
-        console.log(startDate, endDate)
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
         await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/date/${projectId}`, { startDate: startDate, endDate: endDate }, {
             headers: {
@@ -33,16 +32,13 @@ export const addTuskDate = async (projectId, taskId, startDate, endDate) => {
 }
 
 export const handleFileUpload = async (event, taskId, projectId) => {
-    console.log(event);
     const file = event.target.files[0];
     if (!file) return;
     try {
-        console.log(taskId);
 
         const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
         const formData = new FormData();
         formData.append('file', file);
-        console.log(event.target.files)
         await axios.post(`http://${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/upload/${projectId}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',

@@ -5,8 +5,8 @@ const User = new mongoose.Schema({
     password: { type: String, required: true },
     firstname: { type: String, required: true }, // Add nickname field
     secondname: { type: String, required: true }, // Add nickname field
-    thirdname: { type: String, required: true }, // Add nickname field
-    mail: { type: String, required: true },
+    thirdname: { type: String }, // Add nickname field
+    mail: { type: String },
     role: { type: String, enum: ['admin', 'manager', 'employee'], default: 'employee' } // Add role field
 })
 

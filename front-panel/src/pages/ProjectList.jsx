@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { fetchUsers } from './api/response';
-import { fetchProjects, createProject } from './api/response/projectResponse.js'
-import { useSocket } from './WebSocketContext';
+import { useState, useEffect, useMemo } from 'react';
+import { fetchUsers } from '../api/response.js';
+import { fetchProjects, createProject } from '../api/response/projectResponse.js'
+import { useSocket } from '../WebSocketContext.jsx';
 import { useLocation } from 'react-router-dom';
-import '/styles/ProjectsList.css'
-import ProjectElement from './ProjectElement';
-import Modal from './UI/Modal/Modal';
+import styles from '../../styles/ProjectsList.module.css'
+import ProjectElement from '../components/ProjectElement.jsx';
+import Modal from '../UI/Modal/Modal.jsx';
+import Button from '../UI/Button/Button.jsx';
 
 export default function ProjectList() {
     const [projects, setProjects] = useState([])
@@ -43,11 +44,9 @@ export default function ProjectList() {
             setProjects(prevProjects => [...prevProjects, newProject])
         })
         socket.on('deleteProject', (deletedProject) => {
-            console.log(deletedProject);
             setProjects(prevProjects => prevProjects.filter(e => e._id !== deletedProject._id))
         })
         socket.on('updateProject', (updateProject) => {
-            console.log(updateProject);
             setProjects(prevProjects => prevProjects.map(e => {
                 if (e._id === updateProject._id) {
                     return updateProject
@@ -72,11 +71,11 @@ export default function ProjectList() {
     return (
         <div>
             {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
-                modalActive && <Modal active={modalActive} setActive={setModalActive}>
-                    <div className='create_project'>
+                <Modal active={modalActive} setActive={setModalActive}>
+                    <div className={styles.create_project}>
                         <textarea
                             type="text"
-                            className='project_name'
+                            className={styles.project_name}
                             value={projectTitle}
                             onChange={e => setProjectTitle(e.target.value)}
                             onKeyDown={e => {
@@ -86,12 +85,12 @@ export default function ProjectList() {
                                 }
                             }}
                         />
-                        <div className='create_project_bottom'>
-                            <div className='searced_users'>
-                                <div className='search_users'>
+                        <div className={styles.create_project_bottom}>
+                            <div className={styles.searced_users}>
+                                <div className={styles.search_users}>
                                     <input
                                         type="text"
-                                        className='input_search_users'
+                                        className={styles.input_search_users}
                                         placeholder="Найти сотрудника..."
                                         value={searchTerm}
                                         onChange={e => setSearchTerm(e.target.value)}
@@ -100,7 +99,7 @@ export default function ProjectList() {
                                         {searchResults.map(e => {
                                             return <div
                                                 onClick={() => setProjectMembers(prevProjectMembers => [...prevProjectMembers, e])}
-                                                className='project_user'
+                                                className={styles.project_user}
                                                 key={e._id}
                                             >
                                                 {e?.secondname} {e?.firstname}
@@ -109,14 +108,14 @@ export default function ProjectList() {
                                     </div>
                                 </div>
                                 <div>
-                                    {projectMembers.map(e => <div className='project_user'>
+                                    {projectMembers.map(e => <div className={styles.project_user}>
                                         <div key={e._id}>{e?.secondname} {e?.firstname}</div>
-                                        <img onClick={() => removeUserByProject(e._id)} className="trash" src="./media/trash.svg" alt="Мусорка" />
+                                        <img onClick={() => removeUserByProject(e._id)} className={styles.trash} src="./media/trash.svg" alt="Мусорка" />
                                     </div>)}
                                 </div>
                             </div>
                             <button
-                                className='create_project_button'
+                                className={styles.create_project_button}
                                 onClick={() => {
                                     createProject(projectTitle, projectMembers)
                                     setProjectTitle('')
@@ -125,10 +124,10 @@ export default function ProjectList() {
                     </div>
                 </Modal>
             }
-            <h2 className='projects_h2'>Проекты</h2>
+            <h1 className={styles.projects_h1}>Проекты</h1>
             {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
-                <button className='create_project_button' onClick={() => setModalActive(true)}>Создать проект</button>}
-            <div className='projects'>
+                <Button onClick={() => setModalActive(true)}>Создать проект</Button>}
+            <div className={styles.projects}>
                 {projects.map(e => <ProjectElement key={e._id} project={e} />)}
             </div>
         </div>

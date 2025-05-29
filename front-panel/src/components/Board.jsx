@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Column from './Column';
-import { getColumnByIdBoard, addColumn } from './api/response/columnResponse';
+import { getColumnByIdBoard, addColumn } from '../api/response/columnResponse';
 import { useParams } from 'react-router-dom';
-import { useSocket } from './WebSocketContext';
+import { useSocket } from '../WebSocketContext';
+import "../../styles/Board.css"
 
 export default function Board({ boardId }) {
     const [newColumnName, setNewColumnName] = useState('');

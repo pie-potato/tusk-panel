@@ -1,19 +1,20 @@
 .header {
-    background-color: #98ff98;
+    background-color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid #1143c0;
 }
 
 .header_link>* {
     margin: 10px;
-    color: #1876C2;
+    color: #1143c0;
     text-decoration: none;
 }
 
 .user_info {
     display: flex;
-    color: #1876C2;
+    color: #1143c0;
 }
 
 .user_info>* {
@@ -24,5 +25,5 @@
     border: none;
     background: none;
     cursor: pointer;
-    color: #1876C2;
+    color: #1143c0;
 }

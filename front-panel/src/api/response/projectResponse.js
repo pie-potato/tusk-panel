@@ -52,3 +52,16 @@ export const deleteMemberFromProject = async (projectId, userId) => {
         console.log(error)
     }
 }
+
+export const updateProject = async (projectId, title, members) => {
+    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+    try {
+        await axios.put(`http://${process.env.PUBLIC_BACKEND_URL}/api/project/${projectId}`, {title: title, members: members}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+}

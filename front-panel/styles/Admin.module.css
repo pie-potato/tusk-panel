@@ -1,0 +1,27 @@
+.modal_cteate_user {
+    width: 70vw;
+}
+
+.create_user {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.create_user>* {
+    margin: 5px;
+}
+
+.not_valid {
+    border: 1px solid red;
+}
+
+.select_role {
+    border: 1px solid #1143c0;
+    border-radius: 20px;
+padding: 10px;
+}
+
+.fst {
+    margin: 10px;
+}

@@ -13,7 +13,7 @@
 }
 
 .login_input {
-    border: 1px solid #1876C2;
+    border: 1px solid #1143c0;
     border-radius: 20px;
     padding: 10px;
     background: none;
@@ -24,7 +24,7 @@
     border: none;
     background: none;
     cursor: pointer;
-    color: #1876C2;
+    color: #1143c0;
 }
 
 .login_form {

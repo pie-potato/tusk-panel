@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { addBoard } from './api/response/boardResponse';
-import '/styles/BoardDock.css'
+import { useState } from "react";
+import { addBoard } from '../api/response/boardResponse';
+import '../../styles/BoardDock.css'
 import BoardDockElement from "./BoardDockElement";
 import { useParams } from "react-router-dom";
 

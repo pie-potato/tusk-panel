@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Login from './Login';
-import Register from './Register';
-import TaskBoard from './TaskBoard'; // Новый компонент для доски задач
-import AdminPanel from './AdminPanel';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import TaskBoard from './pages/TaskBoard'; // Новый компонент для доски задач
+import AdminPanel from './pages/AdminPanel';
 import Header from './Header';
 import Profile from './Profile';
-import ProjectList from './ProjectList';
+import ProjectList from './pages/ProjectList';
 import { SocketProvider } from './WebSocketContext';
 
 function App() {
@@ -24,7 +24,6 @@ function App() {
       setIsLoading(false); // Set loading to false after fetching user
     };
     fetchUser(); // Call the async function
-
   }, []);
 
   if (isLoading) {  // Display loading message while fetching user data
