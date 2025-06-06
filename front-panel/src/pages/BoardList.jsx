@@ -3,10 +3,10 @@ import "../App.css"
 import BoardDock from '../components/BoardDock.jsx';
 import { getBoardByProjectId } from '../api/response/boardResponse.js';
 import Board from '../components/Board.jsx';
-import { useSocket } from '../WebSocketContext';
+import { useSocket } from '../contexts/WebSocketContext.jsx';
 import { useParams } from 'react-router-dom';
 
-function TaskBoard() {
+function BoardList() {
   const [activeBoard, setActiveBoard] = useState(null)
   const [allBoard, setAllBoards] = useState([])
   const { socket, isConnected, joinRoom, leaveRoom } = useSocket();
@@ -53,4 +53,4 @@ function TaskBoard() {
     </div>
   );
 }
-export default TaskBoard;
+export default BoardList;

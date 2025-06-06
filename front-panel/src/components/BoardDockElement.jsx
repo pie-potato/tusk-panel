@@ -12,8 +12,8 @@ export default function BoardDockElement({ boardInfo, activeBoard, setActiveBoar
         <div className={activeBoard === boardInfo._id ? 'board_dock_element active' : 'board_dock_element'}>
             <div onClick={() => setActiveBoard(boardInfo._id)}>{boardInfo.title}</div>
             <ContextMenu >
-                <Button onClick={async () => await deleteBoard(boardInfo._id, localStorage.getItem('user'), projectId)} className="delete_task">Удалить доску</Button>
-                <Button onClick={() => { }} className="delete_task">Редактировать задачу</Button>
+                <Button onClick={async () => await deleteBoard(boardInfo._id, projectId)}>Удалить доску</Button>
+                <Button onClick={() => { }}>Редактировать задачу</Button>
             </ContextMenu>
         </div>
     )

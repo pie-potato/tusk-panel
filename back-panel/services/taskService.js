@@ -11,14 +11,14 @@ class taskService {
         if (!column) {
             ApiError.BadRequest()
         }
-        const newTask = new Task({
+        const newTask = await Task.create({
             title: taskTitle,
             columnId: columnId,
             createdBy: userId
         })
-        const savedTask = await newTask.save()
-        await Column.findByIdAndUpdate(columnId, { $push: { tasks: savedTask._id } });
-        return savedTask
+        // const savedTask = await newTask.save()
+        await Column.findByIdAndUpdate(columnId, { $push: { tasks: newTask._id } });
+        return newTask
     }
 
     async addTaskFile(taskId, file) {

@@ -1,55 +1,33 @@
-import axios from "axios";
+import axios from '../../configs/axiosConfig'
 
 export const getColumnByIdBoard = async (boardId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        const response = await axios.get(`${process.env.PUBLIC_BACKEND_URL}/api/column/${boardId}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        return response
+        return await axios.get(`/api/column/${boardId}`)
     } catch (error) {
-        console.log(error)
+        console.error(error);
     }
 }
 
-export const addColumn = async (newColumnName, setNewColumnName, boardId, user, projectId) => {
+export const addColumn = async (newColumnName, boardId, projectId) => {
     try {
-        const token = user ? JSON.parse(user).token : null;
-        await axios.post(`${process.env.PUBLIC_BACKEND_URL}/api/column/${boardId}/${projectId}`, { title: newColumnName }, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            }
-        });
-        setNewColumnName('');
+        return await axios.post(`/api/column/${boardId}/${projectId}`, { title: newColumnName })
     } catch (error) {
-        console.error('Error adding column:', error);
+        console.error(error);
     }
-};
+}
 
-export const handleColumnEditSave = async (columnId, columnName, projectId) => {
+export const editColumn = async (columnId, columnName, projectId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/column/${columnId}/${projectId}`, { title: columnName }, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Send the token in the Authorization header
-            }
-        });
+        return await axios.put(`/api/column/${columnId}/${projectId}`, { title: columnName })
     } catch (error) {
-        console.error('Error updating column:', error);
+        console.error(error);
     }
-};
+}
 
 export const deleteColumn = async (id, projectId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.delete(`${process.env.PUBLIC_BACKEND_URL}/api/column/${id}/${projectId}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            }
-        });
+        return await axios.delete(`/api/column/${id}/${projectId}`)
     } catch (error) {
-        console.error('Error deleting column:', error);
+        console.error(error);
     }
-};
+}

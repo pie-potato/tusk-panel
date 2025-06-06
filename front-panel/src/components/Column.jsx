@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import "../../styles/Column.css"
 import { addTask } from "../api/response/taskResponse"
-import { deleteColumn, handleColumnEditSave } from '../api/response/columnResponse';
+import { deleteColumn, editColumn } from '../api/response/columnResponse';
 import Task from './Task';
 import { useParams } from 'react-router-dom';
 import Button from '../UI/Button/Button';
@@ -13,14 +13,23 @@ export default function Column({ column }) {
 
     const [newTask, setNewTask] = useState({ columnId: null, title: '' });
     const [columnName, setColumnName] = useState('')
-    const [editColumn, setEditColumn] = useState(false)
+    const [isEdit, setIsEdit] = useState(false)
     const [active, setActive] = useState(false)
     const { projectId } = useParams()
+
+    const createNewTask = () => {
+        if (!newTask.columnId || newTask.title.length === 0) {
+            alert('У задачи должно быть название');
+            return;
+        }
+        addTask(newTask, projectId)
+        setNewTask({ columnId: null, title: '' })
+    }
 
     return (
         <div key={column._id} className="column">
             <div className="column_header">
-                {editColumn
+                {isEdit
                     ?
                     <Input
                         type="text"
@@ -28,8 +37,8 @@ export default function Column({ column }) {
                         onChange={event => setColumnName(event.target.value)}
                         onKeyDown={event => {
                             if (event.key === "Enter") {
-                                handleColumnEditSave(column._id, columnName, projectId)
-                                setEditColumn(false)
+                                editColumn(column._id, columnName, projectId)
+                                setIsEdit(false)
                             }
                         }}
                     />
@@ -39,7 +48,7 @@ export default function Column({ column }) {
                 <ContextMenu>
                     <Button onClick={() => setActive(true)}>Удалить</Button>
                     <Button onClick={() => {
-                        setEditColumn(true)
+                        setIsEdit(true)
                         setColumnName(column.title)
                     }}>Изменить</Button>
                 </ContextMenu>
@@ -55,11 +64,11 @@ export default function Column({ column }) {
                     value={newTask.title}
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value, columnId: column._id })}
                     placeholder="Добавить задачу..."
-                    onKeyDown={event => { if (event.key === "Enter") addTask(newTask, setNewTask, localStorage.getItem('user'), projectId) }}
+                    onKeyDown={event => { if (event.key === "Enter") createNewTask() }}
                 />
-                <Button className='add_task' onClick={() => addTask(newTask, setNewTask, localStorage.getItem('user'), projectId)}>Добавить задачу</Button>
+                <Button className='add_task' onClick={() => createNewTask()}>Добавить задачу</Button>
             </div>
-            <Modal active={active} setActive={setActive} className="popup">
+            <Modal active={active} setActive={setActive} childrenClass="popup">
                 <div>
                     Вы точно хотите удалить это?
                     Это действие нельзя будет отменить

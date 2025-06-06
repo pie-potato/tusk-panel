@@ -5,14 +5,12 @@ import { deleteProject } from "../api/response/projectResponse.js"
 import styles from '../../styles/ProjectElement.module.css'
 import ContextMenu from "../UI/ContextMenu/ContextMenu.jsx";
 import Modal from "../UI/Modal/Modal.jsx";
-import { fetchUsers } from "../api/response.js";
+import { fetchUsers } from "../api/response/userResponse.js";
 import Input from "../UI/Input/Input.jsx"
 import Button from "../UI/Button/Button.jsx";
 
 export default function ProjectElement({ project }) {
 
-    const contextProjectElemntMenu = useRef()
-    const [isMouse, setIsMouse] = useState(false)
     const [modalActive, setModalActive] = useState(false)
     const [projectTitle, setProjectTitle] = useState(project.title)
     const [projectMembers, setProjectMembers] = useState(project.members)
@@ -24,6 +22,11 @@ export default function ProjectElement({ project }) {
         setProjectMembers(prevProjectMembers => prevProjectMembers.filter(e => e._id !== userId))
     }
 
+    const getUsers = async () => {
+        const users = await fetchUsers()
+        setUsers(users.data)
+    }
+
     useMemo(() => {
         searchTerm
             ? setSearchResults(users.filter(e => e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())))
@@ -31,7 +34,7 @@ export default function ProjectElement({ project }) {
     }, [searchTerm, projectMembers])
 
     useEffect(() => {
-        fetchUsers(setUsers)
+        getUsers()
     }, []);
 
     return (
@@ -41,9 +44,9 @@ export default function ProjectElement({ project }) {
                     {project.title}
                 </Link>
                 {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
-                    <ContextMenu tabIndex={0} className={styles.menu} onClick={() => setIsMouse(true)}>
-                        <button className={styles.button} onClick={() => deleteProject(project._id)}>Удалить</button>
-                        <button className={styles.button} onClick={() => setModalActive(true)}>Редактировать</button>
+                    <ContextMenu tabIndex={0} className={styles.menu}>
+                        <Button className={styles.button} onClick={() => deleteProject(project._id)}>Удалить</Button>
+                        <Button className={styles.button} onClick={() => setModalActive(true)}>Редактировать</Button>
                     </ContextMenu>
                 }
             </div>
@@ -58,7 +61,7 @@ export default function ProjectElement({ project }) {
                             </div>)}
                         </div>
                     </div>
-                    <Modal active={modalActive} setActive={setModalActive} className={styles.create_project_modal}>
+                    <Modal active={modalActive} setActive={setModalActive} childrenClass={styles.create_project_modal}>
                         <div className={styles.create_project}>
                             <textarea
                                 type="text"
@@ -101,7 +104,6 @@ export default function ProjectElement({ project }) {
                                     </div>
                                 </div>
                                 <Button
-                                    // className={styles.create_project_button}
                                     onClick={() => {
                                         updateProject(project._id, projectTitle, projectMembers)
                                         setSearchTerm('')

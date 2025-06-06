@@ -12,7 +12,10 @@ const columnRouter = require('./routers/columnRouter.js');
 const taskRouter = require('./routers/taskRouter.js');
 const userRouter = require('./routers/userRouter.js');
 const decodedUserId = require('./middleware/decodedUserId.js');
-const errorMiddleware = require('./middleware/error.js')
+const errorMiddleware = require('./middleware/error.js');
+const chatRouter = require('./routers/chatRouter.js');
+const messageRouter = require('./routers/messageRouter.js');
+const accessToChat = require('./middleware/accessToChat.js')
 
 const app = express();
 const port = 5000;
@@ -20,13 +23,15 @@ const port = 5000;
 app.use(cors());
 app.use(express.json());
 app.use('/api/project', decodedUserId, projectRouter)
-app.use('/api/board', decodedUserId, boardRouter) 
+app.use('/api/board', decodedUserId, boardRouter)
 app.use('/api/column', decodedUserId, columnRouter)
 app.use('/api/task', taskRouter)
 app.use('/api/user', userRouter)
-app.use(errorMiddleware) 
+app.use('/api/chat', chatRouter)
+app.use('/api/message', messageRouter)
+app.use(errorMiddleware)
 const server = http.createServer(app);
-initializeWebSocketServer(server) 
+initializeWebSocketServer(server)
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017')
@@ -49,7 +54,7 @@ const transporter = nodemailer.createTransport({
 
 async function createDefaultAdmin() {
     try {
-        const existingAdmin = await User.findOne({ username: 'admin' });
+        const existingAdmin = await User.findOne({ role: 'admin' });
         if (existingAdmin) {
             console.log('Admin user already exists. Skipping creation.');
             return;
@@ -61,7 +66,7 @@ async function createDefaultAdmin() {
             password: hashedPassword,
             role: 'admin',
             mail: process.env.ADMIN_FIRSTNAME || " ",
-            firstname: process.env.ADMIN_FIRSTNAME, 
+            firstname: process.env.ADMIN_FIRSTNAME,
             secondname: process.env.ADMIN_SECONDNAME,
             thirdname: process.env.ADMIN_THIRDNAME
 

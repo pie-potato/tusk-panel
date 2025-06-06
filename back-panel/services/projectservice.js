@@ -44,8 +44,7 @@ class projectService {
     }
 
     async deleteUserFromProject(projectId, deletedUserId) {
-        const updatedProject = await Project.findByIdAndUpdate(projectId, { $pull: { members: { _id: deletedUserId } } }, { new: true })
-        return updatedProject
+        return await Project.findByIdAndUpdate(projectId, { $pull: { members: { _id: deletedUserId } } }, { new: true })
     }
 
     async updateProject(projectId, title, members) {

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { getUsers, handleCreateUser, handleUpdateUser } from '../api/response';
+import { handleUpdateUser } from '../api/response';
+import { createUser, getUsersFromAdmin, updateUser } from '../api/response/userResponse';
 import Input from '../UI/Input/Input';
 import Button from '../UI/Button/Button';
 import Modal from '../UI/Modal/Modal';
 import styles from '../../styles/Admin.module.css'
+import { useMemo } from 'react';
 
 function AdminPanel() {
     const [newUser, setNewUser] = useState({ username: '', firstname: '', secondname: '', thirdname: '', password: '', mail: '', role: 'employee' });
@@ -13,38 +15,59 @@ function AdminPanel() {
     const [active, setActive] = useState(false)
     const [notValid, setNotValid] = useState(false)
     const [editingActive, setEditingActive] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
+    const [searchResults, setSearchResults] = useState([]);
+
+    const filteredUser = useMemo(() => {
+        if (!searchTerm) users
+        return users.filter(e => e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase()))
+    }, [searchTerm, users])
+
+    const getUsers = async () => {
+        const users = await getUsersFromAdmin()
+        setUsers(users.data)
+    }
 
     useEffect(() => {
-        getUsers(setUsers)
+        getUsers()
     }, [])
 
-    const handleEditUser = (user) => {
+    const editUser = (user) => {
         setEditingUser(user)
         setEditPassword('')
         setEditingActive(true)
     };
 
-    const handleCancelEdit = () => {
+    const cancelEdit = () => {
+        setEditingActive(false)
         setEditingUser({ username: '', firstname: '', secondname: '', thirdname: '', password: '', mail: '', role: 'employee' });
         setEditPassword('');
     };
 
-    const createUser = () => {
+    const buildUser = () => {
         if (newUser.username.length === 0 || newUser.password.length === 0 || newUser.firstname.length === 0 || newUser.secondname.length === 0) {
             setNotValid(true)
             return;
         }
         else {
-            handleCreateUser(newUser, setNewUser)
+            createUser(newUser)
+            setNewUser({ username: '', firstname: '', secondname: '', thirdname: '', password: '', mail: '', role: 'employee' });
         }
     }
 
+    const updetaUserInformation = () => {
+        updateUser(editingUser, editPassword)
+        setEditingUser({ username: '', firstname: '', secondname: '', thirdname: '', password: '', mail: '', role: 'employee' });
+        setEditPassword('');
+        setEditingActive(false)
+    }
+
     return (
-        <div>
+        <div className={styles.admin}>
             <h2>Панель админа</h2>
             <div>
                 <Button onClick={() => setActive(true)}>Создать нового пользователя</Button>
-                <Modal active={active} setActive={setActive} className={styles.modal_cteate_user}>
+                <Modal active={active} setActive={setActive} childrenClass={styles.modal_cteate_user}>
                     <div className={styles.create_user}>
                         <div className={styles.fst}>
                             <div>
@@ -121,20 +144,23 @@ function AdminPanel() {
                             </select>
                         </div>
                     </div>
-                    <Button onClick={createUser}>Создать пользоваетля</Button>
+                    <Button onClick={buildUser}>Создать пользоваетля</Button>
                 </Modal>
             </div>
             <div>
                 <h3>Пользователи</h3>
-                {users.map((user) => (
-                    <div key={user._id}>
-
-                        <div>
-                            <p>{user?.firstname} {user?.secondname} {user?.thirdname} ({user.username})  - {user.role}</p>
-                            <Button onClick={() => handleEditUser(user)}>Редактировать</Button>
+                <div>
+                    <div>Поиск пользователя</div>
+                    <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                </div>
+                <div>
+                    {filteredUser.map((user) => (
+                        <div key={user._id} className={styles.user}>
+                            <div>{user?.firstname} {user?.secondname} {user?.thirdname} ({user.username})  - {user.role}</div>
+                            <Button onClick={() => editUser(user)}>Редактировать</Button>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
             <Modal active={editingActive} setActive={setEditingActive}>
                 <div className={styles.create_user}>
@@ -205,11 +231,8 @@ function AdminPanel() {
                         </select>
                     </div>
                 </div>
-                <Button onClick={() => {
-                    handleUpdateUser(editingUser, editPassword, setEditingUser, setEditPassword)
-                    setEditingActive(false)
-                }}>Обновить</Button>
-                <Button onClick={handleCancelEdit}>Закрыть</Button>
+                <Button onClick={updetaUserInformation}>Обновить</Button>
+                <Button onClick={cancelEdit}>Закрыть</Button>
             </Modal>
         </div>
     );

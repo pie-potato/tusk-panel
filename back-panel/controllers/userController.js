@@ -25,7 +25,6 @@ class userController {
     }
 
     async getAllUserData(req, res) {
-        // ... (authentication/authorization as before)
         try {
             const users = await User.find({}, '-__v -password'); // Include role
             res.json(users);
@@ -91,10 +90,7 @@ class userController {
 
     async changeUserData(req, res) {
         try {
-            const token = req.header('Authorization')?.replace('Bearer ', '');
-            const decoded = jwt.verify(token, 'PiePotato');
-
-            const updatedUser = await User.findByIdAndUpdate(decoded.userId, req.body, { new: true });
+            const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, { new: true });
             res.json(updatedUser);
         } catch (error) {
             res.status(500).json({ error: 'Error updating profile' });
@@ -102,10 +98,7 @@ class userController {
     }
 
     async changeUserRole(req, res) {
-        // ... (authentication/authorization as before)
         try {
-            console.log(req);
-
             const { role } = req.body;
             const updatedUser = await User.findByIdAndUpdate(req.params.userId, { role }, { new: true });
             res.json(updatedUser);
@@ -118,7 +111,7 @@ class userController {
         try {
             const { role, password } = req.body;
             const updateData = req.body;
-console.log(req.body);
+            console.log(req.body);
 
             if (updateData.password) {
                 updateData.password = await bcrypt.hash(password, 10); // Hash the new password

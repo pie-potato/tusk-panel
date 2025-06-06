@@ -11,7 +11,7 @@ export default function BoardDock({ activeBoard, setActiveBoard, allBoard }) {
     const { projectId } = useParams()
 
     const createBoard = () => {
-        addBoard(newColumnName, setNewColumnName, localStorage.getItem('user'), projectId)
+        addBoard(newColumnName, projectId)
         setNewColumnName('')
         setCreateBoard(false)
     }

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
+import { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { io } from 'socket.io-client';
 
 const SocketContext = createContext(null);
@@ -8,7 +8,7 @@ export const SocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io(`${process.env.PUBLIC_BACKEND_URL}`, { path: '/socket.io' });
+    const newSocket = io(`${process.env.PUBLIC_SOCKET_URL}`, { path: '/socket.io' });
 
     newSocket.on('connect', () => {
       console.log('Socket.IO connected');

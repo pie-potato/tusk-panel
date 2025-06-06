@@ -1,48 +1,27 @@
-import axios from "axios";
+import axios from "../../configs/axiosConfig";
+import { deleteFetch, postFetch, putFetch } from "../../utils/fetch/fetchUtil";
 
-export const addTask = async (newTask, setNewTask, user, projectId) => {
-    if (!newTask.columnId) {
-        alert('Please select a column');
-        return;
-    }
+export const addTask = async (newTask, projectId) => {
     try {
-        const token = user ? JSON.parse(user).token : null;
-        await axios.post(`${process.env.PUBLIC_BACKEND_URL}/api/task/${projectId}`, newTask, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            }
-        });
-        setNewTask({ columnId: null, title: '' });
+        return await axios.post(`/api/task/${projectId}`, newTask)
     } catch (error) {
-        console.error('Error adding task:', error);
-    }
-};
-
-export const addTuskDate = async (projectId, taskId, startDate, endDate) => {
-    try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/date/${projectId}`, { startDate: startDate, endDate: endDate }, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-    } catch (error) {
-        console.log(error)
+        console.error(error);
     }
 }
 
-export const handleFileUpload = async (event, taskId, projectId) => {
-    const file = event.target.files[0];
-    if (!file) return;
+export const addTuskDate = async (projectId, taskId, startDate, endDate) => {
     try {
+        return await axios.put(`/api/task/${taskId}/date/${projectId}`, { startDate: startDate, endDate: endDate })
+    } catch (error) {
+        console.error(error);
+    }
+}
 
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        const formData = new FormData();
-        formData.append('file', file);
-        await axios.post(`${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/upload/${projectId}`, formData, {
+export const uploadFile = async (file, taskId, projectId) => {
+    try {
+        await axios.post(`/api/task/${taskId}/upload/${projectId}`, file, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${token}`
             }
         });
     } catch (error) {
@@ -52,78 +31,48 @@ export const handleFileUpload = async (event, taskId, projectId) => {
 
 export const unassignTask = async (taskId, unAssignedUserId, projectId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.delete(`${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/assign/${unAssignedUserId}/${projectId}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        return await axios.delete(`/api/task/${taskId}/assign/${unAssignedUserId}/${projectId}`)
     } catch (error) {
-        console.error('Error unassigning task:', error);
+        console.error(error);
     }
-};
+}
 
 export const assignTask = async (taskId, userId, projectId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/assign/${projectId}`, { userId }, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Send the token in the Authorization header
-            }
-        });
+        return await putFetch(`/api/task/${taskId}/assign/${projectId}`, { userId })
     } catch (error) {
-        console.error('Error assigning task:', error);
+        console.error(error);
     }
-};
+}
 
 export const editTaskDescription = async (taskId, taskDescription, projectId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/task/description/${taskId}/${projectId}`, { description: taskDescription }, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Send the token in the Authorization header
-            }
-        });
+        return await axios.put(`/api/task/description/${taskId}/${projectId}`, { description: taskDescription })
     } catch (error) {
-        console.error('Error updating task:', error);
+        console.error(error);
     }
 };
 
 export const editTaskTitle = async (taskId, taskTitle, projectId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/task/${taskId}/${projectId}`, { title: taskTitle }, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Send the token in the Authorization header
-            }
-        });
+        return await axios.put(`/api/task/${taskId}/${projectId}`, { title: taskTitle })
     } catch (error) {
-        console.error('Error updating task:', error);
+        console.error(error);
     }
 };
 
 export const deleteTask = async (id, projectId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.delete(`${process.env.PUBLIC_BACKEND_URL}/api/task/${id}/${projectId}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            }
-        });
+        return await axios.delete(`/api/task/${id}/${projectId}`)
     } catch (error) {
-        console.error('Error deleting task:', error);
+        console.error(error);
     }
 };
 
 export const handleDeleteAttachment = async (filename, task, projectId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.delete(`${process.env.PUBLIC_BACKEND_URL}/api/task/${task._id}/attachments/${filename}/${projectId}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
+        return await axios.delete(`/api/task/${task._id}/attachments/${filename}/${projectId}`);
     } catch (error) {
-        console.error('Error deleting attachment:', error);
+        console.error(error);
     }
 };

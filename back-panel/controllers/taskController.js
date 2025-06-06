@@ -12,9 +12,7 @@ class taskController {
 
     async getTaskFile(req, res, next) {
         try {
-            res.sendFile(filePath(req.params.filename), (err) => {
-                next(ApiError.NotFound())
-            });
+            res.download(filePath(req.params.filename))
         } catch (error) {
             next(error)
         }

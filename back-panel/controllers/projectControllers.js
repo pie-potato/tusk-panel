@@ -33,7 +33,7 @@ class projectController {
 
     async deleteUserFromProject(req, res, next) {
         try {
-            const updateProject = await projectService.deleteUserFromProject(req.params.projectId, req.params.userID)
+            const updateProject = await projectService.deleteUserFromProject(req.params.projectId, req.params.userId)
             emitEventToRoom('/project', 'updateProject', updateProject)
             return res.json(updateProject);
         } catch (error) {

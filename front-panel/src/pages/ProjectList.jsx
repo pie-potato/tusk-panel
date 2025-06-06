@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { fetchUsers } from '../api/response.js';
+import { fetchUsers } from '../api/response/userResponse.js';
 import { fetchProjects, createProject } from '../api/response/projectResponse.js'
-import { useSocket } from '../WebSocketContext.jsx';
+import { useSocket } from '../contexts/WebSocketContext.jsx';
 import { useLocation } from 'react-router-dom';
 import styles from '../../styles/ProjectsList.module.css'
 import ProjectElement from '../components/ProjectElement.jsx';
@@ -63,9 +63,19 @@ export default function ProjectList() {
         setProjectMembers(prevProjectMembers => prevProjectMembers.filter(e => e._id !== userId))
     }
 
+    const getAllProject = async () => {
+        const projects = await fetchProjects()
+        setProjects(projects.data)
+    }
+
+    const getUsers = async () => {
+        const users = await fetchUsers()
+        setUsers(users.data)
+    }
+
     useEffect(() => {
-        fetchProjects(setProjects);
-        fetchUsers(setUsers)
+        getAllProject()
+        getUsers()
     }, []);
 
     return (

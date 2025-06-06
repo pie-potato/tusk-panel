@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Column from './Column';
 import { getColumnByIdBoard, addColumn } from '../api/response/columnResponse';
 import { useParams } from 'react-router-dom';
-import { useSocket } from '../WebSocketContext';
+import { useSocket } from '../contexts/WebSocketContext';
 import "../../styles/Board.css"
 
 export default function Board({ boardId }) {
@@ -15,6 +15,11 @@ export default function Board({ boardId }) {
     const responseColumnById = async (boardId) => {
         const response = await getColumnByIdBoard(boardId)
         setColumns(response.data)
+    }
+
+    const addNewColumn = () => {
+        addColumn(newColumnName, boardId, projectId)
+        setNewColumnName('')
     }
 
     useEffect(() => {
@@ -127,6 +132,21 @@ export default function Board({ boardId }) {
                 return e
             }))
         });
+        // socket.on('createChat', (chat) => { //  Добавление колонки
+        //     setColumns(prevColumns => prevColumns.map(e => {
+        //         if (e._id === fileData.columnId) {
+        //             return {
+        //                 ...e, tasks: e.tasks.map(e => {
+        //                     if (e._id === fileData.taskId) {
+        //                         return { ...e, attachments: e.attachments.filter(e => e.filename !== fileData.removedAttachment.filename) }
+        //                     }
+        //                     return e
+        //                 })
+        //             }
+        //         }
+        //         return e
+        //     }))
+        // });
         return () => {
             socket.off();
         };
@@ -156,13 +176,13 @@ export default function Board({ boardId }) {
                                         placeholder="Добавить колонку..."
                                         onKeyDown={event => {
                                             if (event.key === "Enter") {
-                                                addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user'), projectId)
+                                                addNewColumn()
                                                 setAddColumnInput(false)
                                             }
                                         }}
                                     />
                                     <div className='add_task' onClick={() => {
-                                        addColumn(newColumnName, setNewColumnName, boardId, localStorage.getItem('user'), projectId)
+                                        addNewColumn()
                                         setAddColumnInput(false)
                                     }}>+</div>
                                 </div>

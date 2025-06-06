@@ -1,67 +1,42 @@
-import axios from "axios"
+import { deleteFetch, getFetch, postFetch, putFetch } from "../../utils/fetch/fetchUtil";
+import axios from '../../configs/axiosConfig'
 
-export const fetchProjects = async (setProjects) => {
+export const fetchProjects = async () => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        const response = await axios.get(`${process.env.PUBLIC_BACKEND_URL}/api/project`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        setProjects(response.data);
+        return await axios.get(`/api/project`)
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
-};
+}
 
 export const createProject = async (title, members = []) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.post(`${process.env.PUBLIC_BACKEND_URL}/api/project`, { title: title, members: members }, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        return await axios.post(`/api/project`, { title: title, members: members })
     } catch (error) {
-        console.log(error)
+        console.error(error);
     }
 }
 
 export const deleteProject = async (projectId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.delete(`${process.env.PUBLIC_BACKEND_URL}/api/project/${projectId}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        return await axios.delete(`/api/project/${projectId}`)
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 }
 
 export const deleteMemberFromProject = async (projectId, userId) => {
     try {
-        const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
-        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/project/${projectId}/${userId}`, {}, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        return await axios.put(`/api/project/${projectId}/${userId}`)
     } catch (error) {
-        console.log(error)
+        console.error(error);
     }
 }
 
 export const updateProject = async (projectId, title, members) => {
-    const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
     try {
-        await axios.put(`${process.env.PUBLIC_BACKEND_URL}/api/project/${projectId}`, {title: title, members: members}, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        return await axios.put(`/api/project/${projectId}`, { title: title, members: members })
     } catch (error) {
-        console.log(error)
+        console.error(error);
     }
 }

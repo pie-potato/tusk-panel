@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { handleEditNickname, fetchUserData } from './api/response';
+import { handleEditNickname } from './api/response';
+import { fetchUserProfile } from './api/response/userResponse';
 import Input from './UI/Input/Input';
 import Button from './UI/Button/Button';
 import Modal from './UI/Modal/Modal';
@@ -9,8 +10,13 @@ function Profile() {
     const [name, setName] = useState({ firstname: '', secondname: '', thirdname: '' });
     const [isEditing, setIsEditing] = useState(false);
 
+    const getProfile = async () => {
+        const user = await fetchUserProfile()
+        setUser(user.data)
+    }
+
     useEffect(() => {
-        fetchUserData(setUser);
+        getProfile()
     }, []);
 
 
