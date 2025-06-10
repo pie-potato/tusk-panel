@@ -26,7 +26,7 @@ class boardController {
     async changeBoard(req, res, next) {
         try {
             const updatedBoard = await boardService.changeBoard(req.params.boardId, req.body.title)
-            emitEventToRoom(req.params.projectId, "addBoard", newBoard);
+            emitEventToRoom(req.params.projectId, "updateBoard", updatedBoard);
             res.json(updatedBoard);
         } catch (error) {
             next(error)

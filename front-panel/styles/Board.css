@@ -22,3 +22,7 @@
     border-radius: 20px;
     background-color: #356184;
 }
+
+.board_input {
+    width: 100%;
+}

@@ -12,12 +12,21 @@
     font-weight: 700;
 }
 
+.project_name {
+    padding: 10px;
+    border-radius: 20px;
+}
+
 .project {
     border: 2px solid #1143c0;
     margin: 15px;
     padding: 10px;
     border-radius: 20px;
     background: white;
+}
+
+.members {
+    margin-top: 20px;
 }
 
 .submenu {
@@ -28,6 +37,11 @@
     padding: 10px;
     position: absolute;
     flex-direction: column;
+}
+
+.project_member {
+    width: 100%;
+    padding: 5px 0;
 }
 
 .submenu:hover {

@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 class userController {
     async getUserData(req, res) {
         try {
-            const users = await User.find({}, 'username _id nickname firstname secondname thirdname'); // Only retrieve username and _id
+            const users = await User.find({}, 'username firstname secondname thirdname -_id'); // Извлекает только ФИО и username
             res.json(users);
         } catch (error) {
             res.status(500).json({ error: 'Error fetching users' });
@@ -14,10 +14,7 @@ class userController {
 
     async getUserProfile(req, res) {
         try {
-            const token = req.header('Authorization')?.replace('Bearer ', '');
-            const decoded = jwt.verify(token, 'PiePotato');
-
-            const user = await User.findById(decoded.userId);
+            const user = await User.findById(req.userId);
             res.json(user);
         } catch (error) {
             res.status(500).json({ error: 'Error fetching profile data' });
@@ -43,13 +40,27 @@ class userController {
             const isPasswordValid = await bcrypt.compare(password, user.password);
             if (isPasswordValid) {
                 // Создаем JWT
-                const token = jwt.sign({ userId: user._id, isAdmin: user.role === 'admin' }, 'PiePotato');
+                const token = jwt.sign({ userId: user._id }, 'PiePotato');
                 const userData = await User.findOne({ username }, '-_id -password -__v')
-                const response = { ...userData.toObject(), token }
-                res.json(response); // Возвращаем isAdmin
+                res.cookie('token', token, {
+                    httpOnly: true,     // Недоступна из JavaScript
+                    secure: false,       // Только по HTTPS
+                    sameSite: 'Strict', // Защита от CSRF,
+                    maxAge: 86400000,   // Срок жизни (1 день),
+                });
+                res.json(userData); // Возвращаем isAdmin
             } else {
                 res.status(401).json({ message: 'Invalid password' });
             }
+        } catch (error) {
+            res.status(500).json({ error: 'Error logging in' });
+        }
+    }
+
+    async logoutUser(req, res) {
+        try {
+            res.clearCookie('token');
+            res.json({ success: true })
         } catch (error) {
             res.status(500).json({ error: 'Error logging in' });
         }

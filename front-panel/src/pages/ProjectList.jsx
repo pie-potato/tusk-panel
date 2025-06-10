@@ -7,6 +7,7 @@ import styles from '../../styles/ProjectsList.module.css'
 import ProjectElement from '../components/ProjectElement.jsx';
 import Modal from '../UI/Modal/Modal.jsx';
 import Button from '../UI/Button/Button.jsx';
+import Input from '../UI/Input/Input.jsx';
 
 export default function ProjectList() {
     const [projects, setProjects] = useState([])
@@ -21,7 +22,7 @@ export default function ProjectList() {
 
     useMemo(() => {
         searchTerm
-            ? setSearchResults(users.filter(e => e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())))
+            ? setSearchResults(users.filter(e => (e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())) && (e?._id !== projectMembers.find(user => user._id === e._id)?._id)))
             : setSearchResults([])
     }, [searchTerm, projectMembers])
 
@@ -81,56 +82,54 @@ export default function ProjectList() {
     return (
         <div>
             {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
-                <Modal active={modalActive} setActive={setModalActive}>
-                    <div className={styles.create_project}>
-                        <textarea
-                            type="text"
-                            className={styles.project_name}
-                            value={projectTitle}
-                            onChange={e => setProjectTitle(e.target.value)}
-                            onKeyDown={e => {
-                                if (e.key === "Enter") {
-                                    createProject(projectTitle, projectMembers)
-                                    setProjectTitle('')
-                                }
-                            }}
-                        />
-                        <div className={styles.create_project_bottom}>
-                            <div className={styles.searced_users}>
-                                <div className={styles.search_users}>
-                                    <input
-                                        type="text"
-                                        className={styles.input_search_users}
-                                        placeholder="Найти сотрудника..."
-                                        value={searchTerm}
-                                        onChange={e => setSearchTerm(e.target.value)}
-                                    />
-                                    <div>
-                                        {searchResults.map(e => {
-                                            return <div
-                                                onClick={() => setProjectMembers(prevProjectMembers => [...prevProjectMembers, e])}
-                                                className={styles.project_user}
-                                                key={e._id}
-                                            >
-                                                {e?.secondname} {e?.firstname}
-                                            </div>
-                                        })}
-                                    </div>
-                                </div>
+                <Modal active={modalActive} setActive={setModalActive} childrenClass={styles.create_project}>
+                    <div>Название проекта</div>
+                    <textarea
+                        type="text"
+                        className={styles.project_name}
+                        value={projectTitle}
+                        onChange={e => setProjectTitle(e.target.value)}
+                        onKeyDown={e => {
+                            if (e.key === "Enter") {
+                                createProject(projectTitle, projectMembers)
+                                setProjectTitle('')
+                            }
+                        }}
+                    />
+                    <div className={styles.create_project_bottom}>
+                        <div className={styles.searced_users}>
+                            <div className={styles.search_users}>
+                                <Input
+                                    type="text"
+                                    placeholder="Найти сотрудника..."
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                />
                                 <div>
-                                    {projectMembers.map(e => <div className={styles.project_user}>
-                                        <div key={e._id}>{e?.secondname} {e?.firstname}</div>
-                                        <img onClick={() => removeUserByProject(e._id)} className={styles.trash} src="./media/trash.svg" alt="Мусорка" />
-                                    </div>)}
+                                    {searchResults.map(e => {
+                                        return <div
+                                            onClick={() => setProjectMembers(prevProjectMembers => [...prevProjectMembers, e])}
+                                            className={styles.project_user}
+                                            key={e._id}
+                                        >
+                                            {e?.secondname} {e?.firstname} +
+                                        </div>
+                                    })}
                                 </div>
                             </div>
-                            <button
-                                className={styles.create_project_button}
-                                onClick={() => {
-                                    createProject(projectTitle, projectMembers)
-                                    setProjectTitle('')
-                                }}>Сохранить</button>
+                            <div>
+                                {projectMembers.map(e => <div className={styles.project_user}>
+                                    <div key={e._id}>{e?.secondname} {e?.firstname}</div>
+                                    <img onClick={() => removeUserByProject(e._id)} className={styles.trash} src="./media/trash.svg" alt="Мусорка" />
+                                </div>)}
+                            </div>
                         </div>
+                        <button
+                            className={styles.create_project_button}
+                            onClick={() => {
+                                createProject(projectTitle, projectMembers)
+                                setProjectTitle('')
+                            }}>Сохранить</button>
                     </div>
                 </Modal>
             }

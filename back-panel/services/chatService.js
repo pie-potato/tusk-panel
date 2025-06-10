@@ -12,7 +12,8 @@ class chatService {
         const task = await Task.findById(taskId)
         if (!task) throw ApiError.BadRequest()
         const chat = await Chat.create({
-            taskId: taskId
+            taskId: taskId,
+            participants: task.assignedTo
         })
         const updatedTask = await Task.findByIdAndUpdate(taskId, { chatId: chat._id }, { new: true })
         return updatedTask

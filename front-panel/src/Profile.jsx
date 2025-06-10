@@ -4,6 +4,7 @@ import { fetchUserProfile } from './api/response/userResponse';
 import Input from './UI/Input/Input';
 import Button from './UI/Button/Button';
 import Modal from './UI/Modal/Modal';
+import { editNickname } from './api/response/userResponse';
 
 function Profile() {
     const [user, setUser] = useState(null);

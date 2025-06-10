@@ -8,6 +8,7 @@ import Modal from "../UI/Modal/Modal.jsx";
 import { fetchUsers } from "../api/response/userResponse.js";
 import Input from "../UI/Input/Input.jsx"
 import Button from "../UI/Button/Button.jsx";
+import { useModal } from "../contexts/ModalContext.jsx";
 
 export default function ProjectElement({ project }) {
 
@@ -17,10 +18,13 @@ export default function ProjectElement({ project }) {
     const [searchResults, setSearchResults] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [users, setUsers] = useState([])
+    const { confirmOpen } = useModal()
 
     const removeUserByProject = (userId) => {
         setProjectMembers(prevProjectMembers => prevProjectMembers.filter(e => e._id !== userId))
     }
+
+    const removeProject = () => deleteProject(project._id)
 
     const getUsers = async () => {
         const users = await fetchUsers()
@@ -29,7 +33,7 @@ export default function ProjectElement({ project }) {
 
     useMemo(() => {
         searchTerm
-            ? setSearchResults(users.filter(e => e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())))
+            ? setSearchResults(users.filter(e => (e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())) && (e?._id !== projectMembers.find(user => user._id === e._id)?._id)))
             : setSearchResults([])
     }, [searchTerm, projectMembers])
 
@@ -45,7 +49,7 @@ export default function ProjectElement({ project }) {
                 </Link>
                 {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
                     <ContextMenu tabIndex={0} className={styles.menu}>
-                        <Button className={styles.button} onClick={() => deleteProject(project._id)}>Удалить</Button>
+                        <Button className={styles.button} onClick={() => confirmOpen(removeProject)}>Удалить</Button>
                         <Button className={styles.button} onClick={() => setModalActive(true)}>Редактировать</Button>
                     </ContextMenu>
                 }
@@ -55,9 +59,8 @@ export default function ProjectElement({ project }) {
                     <div className={styles.members}>
                         <div>Участники проекта</div>
                         <div>{project.members.map(e =>
-                            <div className={styles.project_element_member} key={e._id}>
-                                {e.secondname}
-                                <img onClick={() => deleteMemberFromProject(project._id, e._id)} className={styles.trash} src="./media/trash.svg" alt="Мусорка" />
+                            <div className={styles.project_member} key={e.username}>
+                                {e.firstname} {e.secondname}
                             </div>)}
                         </div>
                     </div>
@@ -97,10 +100,11 @@ export default function ProjectElement({ project }) {
                                         </div>
                                     </div>
                                     <div>
-                                        {projectMembers.map(e => <div className={styles.project_user}>
-                                            <div key={e._id}>{e?.secondname} {e?.firstname}</div>
-                                            <img onClick={() => removeUserByProject(e._id)} className={styles.trash} src="./media/trash.svg" alt="Мусорка" />
-                                        </div>)}
+                                        {projectMembers.map(e =>
+                                            <div className={styles.project_user} key={e.username}>
+                                                <div key={e._id}>{e?.secondname} {e?.firstname}</div>
+                                                <img onClick={() => removeUserByProject(e._id)} className={styles.trash} src="./media/trash.svg" alt="Мусорка" />
+                                            </div>)}
                                     </div>
                                 </div>
                                 <Button

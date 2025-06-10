@@ -7,10 +7,11 @@ const decodedUserId = require("../middleware/decodedUserId.js");
 const userRouter = new Router()
 
 userRouter.get('', decodedUserId, verifyUserAccess, userController.getUserData)
-userRouter.get('/profile', userController.getUserProfile)
+userRouter.get('/profile', decodedUserId, userController.getUserProfile)
 userRouter.get('/admin', decodedUserId, verifyAdminAccess, userController.getAllUserData)
 
 userRouter.post('/login', userController.loginUser)
+userRouter.post('/logout', userController.logoutUser)
 userRouter.post('/admin', decodedUserId, verifyAdminAccess, userController.adminUser)
 
 userRouter.put('/profile', decodedUserId, verifyAdminAccess, userController.changeUserData)

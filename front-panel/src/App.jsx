@@ -12,11 +12,14 @@ import ProjectList from './pages/ProjectList';
 import { SocketProvider } from './contexts/WebSocketContext';
 import { ChatProvider } from './contexts/ChatContext';
 import { ModalProvider } from './contexts/ModalContext';
-import TaskModal from './components/TaskModal';
-function App() {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+import ConfirmDelete from './UI/ConfirmDelete.jsx/ConfirmDelete';
+import { useUser } from './contexts/UserContext';
+import { logoutUser } from './api/response/userResponse';
 
+function App() {
+  // const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user, setUser } = useUser()
   useEffect(() => {
     const fetchUser = async () => { // Make function async
       const storedUser = localStorage.getItem('user');
@@ -45,7 +48,8 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logoutUser()
     localStorage.removeItem('user');
     setUser(null);
   };
@@ -58,7 +62,7 @@ function App() {
             <Header handleLogout={handleLogout} />
             <div className='main_container'>
               <Routes>
-                <Route path="/login" element={user ? <Navigate to="/project" /> : <Login onLogin={handleLogin} />} />
+                <Route path="/login" element={user ? <Navigate to="/project" /> : <Login />} />
                 <Route path="/register" element={user ? <Navigate to="/project" /> : <Register />} />
                 <Route path="/admin" element={user && user.role === 'admin' ? <AdminPanel /> : <Navigate to="/" />} />
                 <Route path="/profile" element={user && <Profile />} />
@@ -68,7 +72,7 @@ function App() {
               </Routes>
             </div>
           </Router>
-          <TaskModal />
+          <ConfirmDelete />
           <Chat />
         </ModalProvider>
       </ChatProvider>

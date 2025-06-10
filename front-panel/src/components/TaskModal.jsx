@@ -9,7 +9,6 @@ import Input from "../UI/Input/Input";
 import ContextMenu from "../UI/ContextMenu/ContextMenu";
 import { fetchUsers } from "../api/response/userResponse";
 import { createChat } from "../api/response/chatresponse";
-import ConfirmDelete from "../UI/ConfirmDelete.jsx/ConfirmDelete";
 
 const TaskModal = () => {
 
@@ -22,27 +21,16 @@ const TaskModal = () => {
     const [assignTaskDate, setAssignTaskDate] = useState(false)
     const [searchResults, setSearchResults] = useState([]);
     const { openChat } = useChat();
-    const { isOpen, task, projectId, closeModal } = useModal()
+    const { isOpen, task, projectId, closeModal, confirmOpen } = useModal()
     const [endDate, setEndDate] = useState(task.endDate ? new Date(task.endDate) : null);
     const [startDate, setStartDate] = useState(task.startDate ? new Date(task.startDate) : null);
-    const [confirm, setConfirm] = useState(false)
     const [searchTerm, setSearchTerm] = useState('');
-
-    const closeConfirm = () => setConfirm(false)
 
     useMemo(() => {
         searchTerm
             ? setSearchResults(users.filter(e => e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())))
             : setSearchResults([])
     }, [searchTerm])
-
-    // const createChat = async (taskId) => {
-    //     try {
-
-    //     } catch (error) {
-    //         console.error(error)
-    //     }
-    // }
 
     const deleteActiveTask = async () => {
         await deleteTask(task?._id, projectId)
@@ -78,10 +66,9 @@ const TaskModal = () => {
                     <div className={styles.modal_title}>Название задачи</div>
                     <ContextMenu>
                         <Button
-                            onClick={() => setConfirm(true)}
+                            onClick={() => confirmOpen(deleteActiveTask)}
                         >
                             Удалить задчу
-                            <ConfirmDelete confirm={confirm} setConfirm={setConfirm} deleteFunc={deleteActiveTask}/>
                         </Button>
                         <Button onClick={() => {
                             setEditTaskName(true)

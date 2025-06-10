@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { handleUpdateUser } from '../api/response';
 import { createUser, getUsersFromAdmin, updateUser } from '../api/response/userResponse';
 import Input from '../UI/Input/Input';
 import Button from '../UI/Button/Button';

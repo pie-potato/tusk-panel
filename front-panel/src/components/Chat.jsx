@@ -19,6 +19,7 @@ const Chat = () => {
     // Локальное состояние для сообщений
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [errorState, setErrorState] = useState()
     const messagesEndRef = useRef(null);
 
     // Подключение к комнате чата
@@ -48,7 +49,8 @@ const Chat = () => {
                 const response = await axios.get(`/api/message/${chatId}`);
                 setMessages(response.data);
             } catch (error) {
-                console.error('Failed to load messages:', error);
+                setErrorState(error.status)
+                console.error('Failed to load messages:', error)
             }
         };
 
@@ -89,34 +91,39 @@ const Chat = () => {
             </div>
 
             <div className={styles.messagesContainer}>
-                {messages.map((message) => (
-                    <div
-                        key={message._id}
-                        className={`${styles.message} ${message.sender.username === JSON.parse(localStorage.getItem('user')).username ? styles.sent : styles.received}`}
-                    >
-                        {
-                            message.sender.username !== JSON.parse(localStorage.getItem('user')).username
-                            &&
-                            <div className={styles.messageSender}>
-                                {message.sender.firstname} {message.sender.secondname}
+                {
+                    errorState === 403
+                        ?
+                        <div className={styles.acces_denied}>Нет доступа к этому чату</div>
+                        :
+                        messages.map((message) => (
+                            <div
+                                key={message._id}
+                                className={`${styles.message} ${message.sender.username === JSON.parse(localStorage.getItem('user')).username ? styles.sent : styles.received}`}
+                            >
+                                {
+                                    message.sender.username !== JSON.parse(localStorage.getItem('user')).username
+                                    &&
+                                    <div className={styles.messageSender}>
+                                        {message.sender.firstname} {message.sender.secondname}
+                                    </div>
+                                }
+                                <div className={styles.messageContent}>{message.content}</div>
+                                <div className={styles.messageMeta}>
+                                    <span className={styles.messageTime}>
+                                        {new Date(message.timestamp).toLocaleTimeString()}
+                                    </span>
+                                    {message.sender.username === JSON.parse(localStorage.getItem('user')).username && (
+                                        <button
+                                            className={styles.deleteBtn}
+                                            onClick={() => handleDeleteMessage(message._id)}
+                                        >
+                                            Удалить
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                        }
-                        <div className={styles.messageContent}>{message.content}</div>
-                        <div className={styles.messageMeta}>
-                            <span className={styles.messageTime}>
-                                {new Date(message.timestamp).toLocaleTimeString()}
-                            </span>
-                            {message.sender.username === JSON.parse(localStorage.getItem('user')).username && (
-                                <button
-                                    className={styles.deleteBtn}
-                                    onClick={() => handleDeleteMessage(message._id)}
-                                >
-                                    Удалить
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                ))}
+                        ))}
                 <div ref={messagesEndRef} />
             </div>
 

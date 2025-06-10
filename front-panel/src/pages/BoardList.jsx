@@ -36,6 +36,14 @@ function BoardList() {
     socket.on('deleteBoard', (deletedBoard) => {
       setAllBoards(prevAllBoards => prevAllBoards.filter(e => e._id !== deletedBoard._id))
     });
+    socket.on('updateBoard', (updatedBoard) => {
+      setAllBoards(prevAllBoards => prevAllBoards.map(e => {
+        if (e._id === updatedBoard._id) {
+          return { ...e, title: updatedBoard.title }
+        }
+        return e
+      }))
+    });
     return () => {
       socket.off();
     };

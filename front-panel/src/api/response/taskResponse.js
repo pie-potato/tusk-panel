@@ -1,5 +1,4 @@
 import axios from "../../configs/axiosConfig";
-import { deleteFetch, postFetch, putFetch } from "../../utils/fetch/fetchUtil";
 
 export const addTask = async (newTask, projectId) => {
     try {
@@ -39,7 +38,7 @@ export const unassignTask = async (taskId, unAssignedUserId, projectId) => {
 
 export const assignTask = async (taskId, userId, projectId) => {
     try {
-        return await putFetch(`/api/task/${taskId}/assign/${projectId}`, { userId })
+        return await axios.put(`/api/task/${taskId}/assign/${projectId}`, { userId })
     } catch (error) {
         console.error(error);
     }

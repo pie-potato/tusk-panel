@@ -4,6 +4,7 @@ const Task = require("../mongooseModels/Task");
 const User = require("../mongooseModels/User");
 const fs = require('fs');
 const ApiError = require("../exeptions/apiError");
+const Chat = require("../mongooseModels/Chat");
 
 class taskService {
     async createTask(userId, columnId, taskTitle) {
@@ -42,6 +43,12 @@ class taskService {
             .populate('assignedTo', 'username')
         if (!task) {
             throw ApiError.BadRequest()
+        }
+        const chat = await Chat.findOne({ taskId: taskId })
+
+        if (chat) {
+            chat.participants.push(assignedUserId)
+            await chat.save()
         }
         /*
             if (assignedUser?.mail) {
@@ -98,6 +105,12 @@ class taskService {
             .populate('assignedTo', 'username');
         if (!task) {
             throw ApiError.BadRequest()
+        }
+
+        const chat = await Chat.findOne({ taskId: taskId })
+        if (chat) {
+            chat.participants.splice(unssignedUserId)
+            await chat.save()
         }
         return { taskId: task._id, columnId: task.columnId, assignedTo: unssignedUserId }
     }

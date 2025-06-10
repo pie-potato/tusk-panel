@@ -49,3 +49,21 @@ export const updateUser = async (editingUser, editPassword) => {
         console.log(error);
     }
 };
+
+export const loginUser = async (credentials) => {
+    try {
+        return await axios.post(`/api/user/login`, credentials);
+    } catch (error) {
+        // console.error("Login error:", error);
+        return error
+    }
+};
+
+export const logoutUser = async () => {
+    try {
+        return await axios.post(`/api/user/logout`);
+    } catch (error) {
+        // console.error("Login error:", error);
+        return error
+    }
+};

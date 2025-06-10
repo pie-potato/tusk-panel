@@ -30,6 +30,16 @@
   cursor: pointer;
 }
 
+.acces_denied {
+  text-align: center;
+  background-color: red;
+  padding: 30px 0;
+  border-radius: 20px;
+  color: mediumspringgreen;
+  font-size: 20px;
+  font-weight: 800;
+}
+
 .messagesContainer {
   flex: 1;
   padding: 15px;

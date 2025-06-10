@@ -1,19 +1,27 @@
 import Button from '../Button/Button';
 import Modal from '../Modal/Modal';
 import styles from './ConfirmDelete.module.css';
+import { useModal } from '../../contexts/ModalContext';
 
-const ConfirmDelete = ({confirm, setConfirm, deleteFunc}) => {
+const ConfirmDelete = () => {
+
+    const { confirmDelete, confirmClose } = useModal()
+    const { isOpen, deleteFunc } = confirmDelete
+
     return (
-        <Modal active={confirm} setActive={setConfirm} parentClass={styles.modal}>
+        <Modal active={isOpen} setActive={confirmClose} parentClass={styles.modal}>
             <div>
                 Вы точно хотите удалить это?
                 Это действие нельзя будет отменить
             </div>
             <div>
-                <Button onClick={() => setConfirm(false)}>
+                <Button onClick={() => confirmClose()}>
                     Нет, отменить
                 </Button>
-                <Button onClick={deleteFunc}>
+                <Button onClick={() => {
+                    deleteFunc()
+                    confirmClose()
+                }}>
                     Да, удалить
                 </Button>
             </div>

@@ -17,11 +17,16 @@
     justify-content: space-between;
     width: 150px;
     overflow-wrap: anywhere;
+    /* text-wrap: ; */
 }
 
 .active {
     box-shadow: 0 0 10px rgba(50, 100, 120, 0.5);
     border: 2px solid #1143c0;
+}
+
+.board_dock_element.changed {
+    width: 400;
 }
 
 .board_delete_button {

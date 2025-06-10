@@ -11,7 +11,7 @@ taskRouter.get('/uploads/:filename', taskController.getTaskFile)
 
 taskRouter.post('/:projectId', decodedUserId, verifyUserAccess, taskController.createTask);
 
-taskRouter.post('/:taskId/upload/:projectId', decodedUserId, verifyUserAccess, upload.single('file'), taskController.addTaskFile)
+taskRouter.post('/:taskId/upload/:projectId', decodedUserId, upload.single('file'), taskController.addTaskFile)
 
 taskRouter.put('/:taskId/assign/:projectId', decodedUserId, verifyUserAccess, taskController.changeTaskAssign)
 taskRouter.put('/:id/:projectId', decodedUserId, verifyUserAccess, taskController.changeTask)
@@ -20,6 +20,6 @@ taskRouter.put('/description/:id/:projectId', decodedUserId, verifyUserAccess, t
 taskRouter.delete('/:taskId/assign/:userId/:projectId', decodedUserId, verifyUserAccess, taskController.deleteTaskAssign)
 taskRouter.delete('/:taskId/:projectId', decodedUserId, verifyUserAccess, taskController.deleteTask)
 
-taskRouter.delete('/:taskId/attachments/:filename/:projectId', decodedUserId, verifyUserAccess, taskController.deleteTaskFile)
+taskRouter.delete('/:taskId/attachments/:filename/:projectId', decodedUserId, taskController.deleteTaskFile)
 
 module.exports = taskRouter

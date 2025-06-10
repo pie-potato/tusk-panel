@@ -1,23 +1,34 @@
-import React, { useState } from 'react';
-import "/styles/Login.css"
+import { useState } from 'react';
+import styles from "../../styles/Login.module.css"
+import Input from '../UI/Input/Input';
+import Button from '../UI/Button/Button';
+import { loginUser } from '../api/response/userResponse';
+import { useUser } from '../contexts/UserContext';
 
-function Login({ onLogin }) {
+
+function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-
+    const [invalidCredentials, setInvalidCredentials] = useState(false)
+    const { setUser } = useUser()
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await onLogin({ username, password });
+        const response = await loginUser({ username, password })
+        if (response?.status === 401 || response?.status === 404) setInvalidCredentials(true)
+        setUser(response.data)
+        localStorage.setItem('user', JSON.stringify(response.data))
     };
+    console.log(localStorage.getItem('user'));
 
     return (
-        <div className='login'>
+        <div className={styles.login}>
             <h1>Вход</h1>
-            <form onSubmit={handleSubmit} className='login_form'>
-                <div className='login_element'>
+            <form onSubmit={handleSubmit} className={styles.login_form}>
+                {invalidCredentials && <div className={styles.invalid_credentials}>Неправильный логин или пароль</div>}
+                <div className={styles.login_element}>
                     <label htmlFor="username">Имя пользователя:</label>
-                    <input
-                        className='login_input'
+                    <Input
+                        className={styles.login_input}
                         type="text"
                         id="username"
                         value={username}
@@ -25,10 +36,10 @@ function Login({ onLogin }) {
                         required
                     />
                 </div>
-                <div className='login_element'>
+                <div className={styles.login_element}>
                     <label htmlFor="password">Пароль:</label>
-                    <input
-                        className='login_input'
+                    <Input
+                        className={styles.login_input}
                         type="password"
                         id="password"
                         value={password}
@@ -36,7 +47,7 @@ function Login({ onLogin }) {
                         required
                     />
                 </div>
-                <button type="submit" className='submit_button'><h3>Войти</h3></button>
+                <Button type="submit"><h3>Войти</h3></Button>
             </form>
         </div>
     );

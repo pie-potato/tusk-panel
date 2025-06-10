@@ -5,6 +5,9 @@ const boardEvents = (socket) => {
     socket.on('deleteBoard', (room, deletedBoard) => {
         socket.to(room).emit('deleteBoard', deletedBoard);
     });
+    socket.on('updateBoard', (room, updateBoard) => {
+        socket.to(room).emit('updateBoard', updateBoard);
+    });
 }
 
 module.exports = boardEvents

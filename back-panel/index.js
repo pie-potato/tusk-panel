@@ -16,19 +16,23 @@ const errorMiddleware = require('./middleware/error.js');
 const chatRouter = require('./routers/chatRouter.js');
 const messageRouter = require('./routers/messageRouter.js');
 const accessToChat = require('./middleware/accessToChat.js')
-
+const cookieParser = require('./middleware/cookieParser.js');
 const app = express();
 const port = 5000;
 
-app.use(cors());
+app.use(cors({
+    origin: true, // Динамически подставляет запрашиваемый origin
+    credentials: true,
+}));
 app.use(express.json());
+app.use(cookieParser);
 app.use('/api/project', decodedUserId, projectRouter)
 app.use('/api/board', decodedUserId, boardRouter)
 app.use('/api/column', decodedUserId, columnRouter)
 app.use('/api/task', taskRouter)
 app.use('/api/user', userRouter)
-app.use('/api/chat', chatRouter)
-app.use('/api/message', messageRouter)
+app.use('/api/chat', decodedUserId, chatRouter)
+app.use('/api/message', decodedUserId, accessToChat, messageRouter)
 app.use(errorMiddleware)
 const server = http.createServer(app);
 initializeWebSocketServer(server)

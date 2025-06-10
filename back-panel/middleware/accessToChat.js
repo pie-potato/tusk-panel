@@ -7,7 +7,9 @@ module.exports = async (req, res, next) => {
     if (user.role === "admin" || user.role === "manager") {
         return next()
     }
-    const chat = await Chat.find({ taskId: req.params.taskId, participants: user._id })
+    
+    const chat = await Chat.find({ taskId: req.params.taskId, participants: {$in : user._id} })
+    console.log(user._id);
     if (!chat) next(ApiError.AccessDenied())
-    next()
+    return next()
 }

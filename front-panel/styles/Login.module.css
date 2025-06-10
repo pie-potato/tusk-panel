@@ -9,14 +9,11 @@
 
 .login_element {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .login_input {
-    border: 1px solid #1143c0;
-    border-radius: 20px;
-    padding: 10px;
-    background: none;
     margin: 5px;
 }
 
@@ -29,4 +26,13 @@
 
 .login_form {
     text-align: center;
+    border: 2px solid #1143c0;
+    border-radius: 20px;
+    padding: 15px;
+}
+
+.invalid_credentials {
+    color: red;
+    font-size: 24px;
+    font-weight: 600;
 }

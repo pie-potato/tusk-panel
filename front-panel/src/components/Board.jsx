@@ -4,6 +4,7 @@ import { getColumnByIdBoard, addColumn } from '../api/response/columnResponse';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../contexts/WebSocketContext';
 import "../../styles/Board.css"
+import TaskModal from './TaskModal';
 
 export default function Board({ boardId }) {
     const [newColumnName, setNewColumnName] = useState('');
@@ -132,21 +133,6 @@ export default function Board({ boardId }) {
                 return e
             }))
         });
-        // socket.on('createChat', (chat) => { //  Добавление колонки
-        //     setColumns(prevColumns => prevColumns.map(e => {
-        //         if (e._id === fileData.columnId) {
-        //             return {
-        //                 ...e, tasks: e.tasks.map(e => {
-        //                     if (e._id === fileData.taskId) {
-        //                         return { ...e, attachments: e.attachments.filter(e => e.filename !== fileData.removedAttachment.filename) }
-        //                     }
-        //                     return e
-        //                 })
-        //             }
-        //         }
-        //         return e
-        //     }))
-        // });
         return () => {
             socket.off();
         };
@@ -191,6 +177,7 @@ export default function Board({ boardId }) {
                         </div>
                     </div>
                 </div>}
+            <TaskModal />
         </div>
     );
 }
