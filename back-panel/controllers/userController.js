@@ -44,7 +44,7 @@ class userController {
                 const userData = await User.findOne({ username }, '-_id -password -__v')
                 res.cookie('token', token, {
                     httpOnly: true,     // Недоступна из JavaScript
-                    secure: false,       // Только по HTTPS
+                    secure: process.env.SECURE,       // Только по HTTPS
                     sameSite: 'Strict', // Защита от CSRF,
                     maxAge: 86400000,   // Срок жизни (1 день),
                 });

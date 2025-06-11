@@ -7,8 +7,10 @@ const initializeWebSocketServer = (httpServer) => {
     io = new Server(httpServer, {
         cors: {
             origin: "*", //  или ваш домен/порт клиента
-            methods: ["GET", "POST", "PUT", "DELETE"]
-        }
+            methods: ["GET", "POST", "PUT", "DELETE"],
+            credentials: true
+        },
+        transports: ['websocket', 'polling']
     })
     SocketEvents(io)
 }

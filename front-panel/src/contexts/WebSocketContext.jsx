@@ -8,7 +8,12 @@ export const SocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io(`${process.env.PUBLIC_SOCKET_URL}`, { path: '/socket.io' });
+    const newSocket = io(`${process.env.PUBLIC_SOCKET_URL}`, {
+      path: '/socket.io',
+      secure: true,
+      transports: ['websocket', 'polling'],
+      upgrade: true
+    });
 
     newSocket.on('connect', () => {
       console.log('Socket.IO connected');
