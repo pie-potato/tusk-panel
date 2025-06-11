@@ -62,7 +62,7 @@ export default function BoardDockElement({ boardInfo, activeBoard, setActiveBoar
                                 setBoardTitle(boardInfo.title)
                                 setChangeBoard(true)
                             }}>
-                                Редактировать задачу
+                                Редактировать доску
                             </Button>
                         </ContextMenu>
                     }

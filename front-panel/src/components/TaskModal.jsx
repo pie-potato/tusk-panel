@@ -9,6 +9,7 @@ import Input from "../UI/Input/Input";
 import ContextMenu from "../UI/ContextMenu/ContextMenu";
 import { fetchUsers } from "../api/response/userResponse";
 import { createChat } from "../api/response/chatresponse";
+import { useUser } from "../contexts/UserContext";
 
 const TaskModal = () => {
 
@@ -25,7 +26,7 @@ const TaskModal = () => {
     const [endDate, setEndDate] = useState(task.endDate ? new Date(task.endDate) : null);
     const [startDate, setStartDate] = useState(task.startDate ? new Date(task.startDate) : null);
     const [searchTerm, setSearchTerm] = useState('');
-
+    const { user } = useUser()
     useMemo(() => {
         searchTerm
             ? setSearchResults(users.filter(e => e?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || e?.secondname.toLowerCase().includes(searchTerm.toLowerCase())))
@@ -56,7 +57,7 @@ const TaskModal = () => {
     }, [task]);
 
     useEffect(() => {
-        getUsers()
+        if (user?.role === "admin" || user?.role === "manager") getUsers()
     }, []);
 
     return (
@@ -64,20 +65,22 @@ const TaskModal = () => {
             <div className={styles.modal_shadow}>
                 <div className={styles.title_header}>
                     <div className={styles.modal_title}>Название задачи</div>
-                    <ContextMenu>
-                        <Button
-                            onClick={() => confirmOpen(deleteActiveTask)}
-                        >
-                            Удалить задчу
-                        </Button>
-                        <Button onClick={() => {
-                            setEditTaskName(true)
-                            setTaskName(task?.title)
-                        }}
-                        >
-                            Редактировать задачу
-                        </Button>
-                    </ContextMenu>
+                    {(user?.role === "admin" || user?.role === "manager") &&
+                        <ContextMenu>
+                            <Button
+                                onClick={() => confirmOpen(deleteActiveTask)}
+                            >
+                                Удалить задчу
+                            </Button>
+                            <Button onClick={() => {
+                                setEditTaskName(true)
+                                setTaskName(task?.title)
+                            }}
+                            >
+                                Редактировать задачу
+                            </Button>
+                        </ContextMenu>
+                    }
                 </div>
                 <div className={styles.container_task_modal}>
                     {editTaskName

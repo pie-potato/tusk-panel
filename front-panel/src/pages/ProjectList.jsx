@@ -8,6 +8,7 @@ import ProjectElement from '../components/ProjectElement.jsx';
 import Modal from '../UI/Modal/Modal.jsx';
 import Button from '../UI/Button/Button.jsx';
 import Input from '../UI/Input/Input.jsx';
+import { useUser } from '../contexts/UserContext.jsx';
 
 export default function ProjectList() {
     const [projects, setProjects] = useState([])
@@ -19,6 +20,7 @@ export default function ProjectList() {
     const { pathname } = useLocation()
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const { user } = useUser()
 
     useMemo(() => {
         searchTerm
@@ -76,7 +78,7 @@ export default function ProjectList() {
 
     useEffect(() => {
         getAllProject()
-        getUsers()
+        if (user.role === "admin" || user.role === "manager") getUsers()
     }, []);
 
     return (

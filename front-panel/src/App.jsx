@@ -65,7 +65,7 @@ function App() {
                 <Route path="/login" element={user ? <Navigate to="/project" /> : <Login />} />
                 <Route path="/register" element={user ? <Navigate to="/project" /> : <Register />} />
                 <Route path="/admin" element={user && user.role === 'admin' ? <AdminPanel /> : <Navigate to="/" />} />
-                <Route path="/profile" element={user && <Profile />} />
+                <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
                 <Route path="/project/:projectId" element={user ? <BoardList /> : <Navigate to="/login" />} /> {/* Перенаправление на /login, если пользователь не авторизован */}
                 <Route path="/project" element={user ? <ProjectList /> : <Navigate to="/login" />} />
                 <Route path="/" element={user ? <Navigate to="/project" /> : <Navigate to="/login" />} />

@@ -15,6 +15,7 @@ function Profile() {
         const user = await fetchUserProfile()
         setUser(user.data)
     }
+console.log(user);
 
     useEffect(() => {
         getProfile()
@@ -44,12 +45,15 @@ function Profile() {
                             <Input type="text" value={user.thirdname} onChange={(e) => setUser({ ...user, thirdname: e.target.value })} />
                         </div>
                     </div>
-                    <Button onClick={() => handleEditNickname(user, name, setUser, setIsEditing)}>Сохранить</Button>
+                    <Button onClick={() => {
+                        editNickname(user)
+                        setIsEditing(false)
+                        }}>Сохранить</Button>
                     <Button onClick={() => setIsEditing(false)}>Закрыть</Button>
                 </div>
             </Modal>
             <div>
-                <p>ФИО: {user.firstname || user.username || 'Not set'} {user.secondname || user.username || 'Not set'}</p>
+                <p>ФИО: {user?.firstname} {user?.secondname} {user?.thirdname}</p>
                 <Button onClick={() => setIsEditing(true)}>Редактировать ФИО</Button>
             </div>
 

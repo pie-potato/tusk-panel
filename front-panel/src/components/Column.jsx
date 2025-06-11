@@ -8,6 +8,7 @@ import Button from '../UI/Button/Button';
 import ContextMenu from '../UI/ContextMenu/ContextMenu';
 import Input from '../UI/Input/Input';
 import { useModal } from '../contexts/ModalContext';
+import { useUser } from '../contexts/UserContext';
 
 export default function Column({ column }) {
 
@@ -16,7 +17,7 @@ export default function Column({ column }) {
     const [isEdit, setIsEdit] = useState(false)
     const { projectId } = useParams()
     const { confirmOpen } = useModal()
-
+    const { user } = useUser()
     const createNewTask = () => {
         if (!newTask.columnId || newTask.title.length === 0) {
             alert('У задачи должно быть название');
@@ -47,29 +48,33 @@ export default function Column({ column }) {
                     :
                     <h2>{column.title}</h2>
                 }
-                <ContextMenu>
-                    <Button onClick={() => confirmOpen(deleteF)}>Удалить</Button>
-                    <Button onClick={() => {
-                        setIsEdit(true)
-                        setColumnName(column.title)
-                    }}>Изменить</Button>
-                </ContextMenu>
+                {(user?.role === "admin" || user?.role === "manager") &&
+                    <ContextMenu>
+                        <Button onClick={() => confirmOpen(deleteF)}>Удалить</Button>
+                        <Button onClick={() => {
+                            setIsEdit(true)
+                            setColumnName(column.title)
+                        }}>Изменить</Button>
+                    </ContextMenu>
+                }
             </div>
             <div>
                 {column.tasks.map((task) => (
                     <Task key={task._id} task={task} />
                 ))}
             </div>
-            <div>
-                <Input
-                    type="text"
-                    value={newTask.title}
-                    onChange={(e) => setNewTask({ ...newTask, title: e.target.value, columnId: column._id })}
-                    placeholder="Добавить задачу..."
-                    onKeyDown={event => { if (event.key === "Enter") createNewTask() }}
-                />
-                <Button className='add_task' onClick={() => createNewTask()}>Добавить задачу</Button>
-            </div>
+            {(user?.role === "admin" || user?.role === "manager") &&
+                <div>
+                    <Input
+                        type="text"
+                        value={newTask.title}
+                        onChange={(e) => setNewTask({ ...newTask, title: e.target.value, columnId: column._id })}
+                        placeholder="Добавить задачу..."
+                        onKeyDown={event => { if (event.key === "Enter") createNewTask() }}
+                    />
+                    <Button className='add_task' onClick={() => createNewTask()}>Добавить задачу</Button>
+                </div>
+            }
         </div>
     )
 }

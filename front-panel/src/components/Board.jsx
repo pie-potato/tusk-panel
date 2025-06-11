@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useSocket } from '../contexts/WebSocketContext';
 import "../../styles/Board.css"
 import TaskModal from './TaskModal';
+import { useUser } from '../contexts/UserContext';
 
 export default function Board({ boardId }) {
     const [newColumnName, setNewColumnName] = useState('');
@@ -12,7 +13,7 @@ export default function Board({ boardId }) {
     const [addColumnInput, setAddColumnInput] = useState(false)
     const { socket } = useSocket()
     const { projectId } = useParams()
-
+    const { user } = useUser()
     const responseColumnById = async (boardId) => {
         const response = await getColumnByIdBoard(boardId)
         setColumns(response.data)
@@ -150,32 +151,34 @@ export default function Board({ boardId }) {
                     {columns.map((column) => (
                         <Column key={column._id} column={column} />
                     ))}
-                    <div>
+                    {(user?.role === "admin" || user?.role === "manager") &&
                         <div>
-                            {addColumnInput
-                                ? <div className='add_column'>
-                                    <input
-                                        type="text"
-                                        className='add_column_input'
-                                        value={newColumnName}
-                                        onChange={(e) => setNewColumnName(e.target.value)}
-                                        placeholder="Добавить колонку..."
-                                        onKeyDown={event => {
-                                            if (event.key === "Enter") {
-                                                addNewColumn()
-                                                setAddColumnInput(false)
-                                            }
-                                        }}
-                                    />
-                                    <div className='add_task' onClick={() => {
-                                        addNewColumn()
-                                        setAddColumnInput(false)
-                                    }}>+</div>
-                                </div>
-                                : <button className='add_task' onClick={() => setAddColumnInput(true)}>Добавить колонку</button>
-                            }
+                            <div>
+                                {addColumnInput
+                                    ? <div className='add_column'>
+                                        <input
+                                            type="text"
+                                            className='add_column_input'
+                                            value={newColumnName}
+                                            onChange={(e) => setNewColumnName(e.target.value)}
+                                            placeholder="Добавить колонку..."
+                                            onKeyDown={event => {
+                                                if (event.key === "Enter") {
+                                                    addNewColumn()
+                                                    setAddColumnInput(false)
+                                                }
+                                            }}
+                                        />
+                                        <div className='add_task' onClick={() => {
+                                            addNewColumn()
+                                            setAddColumnInput(false)
+                                        }}>+</div>
+                                    </div>
+                                    : <button className='add_task' onClick={() => setAddColumnInput(true)}>Добавить колонку</button>
+                                }
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>}
             <TaskModal />
         </div>

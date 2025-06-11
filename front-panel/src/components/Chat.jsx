@@ -7,6 +7,7 @@ import axios from '../configs/axiosConfig';
 import Button from '../UI/Button/Button';
 import { deleteChat } from '../api/response/chatresponse';
 import { sendMessage } from '../api/response/messageResponse';
+import { createPortal } from 'react-dom';
 
 const Chat = () => {
     // Получаем состояние чата
@@ -82,7 +83,7 @@ const Chat = () => {
         socket.emit('deleteMessage', { messageId });
     };
 
-    return (
+    return createPortal(
         <div className={`${styles.chatPanel} ${isOpen ? styles.open : ''}`}>
             <div className={styles.chatHeader}>
                 <h3>Чат задачи</h3>
@@ -142,7 +143,8 @@ const Chat = () => {
                     {isConnected ? 'Отправить' : 'Соединение...'}
                 </Button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

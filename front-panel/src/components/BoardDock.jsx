@@ -3,13 +3,14 @@ import { addBoard } from '../api/response/boardResponse';
 import '../../styles/BoardDock.css'
 import BoardDockElement from "./BoardDockElement";
 import { useParams } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 
 export default function BoardDock({ activeBoard, setActiveBoard, allBoard }) {
 
     const [creaeteBoard, setCreateBoard] = useState(false)
     const [newColumnName, setNewColumnName] = useState('');
     const { projectId } = useParams()
-
+    const { user } = useUser()
     const createBoard = () => {
         addBoard(newColumnName, projectId)
         setNewColumnName('')
@@ -19,27 +20,28 @@ export default function BoardDock({ activeBoard, setActiveBoard, allBoard }) {
     return (
         <div className="board_dock">
             {allBoard.map(e => <BoardDockElement key={e._id} boardInfo={e} activeBoard={activeBoard} setActiveBoard={setActiveBoard} projectId={projectId} />)}
-            <div onClick={() => setCreateBoard(true)}>
-                {creaeteBoard
-                    ? <input
-                        className="board_dock_add_input"
-                        type="text"
-                        value={newColumnName}
-                        onChange={e => setNewColumnName(e.target.value)}
-                        onKeyDown={event => {
-                            if (event.key === "Enter") {
-                                createBoard()
-                            }
-                        }}
-                        onBlur={() => {
-                            setNewColumnName('')
-                            setCreateBoard(false)
-                        }}
-                    />
-                    : <button className="board_dosk_add_button">+</button>
-                }
-            </div>
-
+            {(user?.role === "admin" || user?.role === "manager") &&
+                <div onClick={() => setCreateBoard(true)}>
+                    {creaeteBoard
+                        ? <input
+                            className="board_dock_add_input"
+                            type="text"
+                            value={newColumnName}
+                            onChange={e => setNewColumnName(e.target.value)}
+                            onKeyDown={event => {
+                                if (event.key === "Enter") {
+                                    createBoard()
+                                }
+                            }}
+                            onBlur={() => {
+                                setNewColumnName('')
+                                setCreateBoard(false)
+                            }}
+                        />
+                        : <button className="board_dosk_add_button">+</button>
+                    }
+                </div>
+            }
         </div>
     )
 }

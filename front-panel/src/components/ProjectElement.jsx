@@ -1,6 +1,6 @@
-import { useState, useRef, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { deleteMemberFromProject, updateProject } from "../api/response/projectResponse.js";
+import { updateProject } from "../api/response/projectResponse.js";
 import { deleteProject } from "../api/response/projectResponse.js"
 import styles from '../../styles/ProjectElement.module.css'
 import ContextMenu from "../UI/ContextMenu/ContextMenu.jsx";
@@ -9,6 +9,7 @@ import { fetchUsers } from "../api/response/userResponse.js";
 import Input from "../UI/Input/Input.jsx"
 import Button from "../UI/Button/Button.jsx";
 import { useModal } from "../contexts/ModalContext.jsx";
+import { useUser } from "../contexts/UserContext.jsx";
 
 export default function ProjectElement({ project }) {
 
@@ -19,7 +20,7 @@ export default function ProjectElement({ project }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [users, setUsers] = useState([])
     const { confirmOpen } = useModal()
-
+    const { user } = useUser()
     const removeUserByProject = (userId) => {
         setProjectMembers(prevProjectMembers => prevProjectMembers.filter(e => e._id !== userId))
     }
@@ -38,7 +39,7 @@ export default function ProjectElement({ project }) {
     }, [searchTerm, projectMembers])
 
     useEffect(() => {
-        getUsers()
+        if (user === "admin" || user?.role === "manager") getUsers()
     }, []);
 
     return (
@@ -47,14 +48,14 @@ export default function ProjectElement({ project }) {
                 <Link className={styles.link_to_project} to={`/project/${project._id}`}>
                     {project.title}
                 </Link>
-                {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
+                {(user?.role === "admin" || user?.role === "manager") &&
                     <ContextMenu tabIndex={0} className={styles.menu}>
                         <Button className={styles.button} onClick={() => confirmOpen(removeProject)}>Удалить</Button>
                         <Button className={styles.button} onClick={() => setModalActive(true)}>Редактировать</Button>
                     </ContextMenu>
                 }
             </div>
-            {(JSON.parse(localStorage.getItem('user'))?.role === "admin" || JSON.parse(localStorage.getItem('user'))?.role === "manager") &&
+            {(user?.role === "admin" || user?.role === "manager") &&
                 <>
                     <div className={styles.members}>
                         <div>Участники проекта</div>

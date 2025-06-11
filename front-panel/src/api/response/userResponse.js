@@ -32,11 +32,9 @@ export const createUser = async (newUser) => {
     }
 };
 
-export const editNickname = async (name, setUser, setIsEditing) => {
+export const editNickname = async (name) => {
     try {
         await axios.put(`/api/user/profile`, name)
-        setUser(name);
-        setIsEditing(false);
     } catch (error) {
         console.error(error);
     }

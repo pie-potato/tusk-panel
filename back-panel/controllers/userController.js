@@ -14,7 +14,7 @@ class userController {
 
     async getUserProfile(req, res) {
         try {
-            const user = await User.findById(req.userId);
+            const user = await User.findById(req.userId, 'username firstname secondname thirdname -_id');
             res.json(user);
         } catch (error) {
             res.status(500).json({ error: 'Error fetching profile data' });

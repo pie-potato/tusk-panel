@@ -14,7 +14,7 @@ userRouter.post('/login', userController.loginUser)
 userRouter.post('/logout', userController.logoutUser)
 userRouter.post('/admin', decodedUserId, verifyAdminAccess, userController.adminUser)
 
-userRouter.put('/profile', decodedUserId, verifyAdminAccess, userController.changeUserData)
+userRouter.put('/profile', decodedUserId,  userController.changeUserData)
 userRouter.put('/admin/role/:userId', decodedUserId, verifyAdminAccess, userController.changeUserRole)
 userRouter.put('/admin/:userId', decodedUserId, verifyAdminAccess, userController.updateUserData)
 

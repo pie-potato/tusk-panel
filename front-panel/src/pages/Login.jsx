@@ -14,7 +14,7 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const response = await loginUser({ username, password })
-        if (response?.status === 401 || response?.status === 404) setInvalidCredentials(true)
+        if (response?.status === 401 || response?.status === 404) return setInvalidCredentials(true)
         setUser(response.data)
         localStorage.setItem('user', JSON.stringify(response.data))
     };
