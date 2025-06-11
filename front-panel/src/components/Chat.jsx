@@ -5,7 +5,7 @@ import { useSocket } from '../contexts/WebSocketContext'
 // import axios from 'axios';
 import axios from '../configs/axiosConfig';
 import Button from '../UI/Button/Button';
-import { deleteChat } from '../api/response/chatresponse';
+import { deleteChat } from '../api/response/chatResponse';
 import { sendMessage } from '../api/response/messageResponse';
 import { createPortal } from 'react-dom';
 

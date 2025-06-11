@@ -8,7 +8,7 @@ import Button from "../UI/Button/Button";
 import Input from "../UI/Input/Input";
 import ContextMenu from "../UI/ContextMenu/ContextMenu";
 import { fetchUsers } from "../api/response/userResponse";
-import { createChat } from "../api/response/chatresponse";
+import { createChat } from "../api/response/chatResponse";
 import { useUser } from "../contexts/UserContext";
 
 const TaskModal = () => {
