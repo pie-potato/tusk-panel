@@ -45,7 +45,7 @@ class userController {
                 res.cookie('token', token, {
                     httpOnly: true,     // Недоступна из JavaScript
                     secure: process.env.SECURE,       // Только по HTTPS
-                    sameSite: 'Strict', // Защита от CSRF,
+                    sameSite: process.env.SAME_SITE, // Защита от CSRF,
                     maxAge: 86400000,   // Срок жизни (1 день),
                 });
                 res.json(userData); // Возвращаем isAdmin

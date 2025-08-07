@@ -18,7 +18,6 @@ function Login() {
         setUser(response.data)
         localStorage.setItem('user', JSON.stringify(response.data))
     };
-    console.log(localStorage.getItem('user'));
 
     return (
         <div className={styles.login}>

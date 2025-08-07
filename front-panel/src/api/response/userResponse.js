@@ -1,6 +1,14 @@
 import axios from '../../configs/axiosConfig'
 
-export const fetchUsers = async () => {
+export const fetchUsers = async (projectId) => {
+    try {
+        return await axios.get(`/api/user/${projectId}`)
+    } catch (error) {
+        console.error('Error fetching users:', error);
+    }
+}
+
+export const fetchAllUsers = async () => {
     try {
         return await axios.get(`/api/user`)
     } catch (error) {

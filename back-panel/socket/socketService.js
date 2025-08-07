@@ -10,6 +10,7 @@ const initializeWebSocketServer = (httpServer) => {
             methods: ["GET", "POST", "PUT", "DELETE"],
             credentials: true
         },
+        path: "/socket",
         transports: ['websocket', 'polling']
     })
     SocketEvents(io)

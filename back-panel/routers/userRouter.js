@@ -7,6 +7,7 @@ const decodedUserId = require("../middleware/decodedUserId.js");
 const userRouter = new Router()
 
 userRouter.get('', decodedUserId, verifyUserAccess, userController.getUserData)
+userRouter.get('/:projectId', decodedUserId, verifyUserAccess, userController.getUserData)
 userRouter.get('/profile', decodedUserId, userController.getUserProfile)
 userRouter.get('/admin', decodedUserId, verifyAdminAccess, userController.getAllUserData)
 

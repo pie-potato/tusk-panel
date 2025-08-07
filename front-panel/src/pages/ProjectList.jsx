@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { fetchUsers } from '../api/response/userResponse.js';
+import { fetchAllUsers } from '../api/response/userResponse.js';
 import { fetchProjects, createProject } from '../api/response/projectResponse.js'
 import { useSocket } from '../contexts/WebSocketContext.jsx';
 import { useLocation } from 'react-router-dom';
@@ -72,7 +72,7 @@ export default function ProjectList() {
     }
 
     const getUsers = async () => {
-        const users = await fetchUsers()
+        const users = await fetchAllUsers()
         setUsers(users.data)
     }
 

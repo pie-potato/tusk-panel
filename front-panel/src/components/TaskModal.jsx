@@ -39,7 +39,7 @@ const TaskModal = () => {
     }
 
     const getUsers = async () => {
-        const users = await fetchUsers()
+        const users = await fetchUsers(projectId)
         setUsers(users.data)
     }
 

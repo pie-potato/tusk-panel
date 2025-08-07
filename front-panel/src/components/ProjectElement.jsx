@@ -5,7 +5,7 @@ import { deleteProject } from "../api/response/projectResponse.js"
 import styles from '../../styles/ProjectElement.module.css'
 import ContextMenu from "../UI/ContextMenu/ContextMenu.jsx";
 import Modal from "../UI/Modal/Modal.jsx";
-import { fetchUsers } from "../api/response/userResponse.js";
+import { fetchAllUsers } from "../api/response/userResponse.js";
 import Input from "../UI/Input/Input.jsx"
 import Button from "../UI/Button/Button.jsx";
 import { useModal } from "../contexts/ModalContext.jsx";
@@ -28,7 +28,7 @@ export default function ProjectElement({ project }) {
     const removeProject = () => deleteProject(project._id)
 
     const getUsers = async () => {
-        const users = await fetchUsers()
+        const users = await fetchAllUsers()
         setUsers(users.data)
     }
 

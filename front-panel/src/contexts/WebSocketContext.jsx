@@ -9,7 +9,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     const newSocket = io(`${process.env.PUBLIC_SOCKET_URL}`, {
-      path: '/socket.io',
+      path: '/socket',
       secure: true,
       transports: ['websocket', 'polling'],
       upgrade: true
